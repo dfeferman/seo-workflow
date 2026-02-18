@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artefakt anlegen – WorkflowSEO</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #fafbfc;
+    --surface: #ffffff;
+    --surface2: #f4f6f8;
+    --border: #e1e4e8;
+    --border-hover: #d0d4d8;
+    --accent: #5b7fff;
+    --accent-hover: #4a6fef;
+    --accent-light: #e8edff;
+    --accent2: #7c3aed;
+    --green: #10b981;
+    --green-light: #d1fae5;
+    --yellow: #f59e0b;
+    --yellow-light: #fef3c7;
+    --red: #ef4444;
+    --red-light: #fee2e2;
+    --text: #1a202c;
+    --text-secondary: #4a5568;
+    --muted: #718096;
+    --muted-light: #a0aec0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── MODAL OVERLAY ─── */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ─── MODAL ─── */
+  .modal {
+    max-width: 720px;
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    animation: slideUp 0.3s ease;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── HEADER ─── */
+  .modal-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .modal-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 2px 8px rgba(91, 127, 255, 0.3);
+  }
+
+  .close-btn {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.15s;
+  }
+
+  .close-btn:hover { 
+    background: var(--surface2); 
+    color: var(--text);
+    border-color: var(--border-hover);
+  }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.4px;
+    margin-bottom: 4px;
+  }
+
+  .modal-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ─── BODY ─── */
+  .modal-body {
+    padding: 28px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .modal-body::-webkit-scrollbar { width: 6px; }
+  .modal-body::-webkit-scrollbar-track { background: transparent; }
+  .modal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ─── STEPS ─── */
+  .steps {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .step-number {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+
+  .step.active .step-number {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .step.completed .step-number {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+
+  .step-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .step.active .step-label {
+    color: var(--accent);
+  }
+
+  .step.completed .step-label {
+    color: var(--green);
+  }
+
+  .step-line {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    margin: 0 8px;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    margin-bottom: 24px;
+  }
+
+  .section:last-child { margin-bottom: 0; }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-icon {
+    font-size: 16px;
+  }
+
+  /* ─── FORM FIELDS ─── */
+  .field {
+    margin-bottom: 18px;
+  }
+
+  .field:last-child { margin-bottom: 0; }
+
+  .label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .required {
+    color: var(--red);
+    font-size: 14px;
+  }
+
+  .label-hint {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 400;
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    transition: all 0.15s;
+    outline: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(91,127,255,0.1);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  textarea.large {
+    min-height: 180px;
+  }
+
+  .input-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* ─── PHASE SELECTOR ─── */
+  .phase-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+
+  .phase-card {
+    padding: 12px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .phase-card:hover {
+    border-color: var(--border-hover);
+    background: var(--surface2);
+  }
+
+  .phase-card.selected {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .phase-badge {
+    width: 32px; height: 32px;
+    margin: 0 auto 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .phase-card.selected .phase-badge {
+    transform: scale(1.1);
+  }
+
+  .badge-A { background: #f3e8ff; color: #7c3aed; }
+  .badge-B { background: #dbeafe; color: #2563eb; }
+  .badge-C { background: #fef3c7; color: #d97706; }
+  .badge-D { background: #d1fae5; color: #059669; }
+  .badge-E { background: #fee2e2; color: #dc2626; }
+  .badge-F { background: #f3f4f6; color: #6b7280; }
+
+  .phase-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .phase-card.selected .phase-label {
+    color: var(--accent);
+  }
+
+  /* ─── DEPENDENCIES ─── */
+  .dependencies {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dependency-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .dependency-placeholder {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .dependency-arrow {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .dependency-select {
+    flex: 2;
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  .add-dependency-btn {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px dashed var(--border);
+    background: transparent;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 8px;
+  }
+
+  .add-dependency-btn:hover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  /* ─── TEMPLATE PREVIEW ─── */
+  .template-preview {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .template-preview::-webkit-scrollbar { width: 5px; }
+  .template-preview::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .highlight {
+    color: var(--accent);
+    font-weight: 600;
+    background: rgba(91, 127, 255, 0.1);
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+
+  /* ─── CHAR COUNTER ─── */
+  .char-counter {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 5px;
+    text-align: right;
+  }
+
+  /* ─── INFO BOX ─── */
+  .info-box {
+    background: var(--accent-light);
+    border: 1px solid rgba(91, 127, 255, 0.25);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-top: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .info-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .info-box strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ─── FOOTER ─── */
+  .modal-footer {
+    padding: 20px 28px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .footer-left {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+  }
+
+  .footer-right {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn:hover { 
+    background: var(--surface2); 
+    color: var(--text);
+    border-color: var(--border-hover);
+  }
+
+  .btn-secondary {
+    background: var(--surface2);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    box-shadow: 0 1px 3px rgba(91, 127, 255, 0.3);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    box-shadow: 0 2px 6px rgba(91, 127, 255, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ─── STEP CONTENT ─── */
+  .step-content {
+    display: none;
+  }
+
+  .step-content.active {
+    display: block;
+    animation: fadeIn 0.2s ease;
+  }
+
+  /* ─── SUGGESTIONS ─── */
+  .suggestions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .suggestion-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .suggestion-chip:hover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay">
+  <div class="modal">
+    
+    <!-- HEADER -->
+    <div class="modal-header">
+      <div class="header-top">
+        <div class="modal-icon">✨</div>
+        <button class="close-btn" onclick="window.history.back()">✕</button>
+      </div>
+      <h2 class="modal-title">Neues Artefakt anlegen</h2>
+      <p class="modal-subtitle">Erstelle ein benutzerdefiniertes Artefakt für deinen Workflow</p>
+    </div>
+
+    <!-- STEPS INDICATOR -->
+    <div style="padding: 20px 28px 0;">
+      <div class="steps">
+        <div class="step active" id="step-indicator-1">
+          <div class="step-number">1</div>
+          <div class="step-label">Basis</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step-indicator-2">
+          <div class="step-number">2</div>
+          <div class="step-label">Prompt</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step-indicator-3">
+          <div class="step-number">3</div>
+          <div class="step-label">Details</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+
+      <!-- STEP 1: BASIC INFO -->
+      <div class="step-content active" id="step-1">
+        
+        <div class="section">
+          <div class="section-title">
+            <span class="section-icon">📋</span>
+            Grundinformationen
+          </div>
+
+          <div class="field">
+            <label class="label">
+              Artefakt-Name <span class="required">*</span>
+            </label>
+            <input type="text" id="artifact-name" placeholder="z.B. Konkurrenzanalyse" autofocus>
+            <div class="input-hint">Beschreibender Name für dieses Artefakt</div>
+          </div>
+
+          <div class="field">
+            <label class="label">
+              Artefakt-Code <span class="required">*</span>
+              <span class="label-hint">Wird in der Workflow-Tabelle angezeigt</span>
+            </label>
+            <input type="text" id="artifact-code" placeholder="z.B. A4 oder B2.2" value="G1">
+            <div class="input-hint">Alphanumerischer Code (z.B. G1, X1.2) – muss eindeutig sein</div>
+          </div>
+
+          <div class="field">
+            <label class="label">
+              Kurzbeschreibung
+            </label>
+            <input type="text" id="artifact-desc" placeholder="z.B. Wettbewerber identifizieren & analysieren">
+            <div class="input-hint">Wird als Untertitel in der Tabelle angezeigt</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">
+            <span class="section-icon">🎯</span>
+            Phase zuordnen
+          </div>
+
+          <div class="phase-grid">
+            <div class="phase-card" onclick="selectPhase('A', this)">
+              <div class="phase-badge badge-A">A</div>
+              <div class="phase-label">Recherche</div>
+            </div>
+            <div class="phase-card" onclick="selectPhase('B', this)">
+              <div class="phase-badge badge-B">B</div>
+              <div class="phase-label">Mapping</div>
+            </div>
+            <div class="phase-card" onclick="selectPhase('C', this)">
+              <div class="phase-badge badge-C">C</div>
+              <div class="phase-label">Briefing</div>
+            </div>
+            <div class="phase-card" onclick="selectPhase('D', this)">
+              <div class="phase-badge badge-D">D</div>
+              <div class="phase-label">Schreiben</div>
+            </div>
+            <div class="phase-card" onclick="selectPhase('E', this)">
+              <div class="phase-badge badge-E">E</div>
+              <div class="phase-label">SEO</div>
+            </div>
+            <div class="phase-card" onclick="selectPhase('F', this)">
+              <div class="phase-badge badge-F">F</div>
+              <div class="phase-label">QA</div>
+            </div>
+          </div>
+
+          <div class="suggestions">
+            <div class="suggestion-chip" onclick="selectPhase('G', null); document.getElementById('artifact-code').value='G1';">📌 Neue Phase "G" erstellen</div>
+          </div>
+
+          <div class="info-box">
+            <span class="info-icon">💡</span>
+            <div>
+              <strong>Tipp:</strong> Du kannst auch eigene Phasen erstellen (z.B. "G" für "Grafiken" oder "X" für "Extra-Aufgaben")
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- STEP 2: PROMPT TEMPLATE -->
+      <div class="step-content" id="step-2">
+        
+        <div class="section">
+          <div class="section-title">
+            <span class="section-icon">✍️</span>
+            Prompt-Template
+          </div>
+
+          <div class="field">
+            <label class="label">
+              Prompt <span class="required">*</span>
+              <span class="label-hint">Platzhalter: [KATEGORIE], [LAND], [INPUT A]</span>
+            </label>
+            <textarea class="large" id="prompt-template" placeholder="Analysiere die Top-Konkurrenten in [LAND] für [KATEGORIE]:
+
+- Identifiziere die 5 stärksten Wettbewerber
+- Analysiere deren Content-Strategie
+- Extrahiere ihre USPs und Alleinstellungsmerkmale
+
+Output: Tabelle mit Konkurrent, Stärken, Schwächen">Analysiere die Top-Konkurrenten in [LAND] für [KATEGORIE]:
+
+- Identifiziere die 5 stärksten Wettbewerber
+- Analysiere deren Content-Strategie  
+- Extrahiere deren USPs
+
+Output: Strukturierte Tabelle</textarea>
+            <div class="char-counter"><span id="char-count">0</span> Zeichen</div>
+          </div>
+
+          <div class="field">
+            <label class="label">
+              Verfügbare Platzhalter
+            </label>
+            <div class="suggestions">
+              <div class="suggestion-chip" onclick="insertPlaceholder('[KATEGORIE]')">[KATEGORIE]</div>
+              <div class="suggestion-chip" onclick="insertPlaceholder('[LAND]')">[LAND]</div>
+              <div class="suggestion-chip" onclick="insertPlaceholder('[SPRACHE]')">[SPRACHE]</div>
+              <div class="suggestion-chip" onclick="insertPlaceholder('[ZIELGRUPPEN]')">[ZIELGRUPPEN]</div>
+              <div class="suggestion-chip" onclick="insertPlaceholder('[USPs]')">[USPs]</div>
+              <div class="suggestion-chip" onclick="insertPlaceholder('[TON]')">[TON]</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">
+              Prompt-Vorschau
+            </label>
+            <div class="template-preview" id="prompt-preview">
+Analysiere die Top-Konkurrenten in <span class="highlight">[Deutschland]</span> für <span class="highlight">[Desinfektionsmittel]</span>:
+
+- Identifiziere die 5 stärksten Wettbewerber
+- Analysiere deren Content-Strategie  
+- Extrahiere deren USPs
+
+Output: Strukturierte Tabelle
+            </div>
+            <div class="input-hint">So sieht der Prompt aus, wenn die Platzhalter ersetzt werden</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- STEP 3: DEPENDENCIES & OPTIONS -->
+      <div class="step-content" id="step-3">
+        
+        <div class="section">
+          <div class="section-title">
+            <span class="section-icon">🔗</span>
+            Abhängigkeiten (optional)
+          </div>
+
+          <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
+            Welche vorherigen Artefakte werden als Input benötigt?
+          </p>
+
+          <div class="dependencies" id="dependencies-list">
+            <div class="dependency-item">
+              <span class="dependency-placeholder">[INPUT A]</span>
+              <span class="dependency-arrow">←</span>
+              <select class="dependency-select">
+                <option value="">Keine Abhängigkeit</option>
+                <option value="phase-a">Alle Artefakte aus Phase A</option>
+                <option value="A1">Nur A1: SERP-Analyse</option>
+                <option value="A1.2">Nur A1.2: Hub/Unterkategorien</option>
+                <option value="A2.1">Nur A2.1: Quellen</option>
+                <option value="A3">Nur A3: FAQ</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="add-dependency-btn" onclick="addDependency()">
+            ＋ Weitere Abhängigkeit hinzufügen
+          </button>
+
+          <div class="info-box">
+            <span class="info-icon">💡</span>
+            <div>
+              <strong>Tipp:</strong> Wenn du [INPUT A] im Prompt verwendest, kannst du hier festlegen, welche Artefakte als Input dienen sollen.
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">
+            <span class="section-icon">⚙️</span>
+            Zusätzliche Optionen
+          </div>
+
+          <div class="field">
+            <label class="label">
+              Empfohlene Quelle
+            </label>
+            <select>
+              <option value="">Keine Angabe</option>
+              <option value="perplexity">Perplexity (Recherche)</option>
+              <option value="chatgpt">ChatGPT (Textgenerierung)</option>
+              <option value="claude">Claude (Analyse)</option>
+              <option value="manual">Manuell</option>
+            </select>
+            <div class="input-hint">Optional: Welches Tool soll für dieses Artefakt verwendet werden?</div>
+          </div>
+
+          <div class="field">
+            <label class="label">
+              Geschätzte Dauer (Minuten)
+            </label>
+            <input type="number" placeholder="z.B. 15" value="20" min="1">
+            <div class="input-hint">Hilft bei der Zeitplanung im Projekt</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <div class="footer-left">
+        <button class="btn btn-secondary" id="btn-back" onclick="previousStep()" style="display:none;">← Zurück</button>
+      </div>
+      <div class="footer-right">
+        <button class="btn" onclick="window.history.back()">Abbrechen</button>
+        <button class="btn btn-primary" id="btn-next" onclick="nextStep()">Weiter →</button>
+        <button class="btn btn-primary" id="btn-save" onclick="saveArtifact()" style="display:none;">✓ Artefakt anlegen</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let currentStep = 1;
+  let selectedPhase = null;
+
+  function nextStep() {
+    if (currentStep < 3) {
+      // Hide current step
+      document.getElementById(`step-${currentStep}`).classList.remove('active');
+      document.getElementById(`step-indicator-${currentStep}`).classList.remove('active');
+      document.getElementById(`step-indicator-${currentStep}`).classList.add('completed');
+
+      // Show next step
+      currentStep++;
+      document.getElementById(`step-${currentStep}`).classList.add('active');
+      document.getElementById(`step-indicator-${currentStep}`).classList.add('active');
+
+      // Update buttons
+      document.getElementById('btn-back').style.display = 'flex';
+      
+      if (currentStep === 3) {
+        document.getElementById('btn-next').style.display = 'none';
+        document.getElementById('btn-save').style.display = 'flex';
+      }
+    }
+  }
+
+  function previousStep() {
+    if (currentStep > 1) {
+      // Hide current step
+      document.getElementById(`step-${currentStep}`).classList.remove('active');
+      document.getElementById(`step-indicator-${currentStep}`).classList.remove('active');
+
+      // Show previous step
+      currentStep--;
+      document.getElementById(`step-${currentStep}`).classList.add('active');
+      document.getElementById(`step-indicator-${currentStep}`).classList.remove('completed');
+
+      // Update buttons
+      if (currentStep === 1) {
+        document.getElementById('btn-back').style.display = 'none';
+      }
+      
+      if (currentStep < 3) {
+        document.getElementById('btn-next').style.display = 'flex';
+        document.getElementById('btn-save').style.display = 'none';
+      }
+    }
+  }
+
+  function selectPhase(phase, element) {
+    selectedPhase = phase;
+    document.querySelectorAll('.phase-card').forEach(card => card.classList.remove('selected'));
+    if (element) {
+      element.classList.add('selected');
+    }
+  }
+
+  function insertPlaceholder(placeholder) {
+    const textarea = document.getElementById('prompt-template');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    textarea.value = text.substring(0, start) + placeholder + text.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + placeholder.length, start + placeholder.length);
+    updateCharCount();
+    updatePreview();
+  }
+
+  function updateCharCount() {
+    const textarea = document.getElementById('prompt-template');
+    document.getElementById('char-count').textContent = textarea.value.length;
+  }
+
+  function updatePreview() {
+    const textarea = document.getElementById('prompt-template');
+    const preview = document.getElementById('prompt-preview');
+    let text = textarea.value;
+    
+    // Replace placeholders with highlighted versions
+    text = text.replace(/\[KATEGORIE\]/g, '<span class="highlight">[Desinfektionsmittel]</span>');
+    text = text.replace(/\[LAND\]/g, '<span class="highlight">[Deutschland]</span>');
+    text = text.replace(/\[SPRACHE\]/g, '<span class="highlight">[Deutsch]</span>');
+    text = text.replace(/\[ZIELGRUPPEN\]/g, '<span class="highlight">[Privat, Pflege, Praxis]</span>');
+    
+    preview.innerHTML = text || '<span style="color:var(--muted)">Prompt-Vorschau wird hier angezeigt...</span>';
+  }
+
+  function addDependency() {
+    const list = document.getElementById('dependencies-list');
+    const newDep = document.createElement('div');
+    newDep.className = 'dependency-item';
+    newDep.innerHTML = `
+      <span class="dependency-placeholder">[INPUT X]</span>
+      <span class="dependency-arrow">←</span>
+      <select class="dependency-select">
+        <option value="">Keine Abhängigkeit</option>
+        <option value="phase-a">Alle Artefakte aus Phase A</option>
+        <option value="phase-b">Alle Artefakte aus Phase B</option>
+      </select>
+    `;
+    list.appendChild(newDep);
+  }
+
+  function saveArtifact() {
+    // Collect data
+    const data = {
+      name: document.getElementById('artifact-name').value,
+      code: document.getElementById('artifact-code').value,
+      description: document.getElementById('artifact-desc').value,
+      phase: selectedPhase,
+      prompt: document.getElementById('prompt-template').value
+    };
+
+    console.log('Saving artifact:', data);
+    
+    // Show success feedback
+    alert('✓ Artefakt erfolgreich angelegt!\n\nDas Artefakt wurde zur Kategorie "Desinfektionsmittel Hub" hinzugefügt.');
+    
+    // In real app: redirect back to workflow table
+    window.history.back();
+  }
+
+  // Auto-update char count and preview
+  document.getElementById('prompt-template').addEventListener('input', function() {
+    updateCharCount();
+    updatePreview();
+  });
+
+  // Initialize
+  updateCharCount();
+  updatePreview();
+</script>
+
+</body>
+</html>

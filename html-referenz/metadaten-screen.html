@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metadaten-Screen – WorkflowSEO</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0e0f11;
+    --surface: #161719;
+    --surface2: #1e2024;
+    --border: #2a2c31;
+    --accent: #5b7fff;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --text: #e8e9eb;
+    --muted: #6b7280;
+    --muted2: #9ca3af;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  /* ─── CONTAINER ─── */
+  .container {
+    max-width: 880px;
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, rgba(91,127,255,0.08), rgba(167,139,250,0.05));
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .bc-sep { color: var(--muted); }
+  .bc-current { color: var(--accent); font-weight: 500; }
+
+  .close-btn {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.15s;
+  }
+
+  .close-btn:hover { background: var(--border); color: var(--text); }
+
+  .title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ─── TABS ─── */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    padding: 0 32px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tab:hover { color: var(--muted2); }
+  .tab.active { 
+    color: var(--accent); 
+    border-bottom-color: var(--accent);
+  }
+
+  .tab-icon { font-size: 14px; }
+
+  /* ─── BODY ─── */
+  .body {
+    padding: 32px;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+
+  .body::-webkit-scrollbar { width: 6px; }
+  .body::-webkit-scrollbar-track { background: transparent; }
+  .body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ─── FORM SECTIONS ─── */
+  .section {
+    margin-bottom: 32px;
+  }
+
+  .section:last-child { margin-bottom: 0; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .section-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(91,127,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .section-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ─── FORM FIELDS ─── */
+  .field {
+    margin-bottom: 20px;
+  }
+
+  .field:last-child { margin-bottom: 0; }
+
+  .label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted2);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .required {
+    color: var(--red);
+    font-size: 14px;
+  }
+
+  .label-hint {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 400;
+    font-family: 'DM Mono', monospace;
+    background: var(--surface2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: auto;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    transition: all 0.15s;
+    outline: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(91,127,255,0.1);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 60px;
+    line-height: 1.6;
+  }
+
+  textarea.large {
+    min-height: 90px;
+  }
+
+  .input-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 5px;
+    line-height: 1.4;
+  }
+
+  /* ─── GRID FIELDS ─── */
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ─── TAGS INPUT ─── */
+  .tags-input-wrap {
+    position: relative;
+  }
+
+  .tags-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-height: 44px;
+    transition: all 0.15s;
+  }
+
+  .tags-display:focus-within {
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(91,127,255,0.1);
+  }
+
+  .tag-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    background: rgba(91,127,255,0.15);
+    border: 1px solid rgba(91,127,255,0.25);
+    border-radius: 5px;
+    font-size: 12px;
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+
+  .tag-item:hover {
+    background: rgba(91,127,255,0.25);
+  }
+
+  .tag-remove {
+    font-size: 13px;
+    opacity: 0.7;
+  }
+
+  .tag-remove:hover { opacity: 1; }
+
+  .tag-input {
+    flex: 1;
+    min-width: 120px;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+  }
+
+  /* ─── PRESET BUTTONS ─── */
+  .presets {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .preset-btn {
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted2);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+
+  .preset-btn:hover {
+    background: var(--border);
+    color: var(--text);
+  }
+
+  /* ─── CHAR COUNTER ─── */
+  .char-counter {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  /* ─── INFO BOX ─── */
+  .info-box {
+    background: rgba(91,127,255,0.06);
+    border: 1px solid rgba(91,127,255,0.15);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--muted2);
+    line-height: 1.6;
+    margin-top: 12px;
+  }
+
+  .info-box strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    padding: 20px 32px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .footer-left {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn:hover { background: var(--border); color: var(--text); }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #4a6fef;
+    border-color: #4a6fef;
+  }
+
+  .btn-danger {
+    background: rgba(248,113,113,0.1);
+    border-color: rgba(248,113,113,0.25);
+    color: var(--red);
+  }
+
+  .btn-danger:hover {
+    background: rgba(248,113,113,0.2);
+  }
+
+  .status-saved {
+    font-size: 12px;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .status-saved.show { opacity: 1; }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .container {
+    animation: slideIn 0.3s ease;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="breadcrumb">
+        <span style="color:var(--muted2);cursor:pointer;">Medizinprodukte-Shop</span>
+        <span class="bc-sep">›</span>
+        <span class="bc-current">Desinfektionsmittel Hub</span>
+      </div>
+      <button class="close-btn" onclick="window.history.back()">✕</button>
+    </div>
+    <h1 class="title">Kategorie-Metadaten bearbeiten</h1>
+    <p class="subtitle">Diese Informationen werden als Platzhalter in allen Prompts verwendet</p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active">
+      <span class="tab-icon">⚙️</span> Metadaten
+    </div>
+    <div class="tab">
+      <span class="tab-icon">📊</span> Workflow
+    </div>
+    <div class="tab">
+      <span class="tab-icon">📈</span> Übersicht
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- SECTION: Grunddaten -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">🏷️</div>
+        <div>
+          <div class="section-title">Grunddaten</div>
+          <div class="section-desc">Kategorie-Name und Unterkategorien</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">
+          Kategorie-Name <span class="required">*</span>
+          <span class="label-hint">[KATEGORIE]</span>
+        </label>
+        <input type="text" value="Desinfektionsmittel" placeholder="z.B. Desinfektionsmittel, Handschuhe, Masken">
+        <div class="input-hint">Wird als <code>[KATEGORIE]</code> in allen Prompts ersetzt</div>
+      </div>
+
+      <div class="field">
+        <label class="label">
+          Hub-Seite Name
+          <span class="label-hint">[HUB-SEITE]</span>
+        </label>
+        <input type="text" value="Desinfektionsmittel Hub" placeholder="z.B. Desinfektionsmittel Hub">
+        <div class="input-hint">Vollständiger Name der Hauptseite</div>
+      </div>
+
+      <div class="field">
+        <label class="label">
+          Unterkategorien <span class="required">*</span>
+          <span class="label-hint">[UNTERKATEGORIEN]</span>
+        </label>
+        <div class="tags-input-wrap">
+          <div class="tags-display">
+            <span class="tag-item">Händedesinfektion <span class="tag-remove">✕</span></span>
+            <span class="tag-item">Flächendesinfektion <span class="tag-remove">✕</span></span>
+            <span class="tag-item">Instrumentendesinfektion <span class="tag-remove">✕</span></span>
+            <span class="tag-item">Desinfektionstücher <span class="tag-remove">✕</span></span>
+            <input type="text" class="tag-input" placeholder="Weitere hinzufügen...">
+          </div>
+        </div>
+        <div class="input-hint">Enter drücken zum Hinzufügen · Wird als kommagetrennte Liste in <code>[UNTERKATEGORIEN]</code> ersetzt</div>
+      </div>
+    </div>
+
+    <!-- SECTION: Markt & Sprache -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">🌍</div>
+        <div>
+          <div class="section-title">Markt & Sprache</div>
+          <div class="section-desc">Land und Sprache für SERP-Analyse</div>
+        </div>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label class="label">
+            Land <span class="required">*</span>
+            <span class="label-hint">[LAND]</span>
+          </label>
+          <select>
+            <option>Deutschland</option>
+            <option>Österreich</option>
+            <option>Schweiz</option>
+            <option>Frankreich</option>
+            <option>UK</option>
+            <option>USA</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="label">
+            Sprache <span class="required">*</span>
+            <span class="label-hint">[SPRACHE]</span>
+          </label>
+          <select>
+            <option>Deutsch</option>
+            <option>Englisch</option>
+            <option>Französisch</option>
+            <option>Spanisch</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION: Zielgruppe & Shop -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">🎯</div>
+        <div>
+          <div class="section-title">Zielgruppe & Shop-Typ</div>
+          <div class="section-desc">Für wen ist diese Kategorie relevant?</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">
+          Zielgruppen <span class="required">*</span>
+          <span class="label-hint">[ZIELGRUPPEN]</span>
+        </label>
+        <div class="tags-input-wrap">
+          <div class="tags-display">
+            <span class="tag-item">Privat <span class="tag-remove">✕</span></span>
+            <span class="tag-item">Pflege <span class="tag-remove">✕</span></span>
+            <span class="tag-item">Praxis <span class="tag-remove">✕</span></span>
+            <input type="text" class="tag-input" placeholder="Weitere hinzufügen...">
+          </div>
+        </div>
+        <div class="presets">
+          <button class="preset-btn">+ Kliniken</button>
+          <button class="preset-btn">+ Gastronomie</button>
+          <button class="preset-btn">+ Industrie</button>
+          <button class="preset-btn">+ Tierärzte</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">
+          Shop-Typ <span class="required">*</span>
+          <span class="label-hint">[SHOP-TYP]</span>
+        </label>
+        <select>
+          <option>B2C Medizinprodukte-Onlineshop</option>
+          <option>B2B Medizinprodukte-Onlineshop</option>
+          <option>B2C & B2B gemischt</option>
+          <option>Marktplatz (Amazon, eBay)</option>
+          <option>Fachhandel mit Onlineshop</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- SECTION: Content-Richtlinien -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon">✍️</div>
+        <div>
+          <div class="section-title">Content-Richtlinien</div>
+          <div class="section-desc">Tonalität und inhaltliche Vorgaben</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">
+          Shop-USPs
+          <span class="label-hint">[USPs]</span>
+        </label>
+        <textarea class="large" placeholder="z.B. Schnelle Lieferung, geprüfte Qualität, persönliche Beratung, kostenlose Retouren">Schnelle Lieferung, geprüfte Qualität, persönliche Beratung durch Fachpersonal, kostenlose Retouren innerhalb 30 Tage</textarea>
+        <div class="char-counter">124 Zeichen</div>
+      </div>
+
+      <div class="field">
+        <label class="label">
+          Tonalität <span class="required">*</span>
+          <span class="label-hint">[TON]</span>
+        </label>
+        <input type="text" value="Seriös-medizinisch, leicht verständlich" placeholder="z.B. Professionell, freundlich, beratend">
+        <div class="presets">
+          <button class="preset-btn">Seriös-medizinisch</button>
+          <button class="preset-btn">Freundlich-informativ</button>
+          <button class="preset-btn">Technisch-präzise</button>
+          <button class="preset-btn">Locker & modern</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">
+          No-Gos / Verbotene Aussagen <span class="required">*</span>
+          <span class="label-hint">[NO-GOS]</span>
+        </label>
+        <textarea class="large" placeholder="Was darf NICHT geschrieben werden?">Keine Heilversprechen, keine Garantien, keine Angst-Kommunikation, keine absoluten Aussagen wie "garantiert", "heilt", "100% sicher"</textarea>
+        <div class="info-box">
+          <strong>YMYL-Hinweis:</strong> Bei medizinischen Themen sind vorsichtige Formulierungen Pflicht. Aussagen zu Wirksamkeit nur mit Quellen (gemäß Herstellerangaben/Normen).
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">
+      <button class="btn btn-danger">🗑 Kategorie löschen</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="status-saved" id="status">✓ Gespeichert</div>
+      <button class="btn" onclick="window.history.back()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="saveMetadata()">💾 Speichern</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Tags hinzufügen/entfernen
+  document.querySelectorAll('.tag-input').forEach(input => {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.target.value.trim()) {
+        const newTag = document.createElement('span');
+        newTag.className = 'tag-item';
+        newTag.innerHTML = `${e.target.value.trim()} <span class="tag-remove">✕</span>`;
+        newTag.querySelector('.tag-remove').addEventListener('click', () => newTag.remove());
+        e.target.parentElement.insertBefore(newTag, e.target);
+        e.target.value = '';
+      }
+    });
+  });
+
+  document.querySelectorAll('.tag-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => e.target.parentElement.remove());
+  });
+
+  // Preset-Buttons
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const field = e.target.closest('.field');
+      const input = field.querySelector('input, textarea');
+      const text = e.target.textContent.replace('+ ', '').trim();
+      
+      if (field.querySelector('.tags-display')) {
+        // Tags-Input
+        const tagsDisplay = field.querySelector('.tags-display');
+        const tagInput = tagsDisplay.querySelector('.tag-input');
+        const newTag = document.createElement('span');
+        newTag.className = 'tag-item';
+        newTag.innerHTML = `${text} <span class="tag-remove">✕</span>`;
+        newTag.querySelector('.tag-remove').addEventListener('click', () => newTag.remove());
+        tagsDisplay.insertBefore(newTag, tagInput);
+      } else {
+        // Normal input
+        input.value = text;
+      }
+    });
+  });
+
+  // Char counter
+  document.querySelectorAll('textarea').forEach(textarea => {
+    const updateCounter = () => {
+      const counter = textarea.nextElementSibling;
+      if (counter && counter.classList.contains('char-counter')) {
+        counter.textContent = `${textarea.value.length} Zeichen`;
+      }
+    };
+    textarea.addEventListener('input', updateCounter);
+    updateCounter();
+  });
+
+  // Save animation
+  function saveMetadata() {
+    const status = document.getElementById('status');
+    status.classList.add('show');
+    
+    // Simulate save
+    setTimeout(() => {
+      status.classList.remove('show');
+      // Optional: redirect back
+      // window.history.back();
+    }, 2000);
+  }
+
+  // Auto-focus first field
+  document.querySelector('input').focus();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEO Workflow – Light Theme</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    /* Light Palette - Professional & Clean */
+    --bg: #fafbfc;
+    --surface: #ffffff;
+    --surface2: #f4f6f8;
+    --border: #e1e4e8;
+    --border-hover: #d0d4d8;
+    
+    /* Accent Colors - Warm & Friendly */
+    --accent: #5b7fff;
+    --accent-hover: #4a6fef;
+    --accent-light: #e8edff;
+    --accent2: #7c3aed;
+    
+    /* Status Colors */
+    --green: #10b981;
+    --green-light: #d1fae5;
+    --yellow: #f59e0b;
+    --yellow-light: #fef3c7;
+    --red: #ef4444;
+    --red-light: #fee2e2;
+    
+    /* Text Colors */
+    --text: #1a202c;
+    --text-secondary: #4a5568;
+    --muted: #718096;
+    --muted-light: #a0aec0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 20px 20px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 2px 8px rgba(91, 127, 255, 0.2);
+  }
+
+  .logo-text {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+  }
+
+  .sidebar-section {
+    padding: 16px 12px 8px;
+  }
+
+  .sidebar-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 0 8px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .sidebar-project {
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+
+  .sidebar-project:hover { 
+    background: var(--surface2); 
+    color: var(--text); 
+  }
+
+  .sidebar-project.active {
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  .proj-icon { font-size: 14px; }
+
+  .sidebar-category {
+    padding: 7px 10px 7px 32px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.15s;
+  }
+
+  .sidebar-category:hover { 
+    background: var(--surface2); 
+    color: var(--text); 
+  }
+
+  .sidebar-category.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .cat-progress {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-new {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--accent);
+    border: none;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 1px 3px rgba(91, 127, 255, 0.3);
+  }
+
+  .btn-new:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 2px 6px rgba(91, 127, 255, 0.4);
+    transform: translateY(-1px);
+  }
+
+  /* ─── MAIN ─── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ─── TOPBAR ─── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 64px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .bc-sep { color: var(--muted-light); }
+  .bc-current { color: var(--text); font-weight: 600; }
+  .bc-item { color: var(--muted); cursor: pointer; transition: color 0.15s; }
+  .bc-item:hover { color: var(--text-secondary); }
+
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+  .btn-sm {
+    padding: 8px 14px;
+    border-radius: 7px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-sm:hover { 
+    background: var(--surface2); 
+    color: var(--text);
+    border-color: var(--border-hover);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+
+  /* ─── CONTENT ─── */
+  .content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── META STRIP ─── */
+  .meta-strip {
+    display: flex;
+    gap: 10px;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .meta-tag {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .meta-label { color: var(--muted); font-weight: 400; }
+
+  .meta-sep {
+    width: 1px; height: 18px;
+    background: var(--border);
+    margin: 0 4px;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-area {
+    padding: 16px 28px 0;
+    flex-shrink: 0;
+    background: var(--surface);
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .phase-pills {
+    display: flex;
+    gap: 6px;
+  }
+
+  .phase-pill {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    color: var(--muted);
+    background: var(--surface2);
+  }
+
+  .phase-pill:hover { 
+    border-color: var(--border-hover); 
+    color: var(--text-secondary); 
+  }
+
+  .phase-pill.done {
+    background: var(--green-light);
+    color: var(--green);
+    border-color: transparent;
+  }
+
+  .phase-pill.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .progress-stat {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+  }
+
+  .progress-stat span { color: var(--accent); font-weight: 600; }
+
+  .progress-bar-wrap {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 3px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 27%;
+    transition: width 0.5s ease;
+  }
+
+  /* ─── TABLE ─── */
+  .table-wrap {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 28px 28px;
+    background: var(--surface);
+  }
+
+  .table-wrap::-webkit-scrollbar { width: 8px; }
+  .table-wrap::-webkit-scrollbar-track { background: transparent; }
+  .table-wrap::-webkit-scrollbar-thumb { 
+    background: var(--border); 
+    border-radius: 4px; 
+  }
+  .table-wrap::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 12px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 1;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+
+  tbody tr:hover { background: var(--surface2); }
+
+  tbody tr.row-active { 
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
+  }
+
+  td {
+    padding: 14px 14px;
+    vertical-align: middle;
+  }
+
+  /* phase badge */
+  .phase-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .badge-A { background: #f3e8ff; color: #7c3aed; }
+  .badge-B { background: #dbeafe; color: #2563eb; }
+  .badge-C { background: #fef3c7; color: #d97706; }
+  .badge-D { background: #d1fae5; color: #059669; }
+  .badge-E { background: #fee2e2; color: #dc2626; }
+  .badge-F { background: #f3f4f6; color: #6b7280; }
+
+  /* status */
+  .status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .dot-done { background: var(--green); }
+  .dot-active { background: var(--yellow); animation: pulse 1.5s infinite; }
+  .dot-open { background: var(--muted-light); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .status-done { color: var(--green); }
+  .status-active { color: var(--yellow); }
+  .status-open { color: var(--muted); }
+
+  /* artifact name */
+  .artifact-name {
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .artifact-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.3;
+  }
+
+  /* action buttons */
+  .action-row { display: flex; gap: 6px; align-items: center; }
+
+  .action-btn {
+    padding: 6px 11px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+
+  .action-btn:hover { 
+    background: var(--surface2); 
+    color: var(--text);
+    border-color: var(--border-hover);
+  }
+
+  .action-btn.copy {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .action-btn.copy:hover {
+    background: #dbe4ff;
+  }
+
+  /* ─── PANEL ─── */
+  .panel {
+    width: 440px;
+    min-width: 440px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.25s ease;
+  }
+
+  .panel.hidden {
+    width: 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+
+  .panel-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .panel-meta {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .close-btn {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.12s;
+  }
+
+  .close-btn:hover { 
+    background: var(--surface2); 
+    color: var(--text);
+    border-color: var(--border-hover);
+  }
+
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+
+  .panel-body::-webkit-scrollbar { width: 6px; }
+  .panel-body::-webkit-scrollbar-track { background: transparent; }
+  .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .panel-section {
+    margin-bottom: 24px;
+  }
+
+  .panel-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .prompt-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .prompt-box::-webkit-scrollbar { width: 5px; }
+  .prompt-box::-webkit-scrollbar-track { background: transparent; }
+  .prompt-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .highlight { color: var(--accent); font-weight: 600; }
+
+  .result-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    min-height: 120px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  .result-box::-webkit-scrollbar { width: 5px; }
+  .result-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .source-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    align-items: center;
+  }
+
+  .source-tag {
+    padding: 3px 9px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .panel-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+
+  .btn-full {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn-full:hover { 
+    background: var(--surface2); 
+    color: var(--text);
+    border-color: var(--border-hover);
+  }
+  
+  .btn-full.accent {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .btn-full.accent:hover { background: var(--accent-hover); }
+
+  /* ─── COPY FLASH ─── */
+  .flash {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--surface);
+    border: 2px solid var(--green);
+    color: var(--green);
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.25s;
+    z-index: 100;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+
+  .flash.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* ─── SCROLL STYLE ─── */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">W</div>
+    <div>
+      <div class="logo-text">WorkflowSEO</div>
+      <div class="logo-sub">Content Suite</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Projekte</div>
+    <div class="sidebar-project active" onclick="switchProject(this)">
+      <span class="proj-icon">🗂</span> Medizinprodukte-Shop
+    </div>
+    <div class="sidebar-category active">
+      Desinfektionsmittel <span class="cat-progress">4/18</span>
+    </div>
+    <div class="sidebar-category">Handschuhe <span class="cat-progress">0/18</span></div>
+    <div class="sidebar-category">Masken <span class="cat-progress">0/18</span></div>
+
+    <div class="sidebar-project" onclick="switchProject(this)" style="margin-top:10px">
+      <span class="proj-icon">🗂</span> Fitness-Shop
+    </div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <button class="btn-new">＋ Neues Projekt</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-item">Medizinprodukte-Shop</span>
+      <span class="bc-sep">›</span>
+      <span class="bc-current">Desinfektionsmittel Hub</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-sm">⬇ Export</button>
+      <button class="btn-sm">✎ Metadaten</button>
+      <button class="btn-sm btn-primary">＋ Artefakt</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- META STRIP -->
+    <div class="meta-strip">
+      <div class="meta-tag"><span class="meta-label">Land:</span> Deutschland</div>
+      <div class="meta-sep"></div>
+      <div class="meta-tag"><span class="meta-label">Sprache:</span> Deutsch</div>
+      <div class="meta-sep"></div>
+      <div class="meta-tag"><span class="meta-label">Zielgruppe:</span> Privat · Pflege · Praxis</div>
+      <div class="meta-sep"></div>
+      <div class="meta-tag"><span class="meta-label">Ton:</span> Seriös-medizinisch</div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-area">
+      <div class="progress-header">
+        <div class="phase-pills">
+          <div class="phase-pill done">A</div>
+          <div class="phase-pill active">B</div>
+          <div class="phase-pill">C</div>
+          <div class="phase-pill">D</div>
+          <div class="phase-pill">E</div>
+          <div class="phase-pill">F</div>
+        </div>
+        <div class="progress-stat"><span>4</span> / 18 abgeschlossen</div>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill"></div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:50px">Phase</th>
+            <th>Artefakt</th>
+            <th style="width:120px">Status</th>
+            <th style="width:220px">Aktionen</th>
+          </tr>
+        </thead>
+        <tbody id="workflow-table">
+
+          <!-- Phase A -->
+          <tr onclick="openPanel('A1','SERP-Analyse & Suchintention','A','done')" class="row-active">
+            <td><span class="phase-badge badge-A">A</span></td>
+            <td>
+              <div class="artifact-name">A1 · SERP-Analyse & Suchintention</div>
+              <div class="artifact-desc">Intent · Must-have Themen · Auswahlkriterien</div>
+            </td>
+            <td><div class="status-dot status-done"><div class="dot dot-done"></div>Abgeschlossen</div></td>
+            <td>
+              <div class="action-row">
+                <button class="action-btn copy" onclick="event.stopPropagation();copyFlash('Prompt kopiert')">📋 Prompt</button>
+                <button class="action-btn copy" onclick="event.stopPropagation();copyFlash('Ergebnis kopiert')">📄 Ergebnis</button>
+                <button class="action-btn" onclick="openPanel('A1','SERP-Analyse & Suchintention','A','done')">↗</button>
+              </div>
+            </td>
+          </tr>
+
+          <tr onclick="openPanel('A1.2','Hub/Unterkategorien ableiten','A','done')">
+            <td><span class="phase-badge badge-A">A</span></td>
+            <td>
+              <div class="artifact-name">A1.2 · Hub / Unterkategorien ableiten</div>
+              <div class="artifact-desc">Hub-Inhalte vs. Spoke-Abgrenzung</div>
+            </td>
+            <td><div class="status-dot status-done"><div class="dot dot-done"></div>Abgeschlossen</div></td>
+            <td>
+              <div class="action-row">
+                <button class="action-btn copy" onclick="event.stopPropagation();copyFlash('Prompt kopiert')">📋 Prompt</button>
+                <button class="action-btn copy" onclick="event.stopPropagation();copyFlash('Ergebnis kopiert')">📄 Ergebnis</button>
+                <button class="action-btn">↗</button>
+              </div>
+            </td>
+          </tr>
+
+          <tr onclick="openPanel('A2.1','Seriöse Quellen (E-E-A-T)','A','done')">
+            <td><span class="phase-badge badge-A">A</span></td>
+            <td>
+              <div class="artifact-name">A2.1 · Seriöse Quellen (E-E-A-T)</div>
+              <div class="artifact-desc">Behörden · Normen · Fachgesellschaften</div>
+            </td>
+            <td><div class="status-dot status-done"><div class="dot dot-done"></div>Abgeschlossen</div></td>
+            <td>
+              <div class="action-row">
+                <button class="action-btn copy" onclick="event.stopPropagation();copyFlash('Prompt kopiert')">📋 Prompt</button>
+                <button class="action-btn copy" onclick="event.stopPropagation();copyFlash('Ergebnis kopiert')">📄 Ergebnis</button>
+                <button class="action-btn">↗</button>
+              </div>
+            </td>
+          </tr>
+
+          <tr onclick="openPanel('A3','Fragepool für Helpful Content','A','done')">
+            <td><span class="phase-badge badge-A">A</span></td>
+            <td>
+              <div class="artifact-name">A3 · Fragepool (FAQ + Kaufberatung)</div>
+              <div class="artifact-desc">30–40 Nutzerfragen geclustert</div>
+            </td>
+            <td><div class="status-dot status-done"><div class="dot dot-done"></div>Abgeschlossen</div></td>
+            <td>
+              <div class="action-row">
+                <button class="action-btn copy" onclick="event.stopPropagation();copyFlash('Prompt kopiert')">📋 Prompt</button>
+                <button class="action-btn copy" onclick="event.stopPropagation();copyFlash('Ergebnis kopiert')">📄 Ergebnis</button>
+                <button class="action-btn">↗</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Phase B -->
+          <tr onclick="openPanel('B1.1','Keyword & Topic Mapping','B','active')">
+            <td><span class="phase-badge badge-B">B</span></td>
+            <td>
+              <div class="artifact-name">B1.1 · Keyword & Topic Mapping</div>
+              <div class="artifact-desc">Hub vs. Unterseiten · Kannibalisierung</div>
+            </td>
+            <td><div class="status-dot status-active"><div class="dot dot-active"></div>In Arbeit</div></td>
+            <td>
+              <div class="action-row">
+                <button class="action-btn copy" onclick="event.stopPropagation();copyFlash('Prompt mit Input A kopiert')">📋 Prompt</button>
+                <button class="action-btn">↗</button>
+              </div>
+            </td>
+          </tr>
+
+          <tr onclick="openPanel('B2.1','Interlinking-Plan','B','open')">
+            <td><span class="phase-badge badge-B">B</span></td>
+            <td>
+              <div class="artifact-name">B2.1 · Interne Verlinkungsarchitektur</div>
+              <div class="artifact-desc">Anchor-Texte · Kontextsätze · Slots K1–K6</div>
+            </td>
+            <td><div class="status-dot status-open"><div class="dot dot-open"></div>Offen</div></td>
+            <td>
+              <div class="action-row">
+                <button class="action-btn" onclick="event.stopPropagation();copyFlash('Prompt kopiert')">📋 Prompt</button>
+                <button class="action-btn">↗</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Phase C -->
+          <tr onclick="openPanel('C1','Content-Briefing Hub','C','open')">
+            <td><span class="phase-badge badge-C">C</span></td>
+            <td>
+              <div class="artifact-name">C1 · Vollständiges Content-Briefing</div>
+              <div class="artifact-desc">Hub-Seite · Scope · Outline · FAQs · YMYL</div>
+            </td>
+            <td><div class="status-dot status-open"><div class="dot dot-open"></div>Offen</div></td>
+            <td>
+              <div class="action-row">
+                <button class="action-btn" style="opacity:0.5" disabled>📋 Prompt</button>
+                <button class="action-btn">↗</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Phase D -->
+          <tr onclick="openPanel('D1','Hub-Text schreiben','D','open')">
+            <td><span class="phase-badge badge-D">D</span></td>
+            <td>
+              <div class="artifact-name">D1 · Hub-Text schreiben</div>
+              <div class="artifact-desc">Vollständiger SEO-Text nach Briefing</div>
+            </td>
+            <td><div class="status-dot status-open"><div class="dot dot-open"></div>Offen</div></td>
+            <td>
+              <div class="action-row">
+                <button class="action-btn" style="opacity:0.5" disabled>📋 Prompt</button>
+                <button class="action-btn">↗</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Phase E -->
+          <tr>
+            <td><span class="phase-badge badge-E">E</span></td>
+            <td>
+              <div class="artifact-name">E1 · SurferSEO-Optimierung</div>
+              <div class="artifact-desc">Terms · Topics · Headings anpassen</div>
+            </td>
+            <td><div class="status-dot status-open"><div class="dot dot-open"></div>Offen</div></td>
+            <td>
+              <div class="action-row">
+                <button class="action-btn" style="opacity:0.5" disabled>📋 Prompt</button>
+                <button class="action-btn">↗</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Phase F -->
+          <tr>
+            <td><span class="phase-badge badge-F">F</span></td>
+            <td>
+              <div class="artifact-name">F1 · YMYL Red-Flag Check</div>
+              <div class="artifact-desc">Claims · Sicherheit · Übertreibungen</div>
+            </td>
+            <td><div class="status-dot status-open"><div class="dot dot-open"></div>Offen</div></td>
+            <td>
+              <div class="action-row">
+                <button class="action-btn" style="opacity:0.5" disabled>📋 Prompt</button>
+                <button class="action-btn">↗</button>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- SIDE PANEL -->
+<div class="panel hidden" id="side-panel">
+  <div class="panel-header">
+    <div>
+      <div class="panel-title" id="panel-title">A1 · SERP-Analyse</div>
+      <div class="panel-meta">
+        <span class="meta-tag" id="panel-phase-tag">Phase A</span>
+        <span class="meta-tag" id="panel-status-tag">✅ Abgeschlossen</span>
+      </div>
+    </div>
+    <button class="close-btn" onclick="closePanel()">✕</button>
+  </div>
+
+  <div class="panel-body">
+    <div class="panel-section">
+      <div class="panel-section-label">
+        Prompt-Template
+        <button class="action-btn copy" onclick="copyFlash('Prompt kopiert')" style="font-size:11px;padding:4px 9px">📋 Kopieren</button>
+      </div>
+      <div class="prompt-box" id="panel-prompt">Analysiere die Top-Ergebnisse in <span class="highlight">[Deutschland]</span> für das Keyword <span class="highlight">[Desinfektionsmittel]</span> kaufen:
+
+- Bestimme dominante Suchintentionen (transaktional / informativ / navigational)
+- Extrahiere wiederkehrende Content-Muster: typische H2/H3-Themen, Strukturbausteine
+- Liste typische Auswahlkriterien (Größen, Normen, Material, Kompatibilität)
+- Nenne Filter-/Sortieroptionen, die in Shops häufig vorkommen
+
+Output: strukturierte Stichpunkte + Zusammenfassung der "Must-have"-Elemente.</div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-label">
+        Ergebnis
+        <button class="action-btn copy" onclick="copyFlash('Ergebnis kopiert')" style="font-size:11px;padding:4px 9px">📄 Kopieren</button>
+      </div>
+      <div class="source-row">
+        <span class="source-tag">Perplexity</span>
+        <span class="source-tag">16.02.2025</span>
+        <span class="source-tag">v1</span>
+      </div>
+      <div class="result-box" id="panel-result" style="margin-top:10px">
+Suchintention:
+• Transaktional (80%): Nutzer wollen kaufen → klarer BOFU-Fokus
+• Informativ (15%): Vergleich, Normen, Wirksamkeit
+• Navigational (5%): Marken-Suchen
+
+Must-have Strukturbausteine:
+• Produktfilter (Wirkstoff, Zulassung, Zielgruppe)
+• Kaufberatung mit Normen (EN 14885, VAH-Liste)
+• FAQ zu Anwendung & Sicherheit
+• Hinweis auf DGUV / BfR-Empfehlungen
+
+Auswahlkriterien Top 5:
+1. Zulassung (VAH / RKI-gelistet)
+2. Wirkspektrum (bakterizid, viruzid, fungizid)
+3. Gebindegröße (250ml–10L)
+4. Verträglichkeit (Haut / Fläche / Instrumente)
+5. Einwirkzeit</div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-label">Notiz</div>
+      <textarea style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text-secondary);resize:vertical;min-height:70px;outline:none;" placeholder="Eigene Notizen..."></textarea>
+    </div>
+  </div>
+
+  <div class="panel-footer">
+    <button class="btn-full" onclick="copyFlash('Komplettes Artefakt kopiert')">📋 Alles kopieren</button>
+    <button class="btn-full accent" onclick="copyFlash('Als abgeschlossen markiert')">✓ Abschließen</button>
+  </div>
+</div>
+
+<!-- COPY FLASH -->
+<div class="flash" id="flash">✓ <span id="flash-text">Kopiert!</span></div>
+
+<script>
+  function openPanel(code, name, phase, status) {
+    const panel = document.getElementById('side-panel');
+    panel.classList.remove('hidden');
+
+    document.getElementById('panel-title').textContent = code + ' · ' + name;
+    document.getElementById('panel-phase-tag').textContent = 'Phase ' + phase;
+
+    const statusMap = {
+      done: '✅ Abgeschlossen',
+      active: '⏳ In Arbeit',
+      open: '⬜ Offen'
+    };
+    document.getElementById('panel-status-tag').textContent = statusMap[status] || status;
+
+    document.querySelectorAll('tbody tr').forEach(r => r.classList.remove('row-active'));
+    event.currentTarget && event.currentTarget.classList && event.currentTarget.classList.add('row-active');
+  }
+
+  function closePanel() {
+    document.getElementById('side-panel').classList.add('hidden');
+    document.querySelectorAll('tbody tr').forEach(r => r.classList.remove('row-active'));
+  }
+
+  function copyFlash(msg) {
+    const flash = document.getElementById('flash');
+    document.getElementById('flash-text').textContent = msg;
+    flash.classList.add('show');
+    setTimeout(() => flash.classList.remove('show'), 2000);
+  }
+
+  function switchProject(el) {
+    document.querySelectorAll('.sidebar-project').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  setTimeout(() => {
+    openPanel('A1', 'SERP-Analyse & Suchintention', 'A', 'done');
+  }, 300);
+</script>
+</body>
+</html>

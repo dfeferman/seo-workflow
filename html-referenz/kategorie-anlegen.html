@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kategorie/Blog anlegen – WorkflowSEO</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #fafbfc;
+    --surface: #ffffff;
+    --surface2: #f4f6f8;
+    --border: #e1e4e8;
+    --border-hover: #d0d4d8;
+    --accent: #5b7fff;
+    --accent-hover: #4a6fef;
+    --accent-light: #e8edff;
+    --accent2: #7c3aed;
+    --green: #10b981;
+    --green-light: #d1fae5;
+    --yellow: #f59e0b;
+    --yellow-light: #fef3c7;
+    --red: #ef4444;
+    --red-light: #fee2e2;
+    --text: #1a202c;
+    --text-secondary: #4a5568;
+    --muted: #718096;
+    --muted-light: #a0aec0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal {
+    max-width: 720px;
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    animation: slideUp 0.3s ease;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── HEADER ─── */
+  .modal-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .modal-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 12px rgba(91, 127, 255, 0.3);
+  }
+
+  .header-text h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.4px;
+    margin-bottom: 3px;
+  }
+
+  .header-text p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .close-btn {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.15s;
+  }
+
+  .close-btn:hover { 
+    background: var(--surface2); 
+    color: var(--text);
+  }
+
+  /* ─── TYPE SELECTOR ─── */
+  .type-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .type-card {
+    padding: 20px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .type-card:hover {
+    border-color: var(--border-hover);
+    background: var(--surface2);
+    transform: translateY(-2px);
+  }
+
+  .type-card.selected {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    box-shadow: 0 0 0 3px rgba(91, 127, 255, 0.15);
+  }
+
+  .type-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .type-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    background: var(--surface2);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .type-card.selected .type-icon {
+    background: rgba(91, 127, 255, 0.2);
+    transform: scale(1.1);
+  }
+
+  .type-info {
+    flex: 1;
+  }
+
+  .type-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .type-subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+
+  .type-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .type-features {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .type-feature {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .feature-icon {
+    font-size: 14px;
+  }
+
+  /* ─── BODY ─── */
+  .modal-body {
+    padding: 28px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .modal-body::-webkit-scrollbar { width: 6px; }
+  .modal-body::-webkit-scrollbar-track { background: transparent; }
+  .modal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    margin-bottom: 24px;
+  }
+
+  .section:last-child { margin-bottom: 0; }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-icon {
+    font-size: 16px;
+  }
+
+  /* ─── FORM FIELDS ─── */
+  .field {
+    margin-bottom: 18px;
+  }
+
+  .field:last-child { margin-bottom: 0; }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .required {
+    color: var(--red);
+    font-size: 14px;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    transition: all 0.15s;
+    outline: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(91,127,255,0.1);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 60px;
+    line-height: 1.6;
+  }
+
+  .input-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* ─── TAGS ─── */
+  .tags-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-height: 44px;
+    transition: all 0.15s;
+  }
+
+  .tags-display:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(91,127,255,0.1);
+  }
+
+  .tag-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    background: var(--accent-light);
+    border: 1px solid var(--accent);
+    border-radius: 5px;
+    font-size: 12px;
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+
+  .tag-item:hover {
+    background: rgba(91, 127, 255, 0.25);
+  }
+
+  .tag-remove {
+    font-size: 13px;
+    opacity: 0.7;
+  }
+
+  .tag-input {
+    flex: 1;
+    min-width: 120px;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+  }
+
+  /* ─── INFO BOX ─── */
+  .info-box {
+    background: var(--accent-light);
+    border: 1px solid rgba(91, 127, 255, 0.25);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .info-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .info-box strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ─── FOOTER ─── */
+  .modal-footer {
+    padding: 20px 28px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .footer-info {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .footer-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+  }
+
+  .btn:hover { 
+    background: var(--surface2); 
+    color: var(--text);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    box-shadow: 0 1px 3px rgba(91, 127, 255, 0.3);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 2px 6px rgba(91, 127, 255, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ─── HIDDEN ─── */
+  .hidden {
+    display: none !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay">
+  <div class="modal">
+    
+    <!-- HEADER -->
+    <div class="modal-header">
+      <div class="header-top">
+        <div class="header-left">
+          <div class="modal-icon">➕</div>
+          <div class="header-text">
+            <h2>Neue Kategorie/Blog anlegen</h2>
+            <p>Projekt: <strong>Medizinprodukte-Shop</strong></p>
+          </div>
+        </div>
+        <button class="close-btn" onclick="window.history.back()">✕</button>
+      </div>
+    </div>
+
+    <!-- TYPE SELECTOR -->
+    <div class="type-selector">
+      
+      <div class="type-card selected" onclick="selectType(this, 'category')">
+        <div class="type-header">
+          <div class="type-icon">🏷️</div>
+          <div class="type-info">
+            <div class="type-title">Kategorie</div>
+            <div class="type-subtitle">Shop-Content</div>
+          </div>
+        </div>
+        <div class="type-desc">
+          Für Produktkategorien mit Unterkategorien (Hub & Spoke)
+        </div>
+        <div class="type-features">
+          <div class="type-feature">
+            <span class="feature-icon">✓</span> 18 Artefakte (Phase A–F)
+          </div>
+          <div class="type-feature">
+            <span class="feature-icon">✓</span> SERP-Analyse + Briefing + QA
+          </div>
+          <div class="type-feature">
+            <span class="feature-icon">✓</span> Unterkategorien-Management
+          </div>
+        </div>
+      </div>
+
+      <div class="type-card" onclick="selectType(this, 'blog')">
+        <div class="type-header">
+          <div class="type-icon">📝</div>
+          <div class="type-info">
+            <div class="type-title">Blog-Artikel</div>
+            <div class="type-subtitle">Content-Marketing</div>
+          </div>
+        </div>
+        <div class="type-desc">
+          Für informative Artikel, Ratgeber und Blog-Posts
+        </div>
+        <div class="type-features">
+          <div class="type-feature">
+            <span class="feature-icon">✓</span> 12 Artefakte (reduziert)
+          </div>
+          <div class="type-feature">
+            <span class="feature-icon">✓</span> Recherche + Outline + SEO
+          </div>
+          <div class="type-feature">
+            <span class="feature-icon">✓</span> Schnellerer Workflow
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+
+      <!-- BASIC INFO -->
+      <div class="section">
+        <div class="section-title">
+          <span class="section-icon">📋</span>
+          Grundinformationen
+        </div>
+
+        <div class="field">
+          <label class="label">
+            Name <span class="required">*</span>
+          </label>
+          <input type="text" id="name" placeholder="z.B. Desinfektionsmittel" autofocus>
+          <div class="input-hint">Name der Kategorie oder des Blog-Artikels</div>
+        </div>
+
+        <div class="field-grid" id="category-fields">
+          <div class="field">
+            <label class="label">
+              Hub-Seite Name
+            </label>
+            <input type="text" placeholder="z.B. Desinfektionsmittel Hub">
+          </div>
+
+          <div class="field">
+            <label class="label">
+              Unterkategorien
+            </label>
+            <div class="tags-display">
+              <input type="text" class="tag-input" placeholder="Enter zum Hinzufügen..." onkeydown="handleTagInput(event, this)">
+            </div>
+            <div class="input-hint">Spoke-Seiten (z.B. Händedesinfektion, Flächendesinfektion)</div>
+          </div>
+        </div>
+
+        <div class="field hidden" id="blog-fields">
+          <label class="label">
+            Thema / Fokus-Keyword
+          </label>
+          <input type="text" placeholder="z.B. Hygiene im Gesundheitswesen">
+          <div class="input-hint">Hauptthema des Blog-Artikels</div>
+        </div>
+
+      </div>
+
+      <!-- MARKET & LANGUAGE -->
+      <div class="section">
+        <div class="section-title">
+          <span class="section-icon">🌍</span>
+          Markt & Sprache
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label class="label">
+              Land <span class="required">*</span>
+            </label>
+            <select>
+              <option>Deutschland</option>
+              <option>Österreich</option>
+              <option>Schweiz</option>
+              <option>Frankreich</option>
+              <option>UK</option>
+              <option>USA</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="label">
+              Sprache <span class="required">*</span>
+            </label>
+            <select>
+              <option>Deutsch</option>
+              <option>Englisch</option>
+              <option>Französisch</option>
+              <option>Spanisch</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- TARGET GROUP -->
+      <div class="section">
+        <div class="section-title">
+          <span class="section-icon">🎯</span>
+          Zielgruppe & Shop
+        </div>
+
+        <div class="field">
+          <label class="label">
+            Zielgruppen <span class="required">*</span>
+          </label>
+          <div class="tags-display">
+            <span class="tag-item">Privat <span class="tag-remove" onclick="this.parentElement.remove()">✕</span></span>
+            <span class="tag-item">Pflege <span class="tag-remove" onclick="this.parentElement.remove()">✕</span></span>
+            <span class="tag-item">Praxis <span class="tag-remove" onclick="this.parentElement.remove()">✕</span></span>
+            <input type="text" class="tag-input" placeholder="Weitere hinzufügen..." onkeydown="handleTagInput(event, this)">
+          </div>
+        </div>
+
+        <div class="field" id="shop-type-field">
+          <label class="label">
+            Shop-Typ <span class="required">*</span>
+          </label>
+          <select>
+            <option>B2C Medizinprodukte-Onlineshop</option>
+            <option>B2B Medizinprodukte-Onlineshop</option>
+            <option>B2C & B2B gemischt</option>
+            <option>Marktplatz (Amazon, eBay)</option>
+            <option>Fachhandel mit Onlineshop</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- CONTENT GUIDELINES -->
+      <div class="section">
+        <div class="section-title">
+          <span class="section-icon">✍️</span>
+          Content-Richtlinien
+        </div>
+
+        <div class="field">
+          <label class="label">
+            Tonalität <span class="required">*</span>
+          </label>
+          <input type="text" value="Seriös-medizinisch, leicht verständlich" placeholder="z.B. Professionell, freundlich, beratend">
+        </div>
+
+        <div class="field">
+          <label class="label">
+            No-Gos / Verbotene Aussagen
+          </label>
+          <textarea placeholder="Was darf NICHT geschrieben werden?">Keine Heilversprechen, keine Garantien, keine Angst-Kommunikation</textarea>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <span class="info-icon">💡</span>
+        <div>
+          <strong>Hinweis:</strong> Nach dem Anlegen werden automatisch alle Standard-Artefakte für diese Kategorie/Blog erstellt. Du kannst sie dann Schritt für Schritt abarbeiten.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <div class="footer-info">
+        <span id="artifact-count">18 Artefakte</span> werden erstellt
+      </div>
+      <div class="footer-actions">
+        <button class="btn" onclick="window.history.back()">Abbrechen</button>
+        <button class="btn btn-primary" onclick="createCategory()">Anlegen & starten</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let selectedType = 'category';
+
+  function selectType(element, type) {
+    selectedType = type;
+    
+    // Update card selection
+    document.querySelectorAll('.type-card').forEach(card => {
+      card.classList.remove('selected');
+    });
+    element.classList.add('selected');
+
+    // Toggle fields
+    if (type === 'category') {
+      document.getElementById('category-fields').classList.remove('hidden');
+      document.getElementById('blog-fields').classList.add('hidden');
+      document.getElementById('shop-type-field').classList.remove('hidden');
+      document.getElementById('artifact-count').textContent = '18 Artefakte';
+    } else {
+      document.getElementById('category-fields').classList.add('hidden');
+      document.getElementById('blog-fields').classList.remove('hidden');
+      document.getElementById('shop-type-field').classList.add('hidden');
+      document.getElementById('artifact-count').textContent = '12 Artefakte';
+    }
+  }
+
+  function handleTagInput(event, input) {
+    if (event.key === 'Enter' && input.value.trim()) {
+      const tagsDisplay = input.closest('.tags-display');
+      const newTag = document.createElement('span');
+      newTag.className = 'tag-item';
+      newTag.innerHTML = `${input.value.trim()} <span class="tag-remove" onclick="this.parentElement.remove()">✕</span>`;
+      tagsDisplay.insertBefore(newTag, input);
+      input.value = '';
+    }
+  }
+
+  function createCategory() {
+    const name = document.getElementById('name').value;
+    
+    if (!name.trim()) {
+      alert('Bitte gib einen Namen ein.');
+      document.getElementById('name').focus();
+      return;
+    }
+
+    console.log('Creating', selectedType, 'with name:', name);
+    
+    alert(`✓ ${selectedType === 'category' ? 'Kategorie' : 'Blog-Artikel'} "${name}" wurde angelegt!\n\nDu wirst jetzt zur Workflow-Ansicht weitergeleitet.`);
+    
+    // In real app: create category and redirect to workflow
+    window.history.back();
+  }
+
+  // Auto-focus
+  document.getElementById('name').focus();
+</script>
+
+</body>
+</html>

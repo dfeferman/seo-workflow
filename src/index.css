@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design-System – Helles Theme (wie HTML-Prototypen) */
+:root {
+  --bg: #fafbfc;
+  --surface: #ffffff;
+  --surface2: #f4f6f8;
+  --border: #e1e4e8;
+  --accent: #5b7fff;
+  --accent-light: #e8edff;
+  --green: #10b981;
+  --yellow: #f59e0b;
+  --red: #ef4444;
+  --text: #1a202c;
+  --text-secondary: #4a5568;
+  --muted: #718096;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-text font-sans antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

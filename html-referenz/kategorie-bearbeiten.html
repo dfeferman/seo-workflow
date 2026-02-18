@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kategorie bearbeiten – WorkflowSEO</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #fafbfc;
+    --surface: #ffffff;
+    --surface2: #f4f6f8;
+    --border: #e1e4e8;
+    --border-hover: #d0d4d8;
+    --accent: #5b7fff;
+    --accent-hover: #4a6fef;
+    --accent-light: #e8edff;
+    --accent2: #7c3aed;
+    --green: #10b981;
+    --green-light: #d1fae5;
+    --yellow: #f59e0b;
+    --yellow-light: #fef3c7;
+    --red: #ef4444;
+    --red-light: #fee2e2;
+    --text: #1a202c;
+    --text-secondary: #4a5568;
+    --muted: #718096;
+    --muted-light: #a0aec0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 20px 20px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 2px 8px rgba(91, 127, 255, 0.2);
+  }
+
+  .logo-text {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  .sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 12px;
+  }
+
+  .sidebar-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 0 8px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .sidebar-project {
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+
+  .sidebar-project.active {
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  .sidebar-item {
+    padding: 6px 10px 6px 32px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+  }
+
+  .sidebar-item:hover { 
+    background: var(--surface2); 
+    color: var(--text); 
+  }
+
+  .sidebar-item.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ─── MAIN ─── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 64px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .bc-sep { color: var(--muted-light); }
+  .bc-current { color: var(--text); font-weight: 600; }
+  .bc-item { color: var(--muted); cursor: pointer; }
+
+  .topbar-actions { display: flex; gap: 10px; }
+
+  .btn-sm {
+    padding: 8px 14px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-sm:hover { 
+    background: var(--surface2); 
+    color: var(--text);
+  }
+
+  /* ─── TABS ─── */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    padding: 8px 28px 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+
+  .tab:hover { color: var(--muted2); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ─── CONTENT ─── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px;
+  }
+
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-icon {
+    font-size: 18px;
+  }
+
+  .section-action {
+    font-size: 13px;
+    color: var(--accent);
+    cursor: pointer;
+    font-weight: 500;
+    transition: opacity 0.15s;
+  }
+
+  .section-action:hover { opacity: 0.7; }
+
+  /* ─── FORM FIELDS ─── */
+  .field {
+    margin-bottom: 20px;
+  }
+
+  .field:last-child { margin-bottom: 0; }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 7px;
+  }
+
+  .required {
+    color: var(--red);
+    font-size: 14px;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    transition: all 0.15s;
+    outline: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(91,127,255,0.1);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.6;
+  }
+
+  /* ─── UNTERKATEGORIEN LIST ─── */
+  .subcategories-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .subcat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.15s;
+  }
+
+  .subcat-item:hover {
+    border-color: var(--border-hover);
+    background: var(--surface);
+  }
+
+  .subcat-drag {
+    font-size: 18px;
+    color: var(--muted);
+    cursor: grab;
+  }
+
+  .subcat-info {
+    flex: 1;
+  }
+
+  .subcat-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .subcat-meta {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .subcat-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .icon-btn {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+
+  .icon-btn:hover {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--border-hover);
+  }
+
+  .icon-btn.danger:hover {
+    background: var(--red-light);
+    color: var(--red);
+    border-color: var(--red);
+  }
+
+  .add-subcat-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px dashed var(--border);
+    background: transparent;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .add-subcat-btn:hover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  /* ─── BADGE ─── */
+  .badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .badge-category {
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  .badge-blog {
+    background: var(--yellow-light);
+    color: var(--yellow);
+  }
+
+  /* ─── SAVE BAR ─── */
+  .save-bar {
+    position: fixed;
+    bottom: 0;
+    left: 280px;
+    right: 0;
+    padding: 16px 28px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+    z-index: 100;
+  }
+
+  .save-bar.show {
+    display: flex;
+    animation: slideUp 0.2s ease;
+  }
+
+  .save-info {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .save-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+  }
+
+  .btn:hover { 
+    background: var(--surface2); 
+    color: var(--text);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    box-shadow: 0 1px 3px rgba(91, 127, 255, 0.3);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .modal-overlay.show {
+    display: flex;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal {
+    max-width: 500px;
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    animation: slideUp 0.3s ease;
+  }
+
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .modal-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .modal-body {
+    padding: 24px;
+  }
+
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">W</div>
+    <div>
+      <div class="logo-text">WorkflowSEO</div>
+    </div>
+  </div>
+
+  <div class="sidebar-content">
+    <div class="sidebar-label">Projekt</div>
+    <div class="sidebar-project active">
+      <span>🗂</span> Medizinprodukte-Shop
+    </div>
+    <div class="sidebar-item active">
+      Desinfektionsmittel
+    </div>
+    <div class="sidebar-item">
+      Handschuhe
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="breadcrumb">
+      <span class="bc-item">Medizinprodukte-Shop</span>
+      <span class="bc-sep">›</span>
+      <span class="bc-item">Desinfektionsmittel</span>
+      <span class="bc-sep">›</span>
+      <span class="bc-current">Einstellungen</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-sm" onclick="window.history.back()">← Zurück zum Workflow</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active">Metadaten</div>
+    <div class="tab">Unterkategorien</div>
+    <div class="tab">Erweitert</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- BASIC INFO -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-icon">📋</span>
+          Grundinformationen
+        </div>
+        <span class="badge badge-category">🏷️ Kategorie</span>
+      </div>
+
+      <div class="field">
+        <label class="label">
+          Kategorie-Name <span class="required">*</span>
+        </label>
+        <input type="text" value="Desinfektionsmittel" onchange="showSaveBar()">
+      </div>
+
+      <div class="field">
+        <label class="label">
+          Hub-Seite Name
+        </label>
+        <input type="text" value="Desinfektionsmittel Hub" onchange="showSaveBar()">
+      </div>
+    </div>
+
+    <!-- UNTERKATEGORIEN -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-icon">📂</span>
+          Unterkategorien (Spokes)
+        </div>
+        <span class="section-action" onclick="openAddSubcatModal()">+ Neue Unterkategorie</span>
+      </div>
+
+      <div class="subcategories-list">
+        
+        <div class="subcat-item">
+          <span class="subcat-drag">⋮⋮</span>
+          <div class="subcat-info">
+            <div class="subcat-name">Händedesinfektion</div>
+            <div class="subcat-meta">
+              <div class="meta-item">📊 <span>8/18 Artefakte</span></div>
+              <div class="meta-item">⏱ <span>Erstellt: 15.02.2025</span></div>
+            </div>
+          </div>
+          <div class="subcat-actions">
+            <button class="icon-btn" onclick="openSubcatSettings('Händedesinfektion')" title="Einstellungen">⚙️</button>
+            <button class="icon-btn" onclick="window.location='#workflow'" title="Zum Workflow">→</button>
+            <button class="icon-btn danger" onclick="deleteSubcat('Händedesinfektion')" title="Löschen">🗑</button>
+          </div>
+        </div>
+
+        <div class="subcat-item">
+          <span class="subcat-drag">⋮⋮</span>
+          <div class="subcat-info">
+            <div class="subcat-name">Flächendesinfektion</div>
+            <div class="subcat-meta">
+              <div class="meta-item">📊 <span>12/18 Artefakte</span></div>
+              <div class="meta-item">⏱ <span>Erstellt: 15.02.2025</span></div>
+            </div>
+          </div>
+          <div class="subcat-actions">
+            <button class="icon-btn" onclick="openSubcatSettings('Flächendesinfektion')" title="Einstellungen">⚙️</button>
+            <button class="icon-btn" onclick="window.location='#workflow'" title="Zum Workflow">→</button>
+            <button class="icon-btn danger" onclick="deleteSubcat('Flächendesinfektion')" title="Löschen">🗑</button>
+          </div>
+        </div>
+
+        <div class="subcat-item">
+          <span class="subcat-drag">⋮⋮</span>
+          <div class="subcat-info">
+            <div class="subcat-name">Instrumentendesinfektion</div>
+            <div class="subcat-meta">
+              <div class="meta-item">📊 <span>0/18 Artefakte</span></div>
+              <div class="meta-item">⏱ <span>Erstellt: 16.02.2025</span></div>
+            </div>
+          </div>
+          <div class="subcat-actions">
+            <button class="icon-btn" onclick="openSubcatSettings('Instrumentendesinfektion')" title="Einstellungen">⚙️</button>
+            <button class="icon-btn" onclick="window.location='#workflow'" title="Zum Workflow">→</button>
+            <button class="icon-btn danger" onclick="deleteSubcat('Instrumentendesinfektion')" title="Löschen">🗑</button>
+          </div>
+        </div>
+
+        <div class="subcat-item">
+          <span class="subcat-drag">⋮⋮</span>
+          <div class="subcat-info">
+            <div class="subcat-name">Desinfektionstücher</div>
+            <div class="subcat-meta">
+              <div class="meta-item">📊 <span>18/18 Artefakte</span></div>
+              <div class="meta-item">⏱ <span>Erstellt: 14.02.2025</span></div>
+            </div>
+          </div>
+          <div class="subcat-actions">
+            <button class="icon-btn" onclick="openSubcatSettings('Desinfektionstücher')" title="Einstellungen">⚙️</button>
+            <button class="icon-btn" onclick="window.location='#workflow'" title="Zum Workflow">→</button>
+            <button class="icon-btn danger" onclick="deleteSubcat('Desinfektionstücher')" title="Löschen">🗑</button>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="add-subcat-btn" onclick="openAddSubcatModal()">
+        ＋ Neue Unterkategorie anlegen
+      </button>
+    </div>
+
+    <!-- MARKET -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-icon">🌍</span>
+          Markt & Sprache
+        </div>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label class="label">Land <span class="required">*</span></label>
+          <select onchange="showSaveBar()">
+            <option selected>Deutschland</option>
+            <option>Österreich</option>
+            <option>Schweiz</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="label">Sprache <span class="required">*</span></label>
+          <select onchange="showSaveBar()">
+            <option selected>Deutsch</option>
+            <option>Englisch</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT GUIDELINES -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-icon">✍️</span>
+          Content-Richtlinien
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Tonalität <span class="required">*</span></label>
+        <input type="text" value="Seriös-medizinisch, leicht verständlich" onchange="showSaveBar()">
+      </div>
+
+      <div class="field">
+        <label class="label">No-Gos / Verbotene Aussagen</label>
+        <textarea onchange="showSaveBar()">Keine Heilversprechen, keine Garantien, keine Angst-Kommunikation</textarea>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SAVE BAR -->
+  <div class="save-bar" id="save-bar">
+    <div class="save-info">
+      Du hast ungespeicherte Änderungen
+    </div>
+    <div class="save-actions">
+      <button class="btn" onclick="hideSaveBar()">Verwerfen</button>
+      <button class="btn btn-primary" onclick="saveChanges()">Änderungen speichern</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADD SUBCATEGORY MODAL -->
+<div class="modal-overlay" id="add-subcat-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Neue Unterkategorie anlegen</div>
+      <div class="modal-subtitle">Für: Desinfektionsmittel Hub</div>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label class="label">Name <span class="required">*</span></label>
+        <input type="text" id="new-subcat-name" placeholder="z.B. Hautdesinfektion" autofocus>
+      </div>
+      <div class="field">
+        <label class="label">Beschreibung (optional)</label>
+        <textarea placeholder="Kurze Beschreibung der Unterkategorie..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeAddSubcatModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="addSubcategory()">Anlegen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showSaveBar() {
+    document.getElementById('save-bar').classList.add('show');
+  }
+
+  function hideSaveBar() {
+    document.getElementById('save-bar').classList.remove('show');
+  }
+
+  function saveChanges() {
+    console.log('Saving changes...');
+    alert('✓ Änderungen gespeichert!');
+    hideSaveBar();
+  }
+
+  function openAddSubcatModal() {
+    document.getElementById('add-subcat-modal').classList.add('show');
+    setTimeout(() => {
+      document.getElementById('new-subcat-name').focus();
+    }, 100);
+  }
+
+  function closeAddSubcatModal() {
+    document.getElementById('add-subcat-modal').classList.remove('show');
+  }
+
+  function addSubcategory() {
+    const name = document.getElementById('new-subcat-name').value;
+    if (!name.trim()) {
+      alert('Bitte gib einen Namen ein.');
+      return;
+    }
+    console.log('Adding subcategory:', name);
+    alert('✓ Unterkategorie "' + name + '" wurde angelegt!\n\n18 Artefakte wurden erstellt.');
+    closeAddSubcatModal();
+  }
+
+  function openSubcatSettings(name) {
+    alert('⚙️ Einstellungen für "' + name + '" öffnen');
+  }
+
+  function deleteSubcat(name) {
+    if (confirm('Möchtest du "' + name + '" wirklich löschen?\n\nAlle 18 Artefakte und Ergebnisse werden gelöscht!')) {
+      console.log('Deleting:', name);
+      alert('✓ "' + name + '" wurde gelöscht.');
+    }
+  }
+</script>
+
+</body>
+</html>

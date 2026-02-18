@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Template-Bibliothek – WorkflowSEO</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #fafbfc;
+    --surface: #ffffff;
+    --surface2: #f4f6f8;
+    --border: #e1e4e8;
+    --border-hover: #d0d4d8;
+    --accent: #5b7fff;
+    --accent-hover: #4a6fef;
+    --accent-light: #e8edff;
+    --accent2: #7c3aed;
+    --green: #10b981;
+    --green-light: #d1fae5;
+    --yellow: #f59e0b;
+    --yellow-light: #fef3c7;
+    --red: #ef4444;
+    --red-light: #fee2e2;
+    --text: #1a202c;
+    --text-secondary: #4a5568;
+    --muted: #718096;
+    --muted-light: #a0aec0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal {
+    max-width: 1100px;
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    animation: slideUp 0.3s ease;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── HEADER ─── */
+  .modal-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, var(--accent-light), var(--surface));
+    flex-shrink: 0;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .modal-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 12px rgba(91, 127, 255, 0.3);
+  }
+
+  .header-text h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.4px;
+    margin-bottom: 3px;
+  }
+
+  .header-text p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .close-btn {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.15s;
+  }
+
+  .close-btn:hover { 
+    background: var(--surface2); 
+    color: var(--text);
+  }
+
+  .search-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 10px 14px 10px 38px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    transition: all 0.15s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 12px center;
+  }
+
+  .search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(91,127,255,0.1);
+  }
+
+  .filter-btn {
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .filter-btn:hover {
+    background: var(--surface2);
+    border-color: var(--border-hover);
+  }
+
+  .filter-btn.active {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ─── BODY ─── */
+  .modal-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    border-right: 1px solid var(--border);
+    background: var(--surface2);
+    padding: 20px 16px;
+    overflow-y: auto;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 5px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .filter-section {
+    margin-bottom: 24px;
+  }
+
+  .filter-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .filter-option {
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .filter-option:hover {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .filter-option.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .filter-count {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--muted);
+  }
+
+  .filter-option.active .filter-count {
+    background: rgba(91, 127, 255, 0.15);
+    color: var(--accent);
+  }
+
+  /* ─── CONTENT ─── */
+  .content {
+    flex: 1;
+    padding: 20px 24px;
+    overflow-y: auto;
+  }
+
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .result-count {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .result-count strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .view-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--surface2);
+    padding: 4px;
+    border-radius: 8px;
+  }
+
+  .view-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .view-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  /* ─── TEMPLATE GRID ─── */
+  .template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  .template-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .template-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+  }
+
+  .template-card.selected {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    box-shadow: 0 0 0 3px rgba(91,127,255,0.15);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .card-phase {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .badge-A { background: #f3e8ff; color: #7c3aed; }
+  .badge-B { background: #dbeafe; color: #2563eb; }
+  .badge-C { background: #fef3c7; color: #d97706; }
+  .badge-D { background: #d1fae5; color: #059669; }
+  .badge-E { background: #fee2e2; color: #dc2626; }
+  .badge-F { background: #f3f4f6; color: #6b7280; }
+
+  .card-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--surface2);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .tag.popular {
+    background: var(--yellow-light);
+    color: var(--yellow);
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .card-prompt-preview {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-height: 80px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card-prompt-preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 30px;
+    background: linear-gradient(to bottom, transparent, var(--surface2));
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-meta {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .card-action {
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .card-action:hover {
+    background: var(--accent-light);
+    border-color: var(--accent);
+  }
+
+  /* ─── LIST VIEW ─── */
+  .template-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .template-list-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .template-list-item:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .template-list-item.selected {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .list-phase {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .list-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .list-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .list-desc {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .list-meta {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .list-tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .list-action {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .list-action:hover {
+    background: var(--accent-light);
+    border-color: var(--accent);
+  }
+
+  /* ─── FOOTER ─── */
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .footer-info {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .footer-info strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .footer-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+  }
+
+  .btn:hover { 
+    background: var(--surface2); 
+    color: var(--text);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+    box-shadow: 0 1px 3px rgba(91, 127, 255, 0.3);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 2px 6px rgba(91, 127, 255, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .empty-desc {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  /* ─── HIDDEN ─── */
+  .hidden {
+    display: none !important;
+  }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay">
+  <div class="modal">
+    
+    <!-- HEADER -->
+    <div class="modal-header">
+      <div class="header-top">
+        <div class="header-left">
+          <div class="modal-icon">📚</div>
+          <div class="header-text">
+            <h2>Template-Bibliothek</h2>
+            <p>Wähle ein vorgefertigtes Artefakt aus oder passe es an</p>
+          </div>
+        </div>
+        <button class="close-btn" onclick="window.history.back()">✕</button>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" class="search-input" placeholder="Templates durchsuchen..." id="search-input" oninput="filterTemplates()">
+        <button class="filter-btn" onclick="toggleView()">
+          <span id="view-icon">⊞</span> 
+          <span id="view-text">Liste</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        
+        <div class="filter-section">
+          <div class="filter-title">Phase</div>
+          <div class="filter-option active" onclick="filterByPhase('all', this)">
+            Alle Phasen
+            <span class="filter-count">24</span>
+          </div>
+          <div class="filter-option" onclick="filterByPhase('A', this)">
+            Phase A: Recherche
+            <span class="filter-count">6</span>
+          </div>
+          <div class="filter-option" onclick="filterByPhase('B', this)">
+            Phase B: Mapping
+            <span class="filter-count">4</span>
+          </div>
+          <div class="filter-option" onclick="filterByPhase('C', this)">
+            Phase C: Briefing
+            <span class="filter-count">3</span>
+          </div>
+          <div class="filter-option" onclick="filterByPhase('D', this)">
+            Phase D: Schreiben
+            <span class="filter-count">5</span>
+          </div>
+          <div class="filter-option" onclick="filterByPhase('E', this)">
+            Phase E: SEO
+            <span class="filter-count">3</span>
+          </div>
+          <div class="filter-option" onclick="filterByPhase('F', this)">
+            Phase F: QA
+            <span class="filter-count">3</span>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-title">Kategorie</div>
+          <div class="filter-option active" onclick="filterByCategory('all', this)">
+            Alle Kategorien
+            <span class="filter-count">24</span>
+          </div>
+          <div class="filter-option" onclick="filterByCategory('analyse', this)">
+            Analyse
+            <span class="filter-count">8</span>
+          </div>
+          <div class="filter-option" onclick="filterByCategory('content', this)">
+            Content
+            <span class="filter-count">10</span>
+          </div>
+          <div class="filter-option" onclick="filterByCategory('seo', this)">
+            SEO
+            <span class="filter-count">6</span>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-title">Beliebtheit</div>
+          <div class="filter-option" onclick="filterByPopular(this)">
+            Nur beliebte
+            <span class="filter-count">8</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CONTENT -->
+      <div class="content">
+        
+        <div class="content-header">
+          <div class="result-count">
+            <strong id="result-count">24</strong> Templates gefunden
+          </div>
+          <div class="view-toggle">
+            <button class="view-btn active" onclick="switchToGrid(this)">⊞ Grid</button>
+            <button class="view-btn" onclick="switchToList(this)">☰ Liste</button>
+          </div>
+        </div>
+
+        <!-- GRID VIEW -->
+        <div class="template-grid" id="grid-view">
+
+          <!-- Template 1 -->
+          <div class="template-card" data-phase="A" data-category="analyse" data-popular="true" onclick="selectTemplate(this, 1)">
+            <div class="card-header">
+              <div class="card-phase badge-A">A1</div>
+              <div class="card-tags">
+                <div class="tag popular">Beliebt</div>
+              </div>
+            </div>
+            <div class="card-title">SERP-Analyse & Suchintention</div>
+            <div class="card-desc">Analysiere die Top-Suchergebnisse und identifiziere die dominante Suchintention</div>
+            <div class="card-prompt-preview">Analysiere die Top-Ergebnisse in [LAND] für das Keyword [KATEGORIE] kaufen:
+
+- Bestimme dominante Suchintentionen (transaktional / informativ / navigational)
+- Extrahiere wiederkehrende Content-Muster...</div>
+            <div class="card-footer">
+              <div class="card-meta">
+                <div class="meta-item">⏱ 15 Min</div>
+                <div class="meta-item">🔗 0 Deps</div>
+              </div>
+              <div class="card-action">Vorschau →</div>
+            </div>
+          </div>
+
+          <!-- Template 2 -->
+          <div class="template-card" data-phase="A" data-category="analyse" data-popular="true" onclick="selectTemplate(this, 2)">
+            <div class="card-header">
+              <div class="card-phase badge-A">A2</div>
+              <div class="card-tags">
+                <div class="tag popular">Beliebt</div>
+              </div>
+            </div>
+            <div class="card-title">Konkurrenzanalyse</div>
+            <div class="card-desc">Identifiziere die Top-Wettbewerber und analysiere ihre Content-Strategie</div>
+            <div class="card-prompt-preview">Analysiere die Top-Konkurrenten in [LAND] für [KATEGORIE]:
+
+- Identifiziere die 5 stärksten Wettbewerber
+- Analysiere deren Content-Strategie und USPs
+- Extrahiere Keywords...</div>
+            <div class="card-footer">
+              <div class="card-meta">
+                <div class="meta-item">⏱ 20 Min</div>
+                <div class="meta-item">🔗 1 Dep</div>
+              </div>
+              <div class="card-action">Vorschau →</div>
+            </div>
+          </div>
+
+          <!-- Template 3 -->
+          <div class="template-card" data-phase="A" data-category="analyse" onclick="selectTemplate(this, 3)">
+            <div class="card-header">
+              <div class="card-phase badge-A">A3</div>
+              <div class="card-tags">
+                <div class="tag">Recherche</div>
+              </div>
+            </div>
+            <div class="card-title">Quellen & E-E-A-T</div>
+            <div class="card-desc">Finde seriöse Quellen für fachliche Aussagen (Behörden, Normen, Studien)</div>
+            <div class="card-prompt-preview">Finde seriöse, zitierfähige Quellen zum Thema [KATEGORIE]:
+
+Priorität:
+1) Behörden/öffentliche Institutionen
+2) Fachgesellschaften/Leitlinien...</div>
+            <div class="card-footer">
+              <div class="card-meta">
+                <div class="meta-item">⏱ 25 Min</div>
+                <div class="meta-item">🔗 0 Deps</div>
+              </div>
+              <div class="card-action">Vorschau →</div>
+            </div>
+          </div>
+
+          <!-- Template 4 -->
+          <div class="template-card" data-phase="B" data-category="seo" data-popular="true" onclick="selectTemplate(this, 4)">
+            <div class="card-header">
+              <div class="card-phase badge-B">B1</div>
+              <div class="card-tags">
+                <div class="tag popular">Beliebt</div>
+              </div>
+            </div>
+            <div class="card-title">Keyword-Mapping</div>
+            <div class="card-desc">Ordne Keywords den richtigen Seiten zu und vermeide Kannibalisierung</div>
+            <div class="card-prompt-preview">Erstelle ein Keyword-Mapping für [KATEGORIE]:
+
+- Ordne Keywords nach Hub vs. Unterseiten
+- Identifiziere Kannibalisierungsrisiken
+- Empfehle Abgrenzungsregeln...</div>
+            <div class="card-footer">
+              <div class="card-meta">
+                <div class="meta-item">⏱ 30 Min</div>
+                <div class="meta-item">🔗 Phase A</div>
+              </div>
+              <div class="card-action">Vorschau →</div>
+            </div>
+          </div>
+
+          <!-- Template 5 -->
+          <div class="template-card" data-phase="B" data-category="seo" onclick="selectTemplate(this, 5)">
+            <div class="card-header">
+              <div class="card-phase badge-B">B2</div>
+              <div class="card-tags">
+                <div class="tag">SEO</div>
+              </div>
+            </div>
+            <div class="card-title">Interlinking-Strategie</div>
+            <div class="card-desc">Plane interne Verlinkung zwischen Hub, Spokes und Ratgebern</div>
+            <div class="card-prompt-preview">Erstelle einen Interlinking-Plan für [KATEGORIE]:
+
+- Hub → Unterseiten (mind. 2 Links pro Seite)
+- Anchor-Texte + Kontextsätze
+- Link-Slots K1–K6...</div>
+            <div class="card-footer">
+              <div class="card-meta">
+                <div class="meta-item">⏱ 25 Min</div>
+                <div class="meta-item">🔗 Phase A</div>
+              </div>
+              <div class="card-action">Vorschau →</div>
+            </div>
+          </div>
+
+          <!-- Template 6 -->
+          <div class="template-card" data-phase="C" data-category="content" data-popular="true" onclick="selectTemplate(this, 6)">
+            <div class="card-header">
+              <div class="card-phase badge-C">C1</div>
+              <div class="card-tags">
+                <div class="tag popular">Beliebt</div>
+              </div>
+            </div>
+            <div class="card-title">Content-Briefing (Hub)</div>
+            <div class="card-desc">Vollständiges Briefing mit Outline, FAQs und YMYL-Compliance</div>
+            <div class="card-prompt-preview">Erstelle ein vollständiges Content-Briefing für [KATEGORIE]:
+
+- Ziel & Suchintention
+- Scope & Abgrenzung
+- SEO-Elemente (H1, Meta, URL)
+- Struktur/Outline...</div>
+            <div class="card-footer">
+              <div class="card-meta">
+                <div class="meta-item">⏱ 40 Min</div>
+                <div class="meta-item">🔗 Phase A+B</div>
+              </div>
+              <div class="card-action">Vorschau →</div>
+            </div>
+          </div>
+
+          <!-- Template 7 -->
+          <div class="template-card" data-phase="D" data-category="content" data-popular="true" onclick="selectTemplate(this, 7)">
+            <div class="card-header">
+              <div class="card-phase badge-D">D1</div>
+              <div class="card-tags">
+                <div class="tag popular">Beliebt</div>
+              </div>
+            </div>
+            <div class="card-title">Hub-Text schreiben</div>
+            <div class="card-desc">Vollständiger SEO-Text nach Briefing mit FAQs und internen Links</div>
+            <div class="card-prompt-preview">Schreibe den vollständigen Text für [KATEGORIE] auf Basis des Briefings:
+
+- Ton: [TON]
+- YMYL: keine Heilversprechen
+- Struktur: H1/H2/H3 wie im Briefing...</div>
+            <div class="card-footer">
+              <div class="card-meta">
+                <div class="meta-item">⏱ 45 Min</div>
+                <div class="meta-item">🔗 Briefing</div>
+              </div>
+              <div class="card-action">Vorschau →</div>
+            </div>
+          </div>
+
+          <!-- Template 8 -->
+          <div class="template-card" data-phase="D" data-category="content" onclick="selectTemplate(this, 8)">
+            <div class="card-header">
+              <div class="card-phase badge-D">D2</div>
+              <div class="card-tags">
+                <div class="tag">Content</div>
+              </div>
+            </div>
+            <div class="card-title">FAQ-Modul erstellen</div>
+            <div class="card-desc">10–12 kaufnahe FAQs mit YMYL-sicheren Antworten</div>
+            <div class="card-prompt-preview">Erstelle die FAQ-Sektion für [KATEGORIE]:
+
+- 10–12 FAQs (kaufnah + Orientierung)
+- Antworten: kurz, konkret, YMYL-sicher
+- Keine Heilversprechen...</div>
+            <div class="card-footer">
+              <div class="card-meta">
+                <div class="meta-item">⏱ 20 Min</div>
+                <div class="meta-item">🔗 Phase A</div>
+              </div>
+              <div class="card-action">Vorschau →</div>
+            </div>
+          </div>
+
+          <!-- Template 9 -->
+          <div class="template-card" data-phase="E" data-category="seo" data-popular="true" onclick="selectTemplate(this, 9)">
+            <div class="card-header">
+              <div class="card-phase badge-E">E1</div>
+              <div class="card-tags">
+                <div class="tag popular">Beliebt</div>
+              </div>
+            </div>
+            <div class="card-title">SurferSEO-Optimierung</div>
+            <div class="card-desc">Integriere Surfer-Terms/Topics ohne Keyword-Stuffing</div>
+            <div class="card-prompt-preview">Optimiere den Text basierend auf Surfer-Output:
+
+- Integriere fehlende Terms natürlich
+- Ergänze fehlende Abschnitte
+- Optimiere Headings (H2/H3)...</div>
+            <div class="card-footer">
+              <div class="card-meta">
+                <div class="meta-item">⏱ 30 Min</div>
+                <div class="meta-item">🔗 Text</div>
+              </div>
+              <div class="card-action">Vorschau →</div>
+            </div>
+          </div>
+
+          <!-- Template 10 -->
+          <div class="template-card" data-phase="F" data-category="analyse" onclick="selectTemplate(this, 10)">
+            <div class="card-header">
+              <div class="card-phase badge-F">F1</div>
+              <div class="card-tags">
+                <div class="tag">QA</div>
+              </div>
+            </div>
+            <div class="card-title">YMYL Red-Flag Check</div>
+            <div class="card-desc">Prüfe Text auf problematische Aussagen und Heilversprechen</div>
+            <div class="card-prompt-preview">Prüfe den Text auf YMYL-Risiken:
+
+- Heilversprechen/Diagnose
+- Übertreibungen
+- Sicherheitslücken
+- Rechtliches...</div>
+            <div class="card-footer">
+              <div class="card-meta">
+                <div class="meta-item">⏱ 25 Min</div>
+                <div class="meta-item">🔗 Text</div>
+              </div>
+              <div class="card-action">Vorschau →</div>
+            </div>
+          </div>
+
+          <!-- More templates would go here... -->
+
+        </div>
+
+        <!-- LIST VIEW (hidden by default) -->
+        <div class="template-list hidden" id="list-view">
+          
+          <div class="template-list-item" data-phase="A" data-category="analyse" data-popular="true" onclick="selectTemplate(this, 1)">
+            <div class="list-phase badge-A">A1</div>
+            <div class="list-content">
+              <div class="list-title">SERP-Analyse & Suchintention</div>
+              <div class="list-desc">Analysiere die Top-Suchergebnisse und identifiziere die dominante Suchintention</div>
+            </div>
+            <div class="list-meta">
+              <div class="list-tag">⏱ 15 Min</div>
+              <div class="list-tag">🔗 0 Deps</div>
+              <div class="list-action">Auswählen</div>
+            </div>
+          </div>
+
+          <div class="template-list-item" data-phase="A" data-category="analyse" data-popular="true" onclick="selectTemplate(this, 2)">
+            <div class="list-phase badge-A">A2</div>
+            <div class="list-content">
+              <div class="list-title">Konkurrenzanalyse</div>
+              <div class="list-desc">Identifiziere die Top-Wettbewerber und analysiere ihre Content-Strategie</div>
+            </div>
+            <div class="list-meta">
+              <div class="list-tag">⏱ 20 Min</div>
+              <div class="list-tag">🔗 1 Dep</div>
+              <div class="list-action">Auswählen</div>
+            </div>
+          </div>
+
+          <!-- More list items... -->
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <div class="footer-info">
+        <span id="selected-info">Kein Template ausgewählt</span>
+      </div>
+      <div class="footer-actions">
+        <button class="btn" onclick="window.history.back()">Abbrechen</button>
+        <button class="btn btn-primary" id="use-template-btn" disabled onclick="useTemplate()">Template verwenden</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let selectedTemplateId = null;
+  let currentView = 'grid';
+  let currentPhaseFilter = 'all';
+  let currentCategoryFilter = 'all';
+  let showOnlyPopular = false;
+
+  function selectTemplate(element, id) {
+    // Remove previous selection
+    document.querySelectorAll('.template-card, .template-list-item').forEach(el => {
+      el.classList.remove('selected');
+    });
+
+    // Add selection
+    element.classList.add('selected');
+    selectedTemplateId = id;
+
+    // Update footer
+    document.getElementById('selected-info').innerHTML = '<strong>Template ausgewählt:</strong> ' + element.querySelector('.card-title, .list-title').textContent;
+    document.getElementById('use-template-btn').disabled = false;
+  }
+
+  function useTemplate() {
+    if (selectedTemplateId) {
+      alert('✓ Template wird ins Artefakt übernommen!\n\nDu kannst es jetzt noch anpassen.');
+      // In real app: load template data into form
+      window.history.back();
+    }
+  }
+
+  function switchToGrid(btn) {
+    currentView = 'grid';
+    document.getElementById('grid-view').classList.remove('hidden');
+    document.getElementById('list-view').classList.add('hidden');
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function switchToList(btn) {
+    currentView = 'list';
+    document.getElementById('grid-view').classList.add('hidden');
+    document.getElementById('list-view').classList.remove('hidden');
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function toggleView() {
+    if (currentView === 'grid') {
+      switchToList(document.querySelectorAll('.view-btn')[1]);
+    } else {
+      switchToGrid(document.querySelectorAll('.view-btn')[0]);
+    }
+  }
+
+  function filterByPhase(phase, element) {
+    currentPhaseFilter = phase;
+    document.querySelectorAll('.filter-section:first-child .filter-option').forEach(opt => {
+      opt.classList.remove('active');
+    });
+    element.classList.add('active');
+    applyFilters();
+  }
+
+  function filterByCategory(category, element) {
+    currentCategoryFilter = category;
+    document.querySelectorAll('.filter-section:nth-child(2) .filter-option').forEach(opt => {
+      opt.classList.remove('active');
+    });
+    element.classList.add('active');
+    applyFilters();
+  }
+
+  function filterByPopular(element) {
+    showOnlyPopular = !element.classList.contains('active');
+    element.classList.toggle('active');
+    applyFilters();
+  }
+
+  function applyFilters() {
+    let count = 0;
+    document.querySelectorAll('.template-card, .template-list-item').forEach(card => {
+      const phase = card.dataset.phase;
+      const category = card.dataset.category;
+      const popular = card.dataset.popular === 'true';
+
+      let showPhase = currentPhaseFilter === 'all' || phase === currentPhaseFilter;
+      let showCategory = currentCategoryFilter === 'all' || category === currentCategoryFilter;
+      let showPopular = !showOnlyPopular || popular;
+
+      if (showPhase && showCategory && showPopular) {
+        card.style.display = '';
+        count++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    document.getElementById('result-count').textContent = count;
+  }
+
+  function filterTemplates() {
+    const query = document.getElementById('search-input').value.toLowerCase();
+    let count = 0;
+
+    document.querySelectorAll('.template-card, .template-list-item').forEach(card => {
+      const title = card.querySelector('.card-title, .list-title').textContent.toLowerCase();
+      const desc = card.querySelector('.card-desc, .list-desc').textContent.toLowerCase();
+
+      if (title.includes(query) || desc.includes(query)) {
+        card.style.display = '';
+        count++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    document.getElementById('result-count').textContent = count;
+  }
+</script>
+
+</body>
+</html>
