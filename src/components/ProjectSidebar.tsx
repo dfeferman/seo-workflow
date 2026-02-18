@@ -4,9 +4,9 @@ import { useProjects } from '@/hooks/useProjects'
 import { useAllCategories, buildCategoryTree } from '@/hooks/useCategories'
 import { useCategoryProgress } from '@/hooks/useCategoryProgress'
 import { useDeleteCategory } from '@/hooks/useDeleteCategory'
-import { supabase } from '@/lib/supabase'
 import { CreateCategoryModal } from '@/components/CreateCategoryModal'
 import { ConfirmModal } from '@/components/ConfirmModal'
+import { UserMenu } from '@/components/UserMenu'
 import type { CategoryRow } from '@/types/database.types'
 
 export function ProjectSidebar() {
@@ -65,13 +65,7 @@ export function ProjectSidebar() {
         >
           ＋ Neues Projekt
         </button>
-        <button
-          type="button"
-          onClick={() => supabase.auth.signOut()}
-          className="w-full py-2 px-3 rounded-lg border border-border text-muted text-xs font-medium hover:bg-surface-2 hover:text-text-secondary transition-colors"
-        >
-          Abmelden
-        </button>
+        <UserMenu />
       </div>
 
       {createModal && (

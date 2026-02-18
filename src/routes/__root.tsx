@@ -9,7 +9,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   const { pathname } = useLocation()
   const { user, loading } = useAuth()
-  const isLoginPage = pathname === '/login'
+  const isPublicPage = pathname === '/login' || pathname === '/signup'
 
   if (loading) {
     return (
@@ -19,7 +19,7 @@ function RootComponent() {
     )
   }
 
-  if (isLoginPage) {
+  if (isPublicPage) {
     return <Outlet />
   }
 
