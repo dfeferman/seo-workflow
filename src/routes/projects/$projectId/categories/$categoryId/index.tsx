@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useArtifacts, useArtifactStatusMap } from '@/hooks/useArtifacts'
 import { usePlaceholderData } from '@/hooks/usePlaceholderData'
@@ -12,6 +12,7 @@ import { TemplateBrowser } from '@/components/TemplateBrowser'
 import { SaveTemplateModal } from '@/components/SaveTemplateModal'
 import { ExportModal } from '@/components/ExportModal'
 import { ConfirmModal } from '@/components/ConfirmModal'
+import { WorkflowTableSkeleton } from '@/components/LoadingSkeleton'
 import { useDeleteArtifact } from '@/hooks/useDeleteArtifact'
 import type { TemplateRow } from '@/types/database.types'
 import type { ArtifactRow } from '@/types/database.types'
@@ -39,6 +40,7 @@ function WorkflowPage() {
   const deleteArtifact = useDeleteArtifact(categoryId)
   const { placeholderMap } = usePlaceholderData(categoryId)
   const { data: category } = useCategory(categoryId)
+  const { data: parentCategory } = useCategory(category?.parent_id ?? undefined)
   const { data: artifacts = [], isLoading: artifactsLoading } = useArtifacts(categoryId)
   const artifactIds = artifacts.map((a) => a.id)
   const { data: statusMap = {} } = useArtifactStatusMap(categoryId, artifactIds)
@@ -52,6 +54,20 @@ function WorkflowPage() {
     const t = setTimeout(() => setFlashMessage(null), 2000)
     return () => clearTimeout(t)
   }, [flashMessage])
+
+  // Cmd+K / Strg+K: Template-Browser öffnen (Step 15: Keyboard-Shortcuts)
+  const openTemplateBrowserRef = useRef(() => setTemplateBrowserOpen(true))
+  openTemplateBrowserRef.current = () => setTemplateBrowserOpen(true)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        openTemplateBrowserRef.current()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   const handleCopyPrompt = useCallback(
     (artifact: ArtifactRow) => {
@@ -88,30 +104,9 @@ function WorkflowPage() {
   return (
     <div className="flex-1 flex min-h-0 overflow-hidden">
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden bg-surface2 min-w-0">
-        {/* Topbar */}
-      <div className="flex items-center justify-between h-16 px-7 border-b border-border bg-surface flex-shrink-0">
-        <nav className="flex items-center gap-2 text-sm" aria-label="Breadcrumb">
-          <span className="text-muted">{project?.name ?? '…'}</span>
-          <span className="text-[#a0aec0]" aria-hidden>›</span>
-          <span className="text-text font-semibold">
-            {category?.name ?? '…'}
-          </span>
-        </nav>
-        <div className="flex gap-2.5 items-center">
-          <button
-            type="button"
-            onClick={() => setExportModalOpen(true)}
-            className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
-          >
-            ⬇ Export
-          </button>
-          <Link
-            to="/projects/$projectId/categories/$categoryId/settings"
-            params={{ projectId, categoryId }}
-            className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
-          >
-            ✎ Metadaten
-          </Link>
+        {/* Topbar: Zeile 1 = Aktionen, Zeile 2 = Breadcrumb */}
+      <div className="flex flex-col border-b border-border bg-surface flex-shrink-0">
+        <div className="flex items-center justify-start gap-2 px-5 py-3">
           <Link
             to="/projects/$projectId/categories/$categoryId/overview"
             params={{ projectId, categoryId }}
@@ -123,8 +118,23 @@ function WorkflowPage() {
             type="button"
             onClick={() => setTemplateBrowserOpen(true)}
             className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
+            title="Template-Bibliothek (⌘K / Strg+K)"
           >
             📚 Aus Vorlage
+          </button>
+          <Link
+            to="/projects/$projectId/categories/$categoryId/settings"
+            params={{ projectId, categoryId }}
+            className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
+          >
+            ✎ Metadaten
+          </Link>
+          <button
+            type="button"
+            onClick={() => setExportModalOpen(true)}
+            className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
+          >
+            ⬇ Export
           </button>
           <button
             type="button"
@@ -134,6 +144,25 @@ function WorkflowPage() {
             ＋ Artefakt
           </button>
         </div>
+        <nav className="flex items-center gap-2 px-5 pb-3 text-sm text-muted" aria-label="Breadcrumb">
+          <span>{project?.name ?? 'Aktuelles Projekt'}</span>
+          {parentCategory && (
+            <>
+              <span aria-hidden>›</span>
+              <Link
+                to="/projects/$projectId/categories/$categoryId"
+                params={{ projectId, categoryId: parentCategory.id }}
+                className="text-text-secondary hover:text-text hover:underline"
+              >
+                {parentCategory.name}
+              </Link>
+            </>
+          )}
+          <span aria-hidden>›</span>
+          <span className="text-text font-semibold">
+            {category?.name ?? '…'}
+          </span>
+        </nav>
       </div>
 
       {/* Progress + Phase Pills */}
@@ -146,9 +175,7 @@ function WorkflowPage() {
 
       {/* Table */}
       {artifactsLoading ? (
-        <div className="flex-1 flex items-center justify-center text-muted text-sm">
-          Artefakte laden…
-        </div>
+        <WorkflowTableSkeleton rows={8} />
       ) : (
         <WorkflowTable
           artifacts={artifacts}
@@ -163,7 +190,7 @@ function WorkflowPage() {
 
         {flashMessage && (
           <div
-            className="fixed bottom-7 right-7 bg-surface border-2 border-green text-green py-3 px-4 rounded-lg text-sm font-medium shadow-lg z-50"
+            className="fixed bottom-7 right-7 bg-surface border-2 border-green text-green py-3 px-4 rounded-lg text-sm font-medium shadow-lg z-50 animate-[slideUp_0.2s_ease-out]"
             role="status"
             aria-live="polite"
           >

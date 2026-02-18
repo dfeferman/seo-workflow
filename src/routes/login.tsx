@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/hooks/useAuth'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -8,10 +9,19 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const signedInSuccess = useRef(false)
+
+  useEffect(() => {
+    if (signedInSuccess.current && user) {
+      signedInSuccess.current = false
+      navigate({ to: '/' })
+    }
+  }, [user, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,7 +33,8 @@ function LoginPage() {
         setError(err.message)
         return
       }
-      await navigate({ to: '/' })
+      signedInSuccess.current = true
+      // Navigation passiert im useEffect, sobald der AuthProvider den User gesetzt hat
     } finally {
       setLoading(false)
     }

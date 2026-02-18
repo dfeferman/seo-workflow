@@ -24,25 +24,46 @@ function TagInput({
   placeholder = 'Enter zum Hinzufügen…',
   inputValue,
   onInputChange,
+  separators,
 }: {
   tags: string[]
   onChange: (tags: string[]) => void
   placeholder?: string
   inputValue?: string
   onInputChange?: (value: string) => void
+  /** Zusätzliche Tasten (z.B. Komma), bei denen der aktuelle Text getrennt und jede Teil als Tag hinzugefügt wird */
+  separators?: string[]
 }) {
   const [internalInput, setInternalInput] = useState('')
   const isControlled = onInputChange != null && inputValue !== undefined
   const input = isControlled ? inputValue : internalInput
   const setInput = isControlled ? onInputChange : setInternalInput
 
-  const add = useCallback(() => {
-    const t = input.trim()
-    if (t && !tags.includes(t)) {
-      onChange([...tags, t])
-      setInput('')
-    }
-  }, [input, tags, onChange, setInput])
+  const add = useCallback(
+    (value?: string) => {
+      const toAdd = (value ?? input).trim()
+      if (toAdd && !tags.includes(toAdd)) {
+        onChange([...tags, toAdd])
+        setInput('')
+      }
+    },
+    [input, tags, onChange, setInput]
+  )
+
+  const addMultiple = useCallback(
+    (text: string, sep: string) => {
+      const parts = text.split(sep).map((s) => s.trim()).filter(Boolean)
+      const newTags = [...tags]
+      for (const p of parts) {
+        if (p && !newTags.includes(p)) newTags.push(p)
+      }
+      if (newTags.length > tags.length) {
+        onChange(newTags)
+        setInput('')
+      }
+    },
+    [tags, onChange, setInput]
+  )
 
   const remove = useCallback(
     (index: number) => {
@@ -55,6 +76,11 @@ function TagInput({
     if (e.key === 'Enter') {
       e.preventDefault()
       add()
+      return
+    }
+    if (separators?.length && separators.includes(e.key)) {
+      e.preventDefault()
+      addMultiple(input, e.key)
     }
   }
 
@@ -155,11 +181,8 @@ export function CreateCategoryModal({ open, onClose, projectId, projectName }: P
   if (!open) return null
 
   const body = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={onClose}>
-      <div
-        className="bg-surface border border-border rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" role="dialog" aria-modal="true" aria-labelledby="create-category-title">
+      <div className="bg-surface border border-border rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 p-5 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-3">
@@ -167,7 +190,7 @@ export function CreateCategoryModal({ open, onClose, projectId, projectName }: P
               ＋
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-text">Neue Kategorie/Blog anlegen</h2>
+              <h2 id="create-category-title" className="text-lg font-semibold text-text">Neue Kategorie/Blog anlegen</h2>
               <p className="text-sm text-muted mt-0.5">
                 Projekt: <strong>{projectName}</strong>
               </p>
@@ -260,8 +283,13 @@ export function CreateCategoryModal({ open, onClose, projectId, projectName }: P
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-text-secondary mb-1.5">Unterkategorien</label>
-                      <TagInput tags={subcategoryTags} onChange={setSubcategoryTags} placeholder="Enter zum Hinzufügen…" />
-                      <p className="text-xs text-muted mt-1.5">Spoke-Seiten (z.B. Händedesinfektion, Flächendesinfektion)</p>
+                      <TagInput
+                        tags={subcategoryTags}
+                        onChange={setSubcategoryTags}
+                        placeholder="Name eingeben, Enter oder Komma zum Hinzufügen"
+                        separators={[',']}
+                      />
+                      <p className="text-xs text-muted mt-1.5">Mehrere mit Komma getrennt möglich (z.B. Händedesinfektion, Flächendesinfektion, Flächenreinigung)</p>
                     </div>
                   </div>
                 )}

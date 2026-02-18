@@ -7,6 +7,8 @@ import { useDeleteCategory } from '@/hooks/useDeleteCategory'
 import { CreateCategoryModal } from '@/components/CreateCategoryModal'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { UserMenu } from '@/components/UserMenu'
+import { SidebarProjectsSkeleton, SidebarCategoriesSkeleton } from '@/components/LoadingSkeleton'
+import { EmptyState } from '@/components/EmptyState'
 import type { CategoryRow } from '@/types/database.types'
 
 export function ProjectSidebar() {
@@ -38,7 +40,13 @@ export function ProjectSidebar() {
           </div>
 
           {isLoading ? (
-            <p className="text-sm text-muted px-2">Laden…</p>
+            <SidebarProjectsSkeleton count={4} />
+          ) : projects.length === 0 ? (
+            <EmptyState
+              icon="🗂"
+              title="Keine Projekte"
+              description="Lege ein neues Projekt an, um zu starten."
+            />
           ) : (
             <div className="space-y-0">
               {projects.map((project) => (
@@ -158,7 +166,7 @@ function ProjectRow({
       {isExpanded && (
         <div className="ml-2 border-l-2 border-border pl-2 mt-1.5 space-y-3">
           {isLoading ? (
-            <p className="text-2xs text-muted px-2">Kategorien laden…</p>
+            <SidebarCategoriesSkeleton count={4} />
           ) : (
             <>
               {categoryTree.length > 0 && (
@@ -184,7 +192,12 @@ function ProjectRow({
                 />
               )}
               {tree.length === 0 && (
-                <p className="text-2xs text-muted px-2">Keine Kategorien</p>
+                <EmptyState
+                  icon="🏷️"
+                  title="Keine Kategorien"
+                  description="Neue Kategorie anlegen, um Inhalte zu strukturieren."
+                  className="py-6 px-2"
+                />
               )}
               <button
                 type="button"
@@ -250,10 +263,37 @@ function CategoryTreeSection({
       </div>
       {nodes.map((node) => {
         if (node.children.length > 0) {
+          const hubDoneTotal = progress[node.id]
+          const isHubActive = currentCategoryId === node.id
           return (
-            <div key={node.id} className="mb-2">
-              <div className="flex items-center justify-between gap-1 py-0.5 px-2.5 text-2xs font-medium text-muted group">
-                <span className="truncate">{node.name}</span>
+            <div key={node.id} className="mb-3">
+              {/* Oberkategorie (Hub) – hebt sich klar ab */}
+              <div
+                className={`flex items-center gap-1.5 py-2 px-2.5 rounded-lg border-l-2 transition-all group ${
+                  isHubActive
+                    ? 'border-accent bg-accent-light/80 text-accent font-semibold'
+                    : 'border-border bg-surface-2 text-text hover:border-accent/50 hover:bg-surface-2'
+                }`}
+              >
+                <span className="text-base flex-shrink-0 opacity-80" aria-hidden>
+                  📁
+                </span>
+                <Link
+                  to="/projects/$projectId/categories/$categoryId"
+                  params={{ projectId, categoryId: node.id }}
+                  className="flex items-center justify-between flex-1 min-w-0"
+                >
+                  <span className="truncate min-w-0 text-sm font-semibold">{node.name}</span>
+                  {hubDoneTotal != null && (
+                    <span
+                      className={`text-2xs font-mono font-medium flex-shrink-0 ml-2 px-1.5 py-0.5 rounded ${
+                        isHubActive ? 'bg-accent/20 text-accent' : 'bg-surface text-muted'
+                      }`}
+                    >
+                      {hubDoneTotal.done}/{hubDoneTotal.total}
+                    </span>
+                  )}
+                </Link>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -268,48 +308,54 @@ function CategoryTreeSection({
                   🗑
                 </button>
               </div>
-              {node.children.map((cat) => {
-                const { done = 0, total = 0 } = progress[cat.id] ?? {}
-                const isActive = currentCategoryId === cat.id
-                return (
-                  <div
-                    key={cat.id}
-                    className={`flex items-center gap-1 py-1.5 px-2.5 rounded-md text-sm transition-all mb-0.5 group ${
-                      isActive
-                        ? 'bg-accent-light text-accent font-medium'
-                        : 'text-text-secondary hover:bg-surface-2 hover:text-text'
-                    }`}
-                  >
-                    <Link
-                      to="/projects/$projectId/categories/$categoryId"
-                      params={{ projectId, categoryId: cat.id }}
-                      className="flex items-center justify-between flex-1 min-w-0"
+              {/* Unterkategorien – Tree-Einrückung mit vertikaler Linie */}
+              <div className="ml-3 mt-0.5 border-l-2 border-border pl-2 space-y-0.5">
+                {node.children.map((cat) => {
+                  const { done = 0, total = 0 } = progress[cat.id] ?? {}
+                  const isActive = currentCategoryId === cat.id
+                  return (
+                    <div
+                      key={cat.id}
+                      className={`flex items-center gap-1 py-1 px-2 rounded-md text-xs transition-all group ${
+                        isActive
+                          ? 'bg-accent-light text-accent font-medium'
+                          : 'text-text-secondary hover:bg-surface-2 hover:text-text'
+                      }`}
                     >
-                      <span className="truncate min-w-0">{cat.name}</span>
-                      <span
-                        className={`text-2xs font-mono font-medium flex-shrink-0 ml-2 px-1.5 py-0.5 rounded ${
-                          isActive ? 'bg-accent/15 text-accent' : 'bg-surface-2 text-muted'
-                        }`}
-                      >
-                        {done}/{total}
+                      <span className="text-muted flex-shrink-0" aria-hidden>
+                        └
                       </span>
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        onDeleteCategory({ id: cat.id, name: cat.name, hasChildren: false })
-                      }}
-                      className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-muted hover:bg-red-100 hover:text-red-600 transition-all flex-shrink-0"
-                      title="Unterkategorie löschen"
-                      aria-label={`${cat.name} löschen`}
-                    >
-                      🗑
-                    </button>
-                  </div>
-                )
-              })}
+                      <Link
+                        to="/projects/$projectId/categories/$categoryId"
+                        params={{ projectId, categoryId: cat.id }}
+                        className="flex items-center justify-between flex-1 min-w-0"
+                      >
+                        <span className="truncate min-w-0">{cat.name}</span>
+                        <span
+                          className={`text-2xs font-mono font-medium flex-shrink-0 ml-2 px-1.5 py-0.5 rounded ${
+                            isActive ? 'bg-accent/15 text-accent' : 'bg-surface-2 text-muted'
+                          }`}
+                        >
+                          {done}/{total}
+                        </span>
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          onDeleteCategory({ id: cat.id, name: cat.name, hasChildren: false })
+                        }}
+                        className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-muted hover:bg-red-100 hover:text-red-600 transition-all flex-shrink-0"
+                        title="Unterkategorie löschen"
+                        aria-label={`${cat.name} löschen`}
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           )
         }

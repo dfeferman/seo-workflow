@@ -59,7 +59,7 @@ export function DashboardCards({
   if (category.shop_typ) meta.push(`🏪 ${category.shop_typ}`)
 
   return (
-    <div className="p-7 space-y-6">
+    <div className="p-5 pt-4 pb-7 space-y-5">
       {/* Hero */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6">
         <div className="min-w-0">
@@ -82,20 +82,13 @@ export function DashboardCards({
               : 'Keine Artefakte in dieser Kategorie.'}
           </p>
         </div>
-        <div className="flex flex-col gap-3 flex-shrink-0">
-          <div className="bg-accent-light/50 border border-accent/20 rounded-xl px-6 py-5 text-center min-w-[180px]">
-            <div className="text-4xl font-bold text-accent">{stats?.progressPercent ?? 0}%</div>
-            <div className="text-2xs text-muted font-medium uppercase tracking-wide mt-1">
+        <div className="flex-shrink-0">
+          <div className="bg-accent-light/50 border border-accent/20 rounded-lg px-4 py-3 text-center min-w-[120px]">
+            <div className="text-2xl font-bold text-accent">{stats?.progressPercent ?? 0}%</div>
+            <div className="text-2xs text-muted font-medium uppercase tracking-wide mt-0.5">
               Fortschritt
             </div>
           </div>
-          <Link
-            to="/projects/$projectId/categories/$categoryId"
-            params={{ projectId, categoryId }}
-            className="py-2.5 px-4 rounded-lg bg-accent text-white text-sm font-semibold text-center hover:bg-[#4a6fef] transition-colors"
-          >
-            → Zum Workflow
-          </Link>
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 import type { ArtifactRow } from '@/types/database.types'
 import type { ArtifactStatus, ArtifactStatusMap } from '@/hooks/useArtifacts'
+import { EmptyState } from '@/components/EmptyState'
 const PHASE_BADGE: Record<string, { bg: string; text: string }> = {
   A: { bg: 'bg-[#f3e8ff]', text: 'text-[#7c3aed]' },
   B: { bg: 'bg-[#dbeafe]', text: 'text-[#2563eb]' },
@@ -61,8 +62,12 @@ export function WorkflowTable({
 }: WorkflowTableProps) {
   if (artifacts.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center py-12 text-muted text-sm">
-        Keine Artefakte in dieser Kategorie.
+      <div className="flex-1 flex items-center justify-center bg-surface">
+        <EmptyState
+          icon="📋"
+          title="Keine Artefakte"
+          description="Artefakte anlegen oder aus einer Vorlage übernehmen."
+        />
       </div>
     )
   }

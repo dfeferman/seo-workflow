@@ -63,18 +63,28 @@ export function useCreateCategory() {
 
       const mainCategoryId = category.id
 
-      // Optional: Unterkategorien (nur bei type category)
+      // Optional: Unterkategorien (nur bei type category) – jede mit Fehlerprüfung und Standard-Artefakten
       if (type === 'category' && subcategoryNames?.length) {
         for (let i = 0; i < subcategoryNames.length; i++) {
           const subName = subcategoryNames[i].trim()
           if (!subName) continue
-          await supabase.from('categories').insert({
-            project_id: projectId,
-            parent_id: mainCategoryId,
-            name: subName,
-            type: 'category',
-            display_order: i,
-          })
+          const { data: subCat, error: subError } = await supabase
+            .from('categories')
+            .insert({
+              project_id: projectId,
+              parent_id: mainCategoryId,
+              name: subName,
+              type: 'category',
+              display_order: i,
+            })
+            .select('id')
+            .single()
+          if (subError) throw subError
+          if (subCat?.id) {
+            const subArtifacts = getDefaultArtifactsForCategory(subCat.id, 'category')
+            const { error: subArtError } = await supabase.from('artifacts').insert(subArtifacts)
+            if (subArtError) throw subArtError
+          }
         }
       }
 

@@ -84,23 +84,40 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
   const [usps, setUsps] = useState('')
   const [ton, setTon] = useState('')
   const [noGos, setNoGos] = useState('')
+  const [customPlaceholders, setCustomPlaceholders] = useState<Record<string, string>>({})
 
   const updateCategory = useUpdateCategory(category?.id, projectId)
 
-  const syncFromCategory = useCallback(() => {
-    if (!category) return
-    setName(category.name)
-    setHubName(category.hub_name ?? '')
-    setZielgruppen(category.zielgruppen ?? [])
-    setShopTyp(category.shop_typ ?? SHOP_TYP_OPTIONS[0])
-    setUsps(category.usps ?? '')
-    setTon(category.ton ?? '')
-    setNoGos(category.no_gos ?? '')
+  const syncFromCategory = useCallback((categoryData?: CategoryRow | null) => {
+    const c = categoryData ?? category
+    if (!c) return
+    setName(c.name)
+    setHubName(c.hub_name ?? '')
+    setZielgruppen(c.zielgruppen ?? [])
+    setShopTyp(c.shop_typ ?? SHOP_TYP_OPTIONS[0])
+    setUsps(c.usps ?? '')
+    setTon(c.ton ?? '')
+    setNoGos(c.no_gos ?? '')
+    setCustomPlaceholders((c.custom_placeholders && typeof c.custom_placeholders === 'object')
+      ? { ...c.custom_placeholders }
+      : {})
   }, [category])
 
   useEffect(() => {
     syncFromCategory()
   }, [syncFromCategory])
+
+  const isCategory = category?.type === 'category'
+  const isHub = isCategory && (category?.parent_id == null)
+
+  const currentHubPlaceholders =
+    category?.custom_placeholders && typeof category.custom_placeholders === 'object'
+      ? category.custom_placeholders
+      : {}
+  const placeholdersDirty =
+    !!category &&
+    isHub &&
+    JSON.stringify(customPlaceholders) !== JSON.stringify(currentHubPlaceholders)
 
   const isDirty =
     !!category &&
@@ -110,7 +127,8 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
       (shopTyp || '') !== (category.shop_typ || '') ||
       (usps || '') !== (category.usps || '') ||
       (ton || '') !== (category.ton || '') ||
-      (noGos || '') !== (category.no_gos || ''))
+      (noGos || '') !== (category.no_gos || '') ||
+      placeholdersDirty)
 
   useEffect(() => {
     onDirtyChange?.(isDirty)
@@ -127,9 +145,40 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
       ton: ton.trim() || null,
       no_gos: noGos.trim() || null,
     }
+    if (isHub) {
+      payload.custom_placeholders = Object.keys(customPlaceholders).length ? customPlaceholders : {}
+    }
     updateCategory.mutate(payload, {
-      onSuccess: () => syncFromCategory(),
+      onSuccess: (updated) => {
+        if (updated) syncFromCategory(updated)
+        else syncFromCategory()
+      },
     })
+  }
+
+  const normalizePlaceholderKey = (key: string) => {
+    const k = key.trim()
+    if (!k) return ''
+    return k.startsWith('[') && k.endsWith(']') ? k : `[${k}]`
+  }
+
+  const setPlaceholder = (key: string, value: string) => {
+    const norm = normalizePlaceholderKey(key)
+    if (!norm) return
+    setCustomPlaceholders((prev) => ({ ...prev, [norm]: value }))
+  }
+
+  const removePlaceholder = (key: string) => {
+    setCustomPlaceholders((prev) => {
+      const next = { ...prev }
+      delete next[key]
+      return next
+    })
+  }
+
+  const addPlaceholder = () => {
+    const newKey = normalizePlaceholderKey('[NEU]')
+    setCustomPlaceholders((prev) => ({ ...prev, [newKey]: '' }))
   }
 
   const tabs: { id: TabId; label: string }[] = [
@@ -145,9 +194,6 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
       </div>
     )
   }
-
-  const isCategory = category.type === 'category'
-  const isHub = isCategory && category.parent_id == null
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -170,7 +216,8 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
 
       <div className="flex-1 overflow-y-auto p-7">
         {activeTab === 'metadaten' && (
-          <div className="space-y-6 max-w-2xl">
+          <div className={`flex gap-8 ${isHub ? 'flex-row' : ''} max-w-5xl`}>
+            <div className="space-y-6 flex-1 min-w-0 max-w-2xl">
             <section className="bg-surface border border-border rounded-xl p-6">
               <div className="flex items-center justify-between mb-5 pb-4 border-b border-border">
                 <h2 className="text-base font-semibold text-text flex items-center gap-2">
@@ -279,6 +326,64 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                 )}
               </div>
             </section>
+            </div>
+
+            {isHub && (
+              <section className="bg-surface border border-border rounded-xl p-6 w-full max-w-md flex-shrink-0">
+                <h2 className="text-base font-semibold text-text flex items-center gap-2 mb-2">
+                  <span className="text-lg">🔖</span>
+                  Platzhalter
+                </h2>
+                <p className="text-xs text-muted mb-4">
+                  Gültig für diese Oberkategorie und alle Unterkategorien. In Vorlagen z. B. als <code className="bg-surface2 px-1 rounded">[MEIN_TAG]</code> nutzbar.
+                </p>
+                <div className="space-y-3">
+                  {Object.entries(customPlaceholders).map(([key, value]) => (
+                    <div key={key} className="flex gap-2 items-start">
+                      <input
+                        type="text"
+                        value={key.startsWith('[') && key.endsWith(']') ? key.slice(1, -1) : key}
+                        onChange={(e) => {
+                          const v = e.target.value
+                          if (!v.trim()) return
+                          const norm = normalizePlaceholderKey(v)
+                          setCustomPlaceholders((prev) => {
+                            const next = { ...prev }
+                            delete next[key]
+                            next[norm] = value
+                            return next
+                          })
+                        }}
+                        placeholder="MEIN_TAG"
+                        className="flex-1 min-w-0 px-2.5 py-2 bg-surface2 border border-border rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent"
+                      />
+                      <input
+                        type="text"
+                        value={value}
+                        onChange={(e) => setPlaceholder(key, e.target.value)}
+                        placeholder="Ersetzungstext"
+                        className="flex-1 min-w-0 px-2.5 py-2 bg-surface2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePlaceholder(key)}
+                        className="p-2 text-muted hover:text-red rounded"
+                        aria-label="Platzhalter entfernen"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={addPlaceholder}
+                  className="mt-3 text-sm text-accent hover:underline"
+                >
+                  + Platzhalter hinzufügen
+                </button>
+              </section>
+            )}
           </div>
         )}
 
@@ -308,8 +413,9 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
       <SaveBar
         show={isDirty}
         onSave={handleSave}
-        onDiscard={syncFromCategory}
+        onDiscard={() => { updateCategory.reset(); syncFromCategory() }}
         isSaving={updateCategory.isPending}
+        saveError={updateCategory.isError ? (updateCategory.error?.message ?? 'Fehler beim Speichern') : null}
       />
     </div>
   )

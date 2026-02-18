@@ -1,7 +1,12 @@
 import { useState, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { useTemplates } from '@/hooks/useTemplates'
+import { useDeleteTemplate } from '@/hooks/useDeleteTemplate'
 import { TemplateCard } from '@/components/TemplateCard'
+import { TemplateFormModal } from '@/components/TemplateFormModal'
+import { ConfirmModal } from '@/components/ConfirmModal'
+import { TemplateGridSkeleton } from '@/components/LoadingSkeleton'
+import { EmptyState } from '@/components/EmptyState'
 import type { TemplateRow } from '@/types/database.types'
 
 const PHASES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'X'] as const
@@ -16,8 +21,12 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
   const [search, setSearch] = useState('')
   const [phaseFilter, setPhaseFilter] = useState<string | null>(null)
   const [view, setView] = useState<'grid' | 'list'>('grid')
+  const [formModalOpen, setFormModalOpen] = useState(false)
+  const [templateToEdit, setTemplateToEdit] = useState<TemplateRow | null>(null)
+  const [templateToDelete, setTemplateToDelete] = useState<TemplateRow | null>(null)
 
   const { data: templates = [], isLoading } = useTemplates()
+  const deleteTemplate = useDeleteTemplate()
 
   const filtered = useMemo(() => {
     let list = templates
@@ -51,12 +60,11 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
   const body = (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
-      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Template-Bibliothek"
     >
-      <div
-        className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col min-w-0">
         <div className="p-5 border-b border-border bg-surface2 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -77,8 +85,15 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
               ✕
             </button>
           </div>
-          <div className="flex gap-2">
-            <div className="flex-1 relative">
+          <div className="flex gap-2 flex-wrap items-center">
+            <button
+              type="button"
+              onClick={() => { setTemplateToEdit(null); setFormModalOpen(true) }}
+              className="py-2.5 px-4 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-[#4a6fef] flex items-center gap-2"
+            >
+              ＋ Neues Template
+            </button>
+            <div className="flex-1 min-w-[200px] relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm" aria-hidden>
                 🔍
               </span>
@@ -154,13 +169,17 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
 
             <div className="flex-1 overflow-y-auto min-h-0">
               {isLoading ? (
-                <p className="text-sm text-muted py-8 text-center">Templates laden…</p>
+                <TemplateGridSkeleton count={6} />
               ) : filtered.length === 0 ? (
-                <p className="text-sm text-muted py-8 text-center">
-                  {templates.length === 0
-                    ? 'Noch keine Templates. Lege zuerst ein Artefakt an und speichere es als Template.'
-                    : 'Keine Templates passen zur Suche oder zum Filter.'}
-                </p>
+                <EmptyState
+                  icon={templates.length === 0 ? '📚' : '🔍'}
+                  title={templates.length === 0 ? 'Keine Templates' : 'Keine Treffer'}
+                  description={
+                    templates.length === 0
+                      ? 'Lege ein neues Template an (Button oben) oder speichere ein Artefakt als Template.'
+                      : 'Keine Templates passen zur Suche oder zum Filter.'
+                  }
+                />
               ) : view === 'grid' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filtered.map((t) => (
@@ -172,6 +191,8 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
                         onUseTemplate(tmpl)
                         onClose()
                       }}
+                      onEdit={(tmpl) => { setTemplateToEdit(tmpl); setFormModalOpen(true) }}
+                      onDelete={(tmpl) => setTemplateToDelete(tmpl)}
                     />
                   ))}
                 </div>
@@ -186,6 +207,8 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
                         onUseTemplate(tmpl)
                         onClose()
                       }}
+                      onEdit={(tmpl) => { setTemplateToEdit(tmpl); setFormModalOpen(true) }}
+                      onDelete={(tmpl) => setTemplateToDelete(tmpl)}
                     />
                   ))}
                 </div>
@@ -197,5 +220,33 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
     </div>
   )
 
-  return createPortal(body, document.body)
+  return (
+    <>
+      {createPortal(body, document.body)}
+      {formModalOpen && (
+        <TemplateFormModal
+          open={true}
+          onClose={() => { setFormModalOpen(false); setTemplateToEdit(null) }}
+          template={templateToEdit}
+          onSaved={() => {}}
+        />
+      )}
+      {templateToDelete && (
+        <ConfirmModal
+          open={true}
+          title="Template löschen?"
+          message={`Vorlage „${templateToDelete.name}" unwiderruflich löschen?`}
+          confirmLabel="Löschen"
+          variant="danger"
+          onConfirm={() => {
+            deleteTemplate.mutate(templateToDelete.id, {
+              onSuccess: () => setTemplateToDelete(null),
+            })
+          }}
+          onCancel={() => setTemplateToDelete(null)}
+          isLoading={deleteTemplate.isPending}
+        />
+      )}
+    </>
+  )
 }

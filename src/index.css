@@ -35,3 +35,13 @@
     opacity: 1;
   }
 }
+
+/* Step 15: Leichte Übergänge für Modals/Overlays */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

@@ -143,12 +143,11 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
       {addModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
-          onClick={() => !isAdding && setAddModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Neue Unterkategorie"
         >
-          <div
-            className="bg-surface border border-border rounded-xl shadow-xl w-full max-w-md p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="bg-surface border border-border rounded-xl shadow-xl w-full max-w-md p-6">
             <h3 className="text-lg font-semibold text-text mb-1">Neue Unterkategorie</h3>
             <p className="text-sm text-muted mb-4">Name der Spoke-Kategorie</p>
             <input
@@ -185,12 +184,11 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
       {deleteConfirm && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
-          onClick={() => !isDeleting && setDeleteConfirm(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Unterkategorie löschen"
         >
-          <div
-            className="bg-surface border border-border rounded-xl shadow-xl w-full max-w-sm p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="bg-surface border border-border rounded-xl shadow-xl w-full max-w-sm p-6">
             <h3 className="text-lg font-semibold text-text mb-2">Unterkategorie löschen?</h3>
             <p className="text-sm text-muted mb-4">
               „{deleteConfirm.name}" und alle zugehörigen Daten werden gelöscht. Dies kann nicht rückgängig gemacht werden.

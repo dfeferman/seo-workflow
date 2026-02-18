@@ -3,18 +3,25 @@ type Props = {
   onSave: () => void
   onDiscard: () => void
   isSaving?: boolean
+  saveError?: string | null
 }
 
-export function SaveBar({ show, onSave, onDiscard, isSaving }: Props) {
+export function SaveBar({ show, onSave, onDiscard, isSaving, saveError }: Props) {
   if (!show) return null
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 md:left-[280px] py-4 px-7 bg-surface border-t border-border flex justify-between items-center shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-[100]"
+      className="fixed bottom-0 left-0 right-0 md:left-[280px] py-4 px-7 bg-surface border-t border-border flex flex-col gap-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-[100]"
       style={{ animation: 'slideUp 0.2s ease' }}
       role="region"
       aria-label="Ungespeicherte Änderungen"
     >
+      {saveError && (
+        <p className="text-sm text-red" role="alert">
+          {saveError}
+        </p>
+      )}
+      <div className="flex justify-between items-center">
       <span className="text-sm text-muted">Ungespeicherte Änderungen</span>
       <div className="flex gap-2">
         <button
@@ -33,6 +40,7 @@ export function SaveBar({ show, onSave, onDiscard, isSaving }: Props) {
         >
           {isSaving ? 'Wird gespeichert…' : 'Speichern'}
         </button>
+      </div>
       </div>
     </div>
   )

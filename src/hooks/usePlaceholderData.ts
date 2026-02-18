@@ -86,18 +86,40 @@ function buildDependencyMap(
 
 /**
  * Hook: Liefert die Map dynamischer Platzhalter für eine Kategorie
- * (Ergebnisse anderer Artefakte: [INPUT A], [BRIEFING], [TEXT], [INPUT C1] usw.).
- * Für die statischen Platzhalter ([KATEGORIE] usw.) wird weiterhin replacePlaceholders(template, category, dependencyMap) verwendet.
+ * (Oberkategorie-Platzhalter + Ergebnisse anderer Artefakte: [INPUT A], [BRIEFING], [TEXT] usw.).
+ * Platzhalter der Oberkategorie gelten für Hub und alle Unterkategorien.
  */
 export function usePlaceholderData(categoryId: string | undefined): {
   placeholderMap: PlaceholderMap
+  latestResultByArtifactId: Record<string, string>
   isLoading: boolean
 } {
   const query = useQuery({
     queryKey: ['placeholder-data', categoryId],
     queryFn: async () => {
+      const { data: category, error: catErr } = await supabase
+        .from('categories')
+        .select('id, parent_id, custom_placeholders')
+        .eq('id', categoryId!)
+        .single()
+      if (catErr) throw catErr
+      const hubId = category?.parent_id ?? category?.id ?? categoryId!
+      let hubPlaceholders: Record<string, string> = {}
+      if (hubId === category?.id && category?.custom_placeholders && typeof category.custom_placeholders === 'object') {
+        hubPlaceholders = { ...category.custom_placeholders }
+      } else if (hubId !== category?.id) {
+        const { data: hub } = await supabase
+          .from('categories')
+          .select('custom_placeholders')
+          .eq('id', hubId)
+          .single()
+        if (hub?.custom_placeholders && typeof hub.custom_placeholders === 'object') {
+          hubPlaceholders = { ...hub.custom_placeholders }
+        }
+      }
       const { artifacts, latestByArtifactId } = await fetchPlaceholderData(categoryId!)
-      const placeholderMap = buildDependencyMap(artifacts, latestByArtifactId)
+      const dependencyMap = buildDependencyMap(artifacts, latestByArtifactId)
+      const placeholderMap: PlaceholderMap = { ...hubPlaceholders, ...dependencyMap }
       const latestResultByArtifactId = Object.fromEntries(latestByArtifactId)
       return { placeholderMap, latestResultByArtifactId }
     },

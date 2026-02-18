@@ -46,6 +46,7 @@ export interface Database {
           usps: string | null
           ton: string | null
           no_gos: string | null
+          custom_placeholders: Record<string, string> | null
           display_order: number
           created_at: string
           updated_at: string
@@ -62,6 +63,7 @@ export interface Database {
           usps?: string | null
           ton?: string | null
           no_gos?: string | null
+          custom_placeholders?: Record<string, string> | null
           display_order?: number
           created_at?: string
           updated_at?: string
@@ -78,6 +80,7 @@ export interface Database {
           usps?: string | null
           ton?: string | null
           no_gos?: string | null
+          custom_placeholders?: Record<string, string> | null
           display_order?: number
           created_at?: string
           updated_at?: string

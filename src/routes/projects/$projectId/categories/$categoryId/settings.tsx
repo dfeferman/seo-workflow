@@ -11,43 +11,63 @@ function CategorySettingsPage() {
   const { projectId, categoryId } = Route.useParams()
   const { data: project } = useProject(projectId)
   const { data: category } = useCategory(categoryId)
+  const { data: parentCategory } = useCategory(category?.parent_id ?? undefined)
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-bg">
-      <div className="flex items-center justify-between h-16 px-7 border-b border-border bg-surface flex-shrink-0">
-        <nav className="flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+      <div className="flex flex-col border-b border-border bg-surface flex-shrink-0">
+        <div className="flex items-center justify-start gap-2 px-5 py-3">
+          <Link
+            to="/projects/$projectId/categories/$categoryId/overview"
+            params={{ projectId, categoryId }}
+            className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
+          >
+            📊 Übersicht
+          </Link>
           <Link
             to="/projects/$projectId/categories/$categoryId"
             params={{ projectId, categoryId }}
-            className="text-muted hover:text-text"
+            className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
           >
-            {project?.name ?? '…'}
+            📚 Aus Vorlage
           </Link>
-          <span className="text-muted" aria-hidden>›</span>
+          <span className="py-2 px-3.5 rounded-lg text-sm font-medium border border-accent bg-accent-light text-accent">
+            ✎ Metadaten
+          </span>
           <Link
             to="/projects/$projectId/categories/$categoryId"
             params={{ projectId, categoryId }}
-            className="text-muted hover:text-text"
+            className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
           >
-            {category?.name ?? '…'}
+            ⬇ Export
           </Link>
+          <Link
+            to="/projects/$projectId/categories/$categoryId"
+            params={{ projectId, categoryId }}
+            className="py-2 px-3.5 rounded-lg text-sm font-semibold border border-accent bg-accent text-white hover:bg-[#4a6fef]"
+          >
+            → Workflow
+          </Link>
+        </div>
+        <nav className="flex items-center gap-2 px-5 pb-3 text-sm text-muted" aria-label="Breadcrumb">
+          <span>{project?.name ?? 'Aktuelles Projekt'}</span>
+          {parentCategory && (
+            <>
+              <span aria-hidden>›</span>
+              <Link
+                to="/projects/$projectId/categories/$categoryId"
+                params={{ projectId, categoryId: parentCategory.id }}
+                className="text-text-secondary hover:text-text hover:underline"
+              >
+                {parentCategory.name}
+              </Link>
+            </>
+          )}
+          <span aria-hidden>›</span>
+          <span className="text-text font-semibold">{category?.name ?? '…'}</span>
           <span className="text-muted" aria-hidden>›</span>
           <span className="text-text font-semibold">Einstellungen</span>
         </nav>
-        <Link
-          to="/projects/$projectId/categories/$categoryId/overview"
-          params={{ projectId, categoryId }}
-          className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
-        >
-          📊 Übersicht
-        </Link>
-        <Link
-          to="/projects/$projectId/categories/$categoryId"
-          params={{ projectId, categoryId }}
-          className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
-        >
-          ← Zum Workflow
-        </Link>
       </div>
 
       <CategorySettingsTabs category={category ?? null} projectId={projectId} />

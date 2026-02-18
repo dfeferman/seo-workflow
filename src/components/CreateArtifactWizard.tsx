@@ -101,7 +101,20 @@ export function CreateArtifactWizard({
       queryClient.invalidateQueries({ queryKey: ['category-progress', projectId] })
       onClose()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Fehler beim Anlegen.')
+      const rawMessage =
+        e instanceof Error
+          ? e.message
+          : typeof e === 'object' && e != null && 'message' in e && typeof (e as { message: unknown }).message === 'string'
+            ? (e as { message: string }).message
+            : ''
+      const message = rawMessage || 'Fehler beim Anlegen.'
+      // Verständliche Meldung bei doppeltem Artefakt-Code (UNIQUE category_id + artifact_code)
+      const friendlyMessage =
+        /unique|duplicate|already exists/i.test(message)
+          ? `Ein Artefakt mit der Kennung „${artifactCode.trim()}“ existiert in dieser Kategorie bereits. Bitte andere Phase/Kennung wählen.`
+          : message
+      setError(friendlyMessage)
+      if (process.env.NODE_ENV === 'development') console.error('Artefakt anlegen:', e)
     } finally {
       setIsSubmitting(false)
     }
@@ -118,12 +131,11 @@ export function CreateArtifactWizard({
   const body = (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
-      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Neues Artefakt anlegen"
     >
-      <div
-        className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div className="p-6 pb-0 flex-shrink-0 border-b border-border bg-surface2">
           <div className="flex items-center justify-between mb-2">
             <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-xl text-white shadow-sm">

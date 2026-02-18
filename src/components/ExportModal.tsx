@@ -5,7 +5,6 @@ import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { useCategory } from '@/hooks/useCategory'
 import { useArtifacts } from '@/hooks/useArtifacts'
 import { usePlaceholderData } from '@/hooks/usePlaceholderData'
-import type { CategoryRow } from '@/types/database.types'
 
 type Props = {
   open: boolean
