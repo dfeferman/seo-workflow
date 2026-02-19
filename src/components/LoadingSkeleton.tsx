@@ -72,21 +72,22 @@ export function SidebarCategoriesSkeleton({ count = 5 }: { count?: number }) {
 /** Eine Tabellenzeile für die Workflow-Tabelle (Phase + Name + Status + Aktionen). */
 export function WorkflowTableRowSkeleton() {
   return (
-    <tr className="border-b border-border">
-      <td className="py-3.5 px-3.5">
-        <div className="w-7 h-7 rounded-lg bg-surface-2 animate-pulse" />
+    <tr className="border-b border-border/80">
+      <td className="py-4 px-6">
+        <div className="w-9 h-9 rounded-xl bg-surface-2 animate-pulse" />
       </td>
-      <td className="py-3.5 px-3.5 space-y-1">
-        <div className="h-4 w-48 rounded bg-surface-2 animate-pulse" />
-        <div className="h-3 w-32 rounded bg-surface-2 animate-pulse" />
+      <td className="py-4 px-6 space-y-2">
+        <div className="h-4 w-52 rounded-md bg-surface-2 animate-pulse" />
+        <div className="h-3 w-36 rounded-md bg-surface-2/80 animate-pulse" />
       </td>
-      <td className="py-3.5 px-3.5">
-        <div className="h-5 w-20 rounded bg-surface-2 animate-pulse" />
+      <td className="py-4 px-6">
+        <div className="h-5 w-24 rounded-md bg-surface-2 animate-pulse" />
       </td>
-      <td className="py-3.5 px-3.5">
+      <td className="py-4 px-6">
         <div className="flex gap-2">
-          <div className="h-8 w-16 rounded bg-surface-2 animate-pulse" />
-          <div className="h-8 w-16 rounded bg-surface-2 animate-pulse" />
+          <div className="h-9 w-20 rounded-lg bg-surface-2 animate-pulse" />
+          <div className="h-9 w-20 rounded-lg bg-surface-2 animate-pulse" />
+          <div className="h-9 w-12 rounded-lg bg-surface-2 animate-pulse" />
         </div>
       </td>
     </tr>
@@ -96,20 +97,20 @@ export function WorkflowTableRowSkeleton() {
 /** Vollständige Workflow-Tabelle als Skeleton. */
 export function WorkflowTableSkeleton({ rows = 6 }: { rows?: number }) {
   return (
-    <div className="flex-1 overflow-y-auto px-7 pb-7 bg-surface">
+    <div className="flex-1 overflow-y-auto bg-surface/80 backdrop-blur-[2px] min-h-0">
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b-2 border-border sticky top-0 bg-surface z-10">
-            <th className="text-left py-3 px-3.5 w-[50px] text-2xs font-semibold uppercase tracking-wider text-muted">
+          <tr className="border-b-2 border-border sticky top-0 bg-surface/95 backdrop-blur-sm z-10 shadow-[0_1px_0_0_var(--border)]">
+            <th className="text-left py-4 px-6 w-[72px] font-sans text-[11px] tracking-widest uppercase text-muted font-semibold">
               Phase
             </th>
-            <th className="text-left py-3 px-3.5 text-2xs font-semibold uppercase tracking-wider text-muted">
+            <th className="text-left py-4 px-6 font-sans text-[11px] tracking-widest uppercase text-muted font-semibold">
               Artefakt
             </th>
-            <th className="text-left py-3 px-3.5 w-[120px] text-2xs font-semibold uppercase tracking-wider text-muted">
+            <th className="text-left py-4 px-6 w-[140px] font-sans text-[11px] tracking-widest uppercase text-muted font-semibold">
               Status
             </th>
-            <th className="text-left py-3 px-3.5 w-[220px] text-2xs font-semibold uppercase tracking-wider text-muted">
+            <th className="text-left py-4 px-6 w-[240px] font-sans text-[11px] tracking-widest uppercase text-muted font-semibold">
               Aktionen
             </th>
           </tr>

@@ -43,18 +43,18 @@ function TagsField({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-text-secondary mb-1.5">{label}</label>
-      <div className="flex flex-wrap gap-1.5 p-2 min-h-[44px] bg-surface2 border border-border rounded-lg focus-within:ring-2 focus-within:ring-accent">
+      <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">{label}</label>
+      <div className="flex flex-wrap gap-1.5 p-2 min-h-[44px] bg-surface2 border border-border rounded-lg focus-within:ring-2 focus-within:ring-accent focus-within:border-accent transition-all">
         {tags.map((tag, i) => (
           <span
             key={i}
-            className="inline-flex items-center gap-1 px-2 py-1 bg-accent-light border border-accent rounded text-xs text-accent"
+            className="inline-flex items-center gap-1 px-2.5 py-1 bg-accent-light border border-accent/30 rounded-full text-xs font-medium text-accent"
           >
             {tag}
             <button
               type="button"
               onClick={() => onChange(tags.filter((_, idx) => idx !== i))}
-              className="opacity-70 hover:opacity-100"
+              className="opacity-60 hover:opacity-100 transition-opacity ml-0.5"
               aria-label={`${tag} entfernen`}
             >
               ✕
@@ -70,6 +70,16 @@ function TagsField({
           className="flex-1 min-w-[100px] bg-transparent border-none py-1 px-1 text-sm text-text outline-none placeholder:text-muted"
         />
       </div>
+    </div>
+  )
+}
+
+/** Editoriales Section-Header mit nummeriertem Label + Trennlinie */
+function SectionHeader({ number, label }: { number: string; label: string }) {
+  return (
+    <div className="section-header">
+      <span className="section-label">{number} · {label}</span>
+      <div className="section-rule" />
     </div>
   )
 }
@@ -197,7 +207,8 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="flex gap-0.5 px-7 pt-2 pb-0 border-b border-border bg-bg flex-shrink-0">
+      {/* Inner sub-tabs (Metadaten / Unterkategorien / Erweitert) */}
+      <div className="flex gap-0 px-7 pt-2 pb-0 border-b border-border bg-bg flex-shrink-0">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -212,130 +223,136 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
             {tab.label}
           </button>
         ))}
+        {/* Typ-Badge */}
+        <div className="ml-auto flex items-center pb-2.5">
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-accent-light text-accent border border-accent/20">
+            {isCategory ? '🏷️ Kategorie' : '📝 Blog'}
+          </span>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-7">
         {activeTab === 'metadaten' && (
           <div className={`flex gap-8 ${isHub ? 'flex-row' : ''} max-w-5xl`}>
-            <div className="space-y-6 flex-1 min-w-0 max-w-2xl">
-            <section className="bg-surface border border-border rounded-xl p-6">
-              <div className="flex items-center justify-between mb-5 pb-4 border-b border-border">
-                <h2 className="text-base font-semibold text-text flex items-center gap-2">
-                  <span className="text-lg">📋</span>
-                  Grundinformationen
-                </h2>
-                <span className="text-xs font-semibold px-2 py-1 rounded bg-accent-light text-accent">
-                  {isCategory ? '🏷️ Kategorie' : '📝 Blog'}
-                </span>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1.5">
-                    Name <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
-                  />
-                </div>
-                {isCategory && (
+            <div className="space-y-7 flex-1 min-w-0 max-w-2xl">
+
+              {/* 01 · Grunddaten */}
+              <section>
+                <SectionHeader number="01" label="Grunddaten" />
+                <div className="bg-surface border border-border rounded-xl p-6 shadow-sm space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1.5">Hub-Seite Name</label>
+                    <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">
+                      Name <span className="text-red">*</span>
+                    </label>
                     <input
                       type="text"
-                      value={hubName}
-                      onChange={(e) => setHubName(e.target.value)}
-                      placeholder="z.B. Oberkategorie Hub"
-                      className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                     />
                   </div>
-                )}
-              </div>
-            </section>
-
-            <section className="bg-surface border border-border rounded-xl p-6">
-              <h2 className="text-base font-semibold text-text flex items-center gap-2 mb-4">
-                <span className="text-lg">🎯</span>
-                Zielgruppe & Shop
-              </h2>
-              <div className="space-y-4">
-                <TagsField
-                  tags={zielgruppen}
-                  onChange={setZielgruppen}
-                  label="Zielgruppen"
-                  placeholder="Enter zum Hinzufügen…"
-                />
-                {isCategory && (
-                  <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1.5">Shop-Typ</label>
-                    <select
-                      value={shopTyp}
-                      onChange={(e) => setShopTyp(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
-                    >
-                      {SHOP_TYP_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-            </section>
-
-            <section className="bg-surface border border-border rounded-xl p-6">
-              <h2 className="text-base font-semibold text-text flex items-center gap-2 mb-4">
-                <span className="text-lg">✍️</span>
-                Content-Richtlinien
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1.5">Tonalität</label>
-                  <input
-                    type="text"
-                    value={ton}
-                    onChange={(e) => setTon(e.target.value)}
-                    placeholder="z.B. Seriös-medizinisch, leicht verständlich"
-                    className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
-                  />
+                  {isCategory && (
+                    <div>
+                      <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">
+                        Hub-Seite Name
+                      </label>
+                      <input
+                        type="text"
+                        value={hubName}
+                        onChange={(e) => setHubName(e.target.value)}
+                        placeholder="z.B. Oberkategorie Hub"
+                        className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1.5">No-Gos / Verbotene Aussagen</label>
-                  <textarea
-                    value={noGos}
-                    onChange={(e) => setNoGos(e.target.value)}
-                    placeholder="Was darf NICHT geschrieben werden?"
-                    rows={3}
-                    className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent resize-y min-h-[80px]"
+              </section>
+
+              {/* 02 · Zielgruppe & Shop */}
+              <section>
+                <SectionHeader number="02" label="Zielgruppe & Shop" />
+                <div className="bg-surface border border-border rounded-xl p-6 shadow-sm space-y-4">
+                  <TagsField
+                    tags={zielgruppen}
+                    onChange={setZielgruppen}
+                    label="Zielgruppen"
+                    placeholder="Enter zum Hinzufügen…"
                   />
+                  {isCategory && (
+                    <div>
+                      <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">
+                        Shop-Typ
+                      </label>
+                      <select
+                        value={shopTyp}
+                        onChange={(e) => setShopTyp(e.target.value)}
+                        className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                      >
+                        {SHOP_TYP_OPTIONS.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
-                {isCategory && (
+              </section>
+
+              {/* 03 · Content-Richtlinien */}
+              <section>
+                <SectionHeader number="03" label="Content-Richtlinien" />
+                <div className="bg-surface border border-border rounded-xl p-6 shadow-sm space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1.5">USPs</label>
+                    <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">
+                      Tonalität
+                    </label>
                     <input
                       type="text"
-                      value={usps}
-                      onChange={(e) => setUsps(e.target.value)}
-                      placeholder="Unique Selling Points"
-                      className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+                      value={ton}
+                      onChange={(e) => setTon(e.target.value)}
+                      placeholder="z.B. Seriös-medizinisch, leicht verständlich"
+                      className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
                     />
                   </div>
-                )}
-              </div>
-            </section>
+                  <div>
+                    <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">
+                      No-Gos / Verbotene Aussagen
+                    </label>
+                    <textarea
+                      value={noGos}
+                      onChange={(e) => setNoGos(e.target.value)}
+                      placeholder="Was darf NICHT geschrieben werden?"
+                      rows={3}
+                      className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent resize-y min-h-[80px] transition-all"
+                    />
+                  </div>
+                  {isCategory && (
+                    <div>
+                      <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">
+                        USPs
+                      </label>
+                      <input
+                        type="text"
+                        value={usps}
+                        onChange={(e) => setUsps(e.target.value)}
+                        placeholder="Unique Selling Points"
+                        className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                      />
+                    </div>
+                  )}
+                </div>
+              </section>
+
             </div>
 
+            {/* Platzhalter-Panel (nur Hub) */}
             {isHub && (
-              <section className="bg-surface border border-border rounded-xl p-6 w-full max-w-md flex-shrink-0">
-                <h2 className="text-base font-semibold text-text flex items-center gap-2 mb-2">
-                  <span className="text-lg">🔖</span>
-                  Platzhalter
-                </h2>
-                <p className="text-xs text-muted mb-4">
-                  Gültig für diese Oberkategorie und alle Unterkategorien. In Vorlagen z. B. als <code className="bg-surface2 px-1 rounded">[MEIN_TAG]</code> nutzbar.
+              <section className="bg-surface border border-border rounded-xl p-6 shadow-sm w-full max-w-md flex-shrink-0 self-start">
+                <SectionHeader number="04" label="Platzhalter" />
+                <p className="text-xs text-muted mb-4 leading-relaxed">
+                  Gültig für diese Oberkategorie und alle Unterkategorien. In Vorlagen z. B. als{' '}
+                  <code className="bg-surface2 px-1.5 py-0.5 rounded font-mono text-[11px]">[MEIN_TAG]</code> nutzbar.
                 </p>
                 <div className="space-y-3">
                   {Object.entries(customPlaceholders).map(([key, value], index) => (
@@ -355,19 +372,19 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                           })
                         }}
                         placeholder="MEIN_TAG"
-                        className="flex-1 min-w-0 px-2.5 py-2 bg-surface2 border border-border rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent"
+                        className="flex-1 min-w-0 px-2.5 py-2 bg-surface2 border border-border rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent transition-all"
                       />
                       <input
                         type="text"
                         value={value}
                         onChange={(e) => setPlaceholder(key, e.target.value)}
                         placeholder="Ersetzungstext"
-                        className="flex-1 min-w-0 px-2.5 py-2 bg-surface2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                        className="flex-1 min-w-0 px-2.5 py-2 bg-surface2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-all"
                       />
                       <button
                         type="button"
                         onClick={() => removePlaceholder(key)}
-                        className="p-2 text-muted hover:text-red rounded"
+                        className="p-2 text-muted hover:text-red transition-colors rounded"
                         aria-label="Platzhalter entfernen"
                       >
                         ✕
@@ -378,7 +395,7 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                 <button
                   type="button"
                   onClick={addPlaceholder}
-                  className="mt-3 text-sm text-accent hover:underline"
+                  className="mt-4 text-sm text-accent hover:underline font-medium transition-colors"
                 >
                   + Platzhalter hinzufügen
                 </button>

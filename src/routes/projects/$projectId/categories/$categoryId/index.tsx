@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useArtifacts, useArtifactStatusMap } from '@/hooks/useArtifacts'
 import { usePlaceholderData } from '@/hooks/usePlaceholderData'
 import { useProject } from '@/hooks/useProject'
@@ -21,11 +21,16 @@ import { supabase } from '@/lib/supabase'
 import { replacePlaceholders } from '@/utils/replacePlaceholders'
 
 export const Route = createFileRoute('/projects/$projectId/categories/$categoryId/')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    open: search.open === 'templates' ? ('templates' as const) : undefined,
+  }),
   component: WorkflowPage,
 })
 
 function WorkflowPage() {
   const { projectId, categoryId } = Route.useParams()
+  const search = Route.useSearch()
+  const navigate = useNavigate()
   const [selectedArtifactId, setSelectedArtifactId] = useState<string | null>(null)
   const [activePhase, setActivePhase] = useState<ArtifactPhase | null>(null)
   const [flashMessage, setFlashMessage] = useState<string | null>(null)
@@ -54,6 +59,14 @@ function WorkflowPage() {
     const t = setTimeout(() => setFlashMessage(null), 2000)
     return () => clearTimeout(t)
   }, [flashMessage])
+
+  // Bei Navigation mit ?open=templates (z. B. von Übersicht/Einstellungen) Template-Browser öffnen
+  useEffect(() => {
+    if (search.open === 'templates') {
+      setTemplateBrowserOpen(true)
+      navigate({ to: '.', search: {}, replace: true })
+    }
+  }, [search.open, navigate])
 
   // Cmd+K / Strg+K: Template-Browser öffnen (Step 15: Keyboard-Shortcuts)
   const openTemplateBrowserRef = useRef(() => setTemplateBrowserOpen(true))
@@ -103,7 +116,7 @@ function WorkflowPage() {
 
   return (
     <div className="flex-1 flex min-h-0 overflow-hidden">
-      <main className="flex-1 flex flex-col min-h-0 overflow-hidden bg-surface2 min-w-0">
+      <main className="flex-1 flex flex-col min-h-0 overflow-hidden min-w-0">
         {/* Topbar: Zeile 1 = Aktionen, Zeile 2 = Breadcrumb */}
       <div className="flex flex-col border-b border-border bg-surface flex-shrink-0">
         <div className="flex items-center justify-start gap-2 px-5 py-3">
@@ -120,7 +133,7 @@ function WorkflowPage() {
             className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
             title="Template-Bibliothek (⌘K / Strg+K)"
           >
-            📚 Aus Vorlage
+            📚 Templates
           </button>
           <Link
             to="/projects/$projectId/categories/$categoryId/settings"
@@ -165,38 +178,40 @@ function WorkflowPage() {
         </nav>
       </div>
 
-      {/* Progress + Phase Pills */}
-      <PhasePills
-        artifacts={artifacts}
-        statusMap={statusMap}
-        activePhase={activePhase}
-        onPhaseClick={setActivePhase}
-      />
+      {/* Phase Pills + Tabelle */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <PhasePills
+            artifacts={artifacts}
+            statusMap={statusMap}
+            activePhase={activePhase}
+            onPhaseClick={setActivePhase}
+          />
 
-      {/* Table */}
-      {artifactsLoading ? (
-        <WorkflowTableSkeleton rows={8} />
-      ) : (
-        <WorkflowTable
-          artifacts={artifacts}
-          statusMap={statusMap}
-          selectedArtifactId={selectedArtifactId}
-          onSelectArtifact={(a) => setSelectedArtifactId((id) => (id === a.id ? null : a.id))}
-          onCopyPrompt={handleCopyPrompt}
-          onCopyResult={handleCopyResult}
-          onDeleteArtifact={(a) => setDeleteArtifactConfirm(a)}
-        />
-      )}
+          {/* Table */}
+          {artifactsLoading ? (
+            <WorkflowTableSkeleton rows={8} />
+          ) : (
+            <WorkflowTable
+              artifacts={artifacts}
+              statusMap={statusMap}
+              selectedArtifactId={selectedArtifactId}
+              onSelectArtifact={(a) => setSelectedArtifactId((id) => (id === a.id ? null : a.id))}
+              onCopyPrompt={handleCopyPrompt}
+              onCopyResult={handleCopyResult}
+              onDeleteArtifact={(a) => setDeleteArtifactConfirm(a)}
+            />
+          )}
 
-        {flashMessage && (
-          <div
-            className="fixed bottom-7 right-7 bg-surface border-2 border-green text-green py-3 px-4 rounded-lg text-sm font-medium shadow-lg z-50 animate-[slideUp_0.2s_ease-out]"
-            role="status"
-            aria-live="polite"
-          >
-            {flashMessage}
-          </div>
-        )}
+          {flashMessage && (
+            <div
+              className="fixed bottom-7 right-7 bg-surface border-2 border-green text-green py-3 px-4 rounded-xl text-sm font-semibold shadow-lg z-50 animate-[slideUp_0.2s_ease-out]"
+              role="status"
+              aria-live="polite"
+            >
+              {flashMessage}
+            </div>
+          )}
+      </div>
       </main>
 
       {selectedArtifact && (

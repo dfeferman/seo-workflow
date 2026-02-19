@@ -33,9 +33,9 @@ export function PhasePills({
   const phasesToShow = PHASE_ORDER.filter((p) => (byPhase.get(p)?.total ?? 0) > 0)
 
   return (
-    <div className="flex-shrink-0 bg-surface px-7 pt-4">
-      <div className="flex justify-between items-center mb-2.5">
-        <div className="flex gap-1.5">
+    <div className="flex-shrink-0 bg-surface/90 backdrop-blur-sm border-b border-border/80 px-6 pt-5 pb-5 shadow-[0_1px_0_0_var(--border)]">
+      <div className="flex justify-between items-center gap-4 mb-3">
+        <div className="flex flex-wrap gap-2">
           {phasesToShow.map((phase) => {
             const { total, done } = byPhase.get(phase) ?? { total: 0, done: 0 }
             const isDone = total > 0 && done === total
@@ -45,12 +45,12 @@ export function PhasePills({
                 key={phase}
                 type="button"
                 onClick={() => onPhaseClick?.(phase)}
-                className={`py-1.5 px-3 rounded-full text-xs font-semibold font-mono transition-all border ${
+                className={`py-2 px-4 rounded-xl text-xs font-semibold font-sans tracking-wide transition-all duration-200 border-2 ${
                   isDone
-                    ? 'bg-green/10 text-green border-transparent'
+                    ? 'bg-green/10 text-green border-green/30 shadow-sm'
                     : isActive
-                      ? 'bg-accent-light text-accent border-accent'
-                      : 'bg-surface-2 text-muted border-transparent hover:border-border hover:text-text-secondary'
+                      ? 'bg-accent-light text-accent border-accent shadow-sm'
+                      : 'bg-surface-2/80 text-muted border-transparent hover:border-border hover:text-text-secondary'
                 }`}
               >
                 {phase}
@@ -58,13 +58,15 @@ export function PhasePills({
             )
           })}
         </div>
-        <div className="text-sm text-muted font-mono font-medium">
-          <span className="text-accent font-semibold">{doneCount}</span> / {totalArtifacts} abgeschlossen
+        <div className="text-sm text-muted font-sans font-medium tabular-nums shrink-0">
+          <span className="text-accent font-bold">{doneCount}</span>
+          <span className="text-muted/80"> / {totalArtifacts}</span>
+          <span className="text-muted ml-0.5"> abgeschlossen</span>
         </div>
       </div>
-      <div className="h-1 bg-surface-2 rounded border border-border overflow-hidden mb-5">
+      <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
         <div
-          className="h-full rounded bg-gradient-to-r from-accent to-[#7c3aed] transition-all duration-500"
+          className="h-full rounded-full bg-gradient-to-r from-accent via-accent to-[#7c3aed] transition-[width] duration-700 ease-out"
           style={{ width: `${progressPercent}%` }}
         />
       </div>

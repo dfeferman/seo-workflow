@@ -15,6 +15,7 @@ function CategorySettingsPage() {
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-bg">
+      {/* Topbar: wie Artefakte-Seite – Buttons + Breadcrumb */}
       <div className="flex flex-col border-b border-border bg-surface flex-shrink-0">
         <div className="flex items-center justify-start gap-2 px-5 py-3">
           <Link
@@ -27,11 +28,12 @@ function CategorySettingsPage() {
           <Link
             to="/projects/$projectId/categories/$categoryId"
             params={{ projectId, categoryId }}
+            search={{ open: 'templates' }}
             className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
           >
-            📚 Aus Vorlage
+            📚 Templates
           </Link>
-          <span className="py-2 px-3.5 rounded-lg text-sm font-medium border border-accent bg-accent-light text-accent">
+          <span className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary">
             ✎ Metadaten
           </span>
           <Link
@@ -46,7 +48,7 @@ function CategorySettingsPage() {
             params={{ projectId, categoryId }}
             className="py-2 px-3.5 rounded-lg text-sm font-semibold border border-accent bg-accent text-white hover:bg-[#4a6fef]"
           >
-            → Workflow
+            ＋ Artefakt
           </Link>
         </div>
         <nav className="flex items-center gap-2 px-5 pb-3 text-sm text-muted" aria-label="Breadcrumb">
@@ -65,8 +67,8 @@ function CategorySettingsPage() {
           )}
           <span aria-hidden>›</span>
           <span className="text-text font-semibold">{category?.name ?? '…'}</span>
-          <span className="text-muted" aria-hidden>›</span>
-          <span className="text-text font-semibold">Einstellungen</span>
+          <span aria-hidden>›</span>
+          <span className="text-text-secondary">Metadaten</span>
         </nav>
       </div>
 

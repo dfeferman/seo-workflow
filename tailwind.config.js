@@ -25,8 +25,9 @@ export default {
         'phase-f': '#6b7280',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+        display: ['Fraunces', 'Georgia', 'serif'],
+        sans: ['Figtree', 'system-ui', 'sans-serif'],
+        mono: ['ui-monospace', 'SF Mono', 'Consolas', 'monospace'],
       },
       fontSize: {
         '2xs': ['11px', { lineHeight: '1.4' }],

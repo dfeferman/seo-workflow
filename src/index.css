@@ -25,6 +25,19 @@
   }
 }
 
+@layer components {
+  /* Editoriales Section-Label (01 · Titel + Trennlinie) */
+  .section-header {
+    @apply flex items-baseline gap-4 mb-5;
+  }
+  .section-label {
+    @apply font-mono text-xs font-semibold tracking-[.08em] uppercase text-accent flex-shrink-0;
+  }
+  .section-rule {
+    @apply flex-1 h-px bg-border;
+  }
+}
+
 @keyframes slideUp {
   from {
     transform: translateY(20px);
@@ -36,12 +49,23 @@
   }
 }
 
-/* Step 15: Leichte Übergänge für Modals/Overlays */
 @keyframes fadeIn {
   from {
     opacity: 0;
   }
   to {
     opacity: 1;
+  }
+}
+
+/* Artefakt-Liste: Staggered Reveal */
+@keyframes artifactRowIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

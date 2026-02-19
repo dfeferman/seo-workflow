@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metadaten – SEO Workflow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Design Tokens (aus src/index.css) ─── */
+    :root {
+      --bg:          #fafbfc;
+      --bg2:         #ffffff;
+      --surface:     #ffffff;
+      --surface2:    #f4f6f8;
+      --surface3:    #edf0f3;
+      --border:      #e1e4e8;
+      --border2:     #c9cdd4;
+      --accent:      #5b7fff;
+      --accent-dim:  #e8edff;
+      --accent-glow: rgba(91,127,255,.22);
+      --green:       #10b981;
+      --green-dim:   rgba(16,185,129,.12);
+      --red:         #ef4444;
+      --red-dim:     rgba(239,68,68,.10);
+      --yellow:      #f59e0b;
+      --text:        #1a202c;
+      --text-sec:    #4a5568;
+      --text-muted:  #718096;
+      --font-display: 'Crimson Pro', Georgia, serif;
+      --font-ui:      'IBM Plex Sans', system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+      --radius-sm:   6px;
+      --radius:      10px;
+      --radius-lg:   16px;
+      --transition:  150ms cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ─── Reset ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font-ui);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Subtle background texture ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 60% 0%, rgba(91,127,255,.04) 0%, transparent 70%),
+                  radial-gradient(ellipse 50% 40% at 10% 80%, rgba(91,127,255,.03) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── Layout ─── */
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding-bottom: 84px; /* save bar height */
+    }
+
+    /* ─── Top Header ─── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(20px) saturate(1.6);
+      background: rgba(250,251,252,.92);
+      box-shadow: 0 1px 0 var(--border);
+    }
+
+    .tab-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 24px 0;
+    }
+
+    .tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-sec);
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color var(--transition), border-color var(--transition);
+      white-space: nowrap;
+      position: relative;
+      letter-spacing: .01em;
+    }
+
+    .tab:hover { color: var(--text); }
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-spacer { flex: 1; }
+
+    .tab-workflow {
+      margin-right: -24px;
+      margin-left: 8px;
+      padding: 6px 18px 9px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border-bottom-color: var(--accent);
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    }
+    .tab-workflow:hover { color: #4a6fef; background: #dde5ff; }
+
+    .breadcrumb-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 24px 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .breadcrumb-row a {
+      color: var(--text-sec);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    .breadcrumb-row a:hover { color: var(--text); }
+
+    .breadcrumb-row .current { color: var(--text); font-weight: 500; }
+    .breadcrumb-sep { color: var(--text-muted); user-select: none; }
+
+    /* ─── Main Content ─── */
+    .main {
+      flex: 1;
+      padding: 32px 24px;
+      max-width: 840px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ─── Page Title ─── */
+    .page-title {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text);
+      margin-bottom: 4px;
+      letter-spacing: -.01em;
+      line-height: 1.2;
+    }
+
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 36px;
+    }
+
+    /* ─── Form Section ─── */
+    .form-section {
+      margin-bottom: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .section-rule {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border2) 0%, transparent 100%);
+    }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 8px rgba(0,0,0,.03);
+    }
+
+    .form-card:focus-within {
+      border-color: var(--border2);
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+
+    /* ─── Form Fields ─── */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-sec);
+      letter-spacing: .02em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    label .required {
+      color: var(--accent);
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    label .hint {
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-left: auto;
+    }
+
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 13px;
+      font-family: var(--font-ui);
+      font-size: 14px;
+      color: var(--text);
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="text"]::placeholder,
+    textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    input[type="text"]:hover,
+    select:hover,
+    textarea:hover {
+      border-color: var(--border2);
+      background: var(--surface2);
+    }
+
+    input[type="text"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: var(--surface2);
+    }
+
+    select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23718096' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+
+    select option {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 88px;
+      font-family: var(--font-ui);
+      line-height: 1.6;
+    }
+
+    .textarea-wrap {
+      position: relative;
+    }
+
+    .char-counter {
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      pointer-events: none;
+      transition: color var(--transition);
+    }
+
+    .char-counter.warn { color: var(--yellow); }
+    .char-counter.over  { color: var(--red); }
+
+    /* ─── Tag Input ─── */
+    .tag-input-wrap {
+      min-height: 42px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-items: center;
+      cursor: text;
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+
+    .tag-input-wrap:hover {
+      border-color: var(--border2);
+      background: var(--surface2);
+    }
+
+    .tag-input-wrap.focused {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: var(--surface2);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--surface3);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 2px 10px 2px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      animation: tagIn 160ms ease;
+    }
+
+    @keyframes tagIn {
+      from { opacity: 0; transform: scale(.85) translateY(3px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .tag-remove {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      transition: color var(--transition), background var(--transition);
+      font-size: 13px;
+      line-height: 1;
+    }
+    .tag-remove:hover {
+      color: var(--red);
+      background: var(--red-dim);
+    }
+
+    .tag-text-input {
+      flex: 1;
+      min-width: 80px;
+      background: none;
+      border: none;
+      outline: none;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      color: var(--text);
+      padding: 2px 4px;
+    }
+    .tag-text-input::placeholder { color: var(--text-muted); }
+
+    /* ─── Preset Buttons ─── */
+    .preset-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .preset-btn {
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: var(--font-ui);
+      color: var(--text-sec);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: color var(--transition), background var(--transition), border-color var(--transition), transform var(--transition);
+    }
+    .preset-btn:hover {
+      color: var(--accent);
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .preset-btn:active { transform: translateY(0); }
+
+    .preset-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+      align-self: center;
+      margin-right: 2px;
+    }
+
+    /* ─── Field description ─── */
+    .field-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ─── Sticky Save Bar ─── */
+    .save-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 32px;
+      background: rgba(250,251,252,.94);
+      backdrop-filter: blur(24px) saturate(1.6);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -1px 0 var(--border), 0 -8px 32px rgba(0,0,0,.06);
+      transform: translateY(0);
+      transition: transform 280ms cubic-bezier(.4,0,.2,1), opacity 280ms;
+    }
+
+    .save-bar.hidden {
+      transform: translateY(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .save-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .save-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .save-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 18px;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: var(--radius);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+      white-space: nowrap;
+      letter-spacing: .01em;
+    }
+    .btn:active { transform: scale(.98); }
+
+    .btn-ghost {
+      background: none;
+      border-color: var(--border);
+      color: var(--text-sec);
+    }
+    .btn-ghost:hover {
+      background: var(--surface2);
+      color: var(--text);
+      border-color: var(--border2);
+    }
+
+    .btn-danger {
+      background: var(--red-dim);
+      border-color: rgba(255,77,106,.25);
+      color: var(--red);
+    }
+    .btn-danger:hover {
+      background: rgba(255,77,106,.2);
+      box-shadow: 0 0 0 3px rgba(255,77,106,.15);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(91,127,255,.28);
+    }
+    .btn-primary:hover {
+      background: #4a6fef;
+      box-shadow: 0 4px 16px rgba(91,127,255,.4);
+    }
+    .btn-primary:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ─── Success feedback ─── */
+    .saved-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--green);
+      background: var(--green-dim);
+      border: 1px solid rgba(16,201,124,.2);
+      border-radius: 20px;
+      padding: 4px 10px;
+      opacity: 0;
+      transform: translateX(8px);
+      transition: opacity 220ms, transform 220ms;
+    }
+    .saved-badge.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ─── Divider within card ─── */
+    .card-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px -24px;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 600px) {
+      .field-row { grid-template-columns: 1fr; }
+      .main { padding: 20px 16px; }
+      .save-bar { padding: 12px 16px; }
+      .tab-row { gap: 0; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ── Top Bar ── -->
+  <header class="topbar">
+    <div class="tab-row">
+      <a href="#" class="tab">📊 Übersicht</a>
+      <a href="#" class="tab">📚 Aus Vorlage</a>
+      <a href="#" class="tab active">✎ Metadaten</a>
+      <a href="#" class="tab">⬇ Export</a>
+      <span class="tab-spacer"></span>
+      <a href="#" class="tab tab-workflow">→ Workflow</a>
+    </div>
+    <nav class="breadcrumb-row" aria-label="Breadcrumb">
+      <a href="#">Mein Shop-Projekt</a>
+      <span class="breadcrumb-sep">›</span>
+      <a href="#">Nahrungsergänzung</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="current">Magnesium Komplex</span>
+      <span class="breadcrumb-sep">›</span>
+      <span class="current">Einstellungen</span>
+    </nav>
+  </header>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <h1 class="page-title">Kategorie-Metadaten</h1>
+    <p class="page-subtitle">Grundlegende Eigenschaften dieser Kategorie – fließen als Platzhalter in alle Workflow-Prompts ein.</p>
+
+    <!-- ── Section 1: Grunddaten ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <span class="section-label">01 · Grunddaten</span>
+        <span class="section-rule"></span>
+      </div>
+      <div class="form-card">
+
+        <div class="field">
+          <label for="cat-name">Kategorie-Name <span class="required">*</span></label>
+          <input type="text" id="cat-name" data-dirty value="Magnesium Komplex" placeholder="z.B. Magnesium Komplex" />
+        </div>
+
+        <div class="field">
+          <label for="hub-name">
+            Hub-Seite Name
+            <span class="hint">optional</span>
+          </label>
+          <input type="text" id="hub-name" data-dirty value="Nahrungsergänzung" placeholder="z.B. Vitamine & Mineralstoffe" />
+        </div>
+
+        <div class="field">
+          <label>
+            Unterkategorien
+            <span class="hint">Enter oder Komma zum Hinzufügen</span>
+          </label>
+          <div class="tag-input-wrap" id="subcats-wrap">
+            <span class="tag" data-tag>Magnesium Citrat <button class="tag-remove" aria-label="Entfernen" onclick="removeTag(this)">×</button></span>
+            <span class="tag" data-tag>Magnesium Malat <button class="tag-remove" aria-label="Entfernen" onclick="removeTag(this)">×</button></span>
+            <span class="tag" data-tag>Magnesium Bisglycinat <button class="tag-remove" aria-label="Entfernen" onclick="removeTag(this)">×</button></span>
+            <input class="tag-text-input" type="text" placeholder="Unterkategorie hinzufügen…" data-container="subcats-wrap" />
+          </div>
+          <span class="field-desc">Spoke-Seiten, die dieser Hub-Kategorie zugeordnet sind.</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Section 2: Zielgruppe & Shop ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <span class="section-label">02 · Zielgruppe & Shop</span>
+        <span class="section-rule"></span>
+      </div>
+      <div class="form-card">
+
+        <div class="field">
+          <label>Zielgruppen <span class="required">*</span></label>
+          <div class="tag-input-wrap" id="audiences-wrap">
+            <span class="tag" data-tag>Sportler & Aktive <button class="tag-remove" aria-label="Entfernen" onclick="removeTag(this)">×</button></span>
+            <span class="tag" data-tag>Stressgeplagte <button class="tag-remove" aria-label="Entfernen" onclick="removeTag(this)">×</button></span>
+            <input class="tag-text-input" type="text" placeholder="Zielgruppe hinzufügen…" data-container="audiences-wrap" />
+          </div>
+          <div class="preset-row">
+            <span class="preset-label">Vorschläge:</span>
+            <button class="preset-btn" onclick="addPreset('audiences-wrap', this)">Laien</button>
+            <button class="preset-btn" onclick="addPreset('audiences-wrap', this)">Fachleute</button>
+            <button class="preset-btn" onclick="addPreset('audiences-wrap', this)">Senioren 60+</button>
+            <button class="preset-btn" onclick="addPreset('audiences-wrap', this)">Eltern</button>
+            <button class="preset-btn" onclick="addPreset('audiences-wrap', this)">Sportler & Aktive</button>
+            <button class="preset-btn" onclick="addPreset('audiences-wrap', this)">Stressgeplagte</button>
+            <button class="preset-btn" onclick="addPreset('audiences-wrap', this)">Veganer</button>
+          </div>
+        </div>
+
+        <div class="card-divider"></div>
+
+        <div class="field">
+          <label for="shop-type">Shop-Typ</label>
+          <select id="shop-type" data-dirty>
+            <option value="">– bitte wählen –</option>
+            <option value="arznei" selected>Arzneimittel-Shop</option>
+            <option value="drogerie">Drogerie / Gesundheitsshop</option>
+            <option value="naturkosmetik">Naturkosmetik</option>
+            <option value="supplement">Supplement / Sport-Nutrition</option>
+            <option value="tiergesundheit">Tiergesundheit</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Section 3: Content-Richtlinien ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <span class="section-label">03 · Content-Richtlinien</span>
+        <span class="section-rule"></span>
+      </div>
+      <div class="form-card">
+
+        <div class="field">
+          <label>
+            Shop-USPs
+            <span class="hint">optional · Enter oder Komma</span>
+          </label>
+          <div class="tag-input-wrap" id="usps-wrap">
+            <span class="tag" data-tag>Laborgeprüfte Qualität <button class="tag-remove" aria-label="Entfernen" onclick="removeTag(this)">×</button></span>
+            <span class="tag" data-tag>Vegan & glutenfrei <button class="tag-remove" aria-label="Entfernen" onclick="removeTag(this)">×</button></span>
+            <span class="tag" data-tag>Kostenloser Versand ab 30€ <button class="tag-remove" aria-label="Entfernen" onclick="removeTag(this)">×</button></span>
+            <input class="tag-text-input" type="text" placeholder="USP hinzufügen…" data-container="usps-wrap" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="tonality">Tonalität</label>
+          <input type="text" id="tonality" data-dirty
+            value="Seriös-medizinisch, leicht verständlich"
+            placeholder="z.B. Seriös-medizinisch, leicht verständlich" />
+        </div>
+
+        <div class="field">
+          <label for="nogos">
+            No-Gos
+            <span class="hint">max. 500 Zeichen</span>
+          </label>
+          <div class="textarea-wrap">
+            <textarea id="nogos" data-dirty rows="4" maxlength="500"
+              placeholder="z.B. Keine Heilversprechen, keine Garantien…"
+            >Keine Heilversprechen, keine Garantien, keine Angst-Kommunikation, keine übertriebenen Superlative</textarea>
+            <span class="char-counter" id="nogos-counter">91 / 500</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div><!-- /page-wrapper -->
+
+
+<!-- ── Save Bar ── -->
+<div class="save-bar hidden" id="save-bar">
+  <div class="save-bar-left">
+    <button class="btn btn-danger" onclick="confirmDelete()">🗑 Kategorie löschen</button>
+    <span class="save-hint" id="dirty-hint">Ungespeicherte Änderungen</span>
+  </div>
+  <div class="save-bar-right">
+    <span class="saved-badge" id="saved-badge">✓ Gespeichert</span>
+    <button class="btn btn-ghost" onclick="discardChanges()">Abbrechen</button>
+    <button class="btn btn-primary" id="save-btn" onclick="saveChanges()">Änderungen speichern</button>
+  </div>
+</div>
+
+
+<script>
+  /* ─────────────── Tag Input System ─────────────── */
+
+  function makeTag(text, containerId) {
+    const wrap = document.getElementById(containerId);
+    if (!text.trim()) return;
+
+    // Prevent duplicates
+    const existing = [...wrap.querySelectorAll('[data-tag]')].map(t =>
+      t.textContent.replace('×','').trim()
+    );
+    if (existing.includes(text.trim())) return;
+
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.setAttribute('data-tag', '');
+    span.innerHTML = `${escapeHtml(text.trim())} <button class="tag-remove" aria-label="Entfernen" onclick="removeTag(this)">×</button>`;
+
+    // Insert before the input
+    const input = wrap.querySelector('.tag-text-input');
+    wrap.insertBefore(span, input);
+    markDirty();
+  }
+
+  function removeTag(btn) {
+    btn.closest('[data-tag]').remove();
+    markDirty();
+  }
+
+  function addPreset(containerId, btn) {
+    makeTag(btn.textContent, containerId);
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Wire up all tag input wraps
+  document.querySelectorAll('.tag-input-wrap').forEach(wrap => {
+    const input = wrap.querySelector('.tag-text-input');
+    const containerId = wrap.id;
+
+    wrap.addEventListener('click', () => input.focus());
+
+    input.addEventListener('focus', () => wrap.classList.add('focused'));
+    input.addEventListener('blur', () => {
+      wrap.classList.remove('focused');
+      if (input.value.trim()) {
+        makeTag(input.value, containerId);
+        input.value = '';
+      }
+    });
+
+    input.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+        e.preventDefault();
+        makeTag(input.value.replace(/,/g,''), containerId);
+        input.value = '';
+      }
+      // Delete last tag on Backspace if input empty
+      if (e.key === 'Backspace' && !input.value) {
+        const tags = wrap.querySelectorAll('[data-tag]');
+        if (tags.length) {
+          tags[tags.length - 1].remove();
+          markDirty();
+        }
+      }
+    });
+
+    input.addEventListener('input', () => {
+      if (input.value.includes(',')) {
+        const parts = input.value.split(',');
+        parts.slice(0, -1).forEach(p => makeTag(p, containerId));
+        input.value = parts[parts.length - 1];
+      }
+    });
+  });
+
+
+  /* ─────────────── Char Counter ─────────────── */
+
+  const nogosEl = document.getElementById('nogos');
+  const counter = document.getElementById('nogos-counter');
+  const MAX = 500;
+
+  function updateCounter() {
+    const len = nogosEl.value.length;
+    counter.textContent = `${len} / ${MAX}`;
+    counter.className = 'char-counter' + (len >= MAX ? ' over' : len >= MAX * .8 ? ' warn' : '');
+  }
+
+  nogosEl.addEventListener('input', () => { updateCounter(); markDirty(); });
+  updateCounter();
+
+
+  /* ─────────────── Dirty State & Save Bar ─────────────── */
+
+  let isDirty = false;
+
+  function markDirty() {
+    if (!isDirty) {
+      isDirty = true;
+      document.getElementById('save-bar').classList.remove('hidden');
+    }
+  }
+
+  // Wire up standard inputs
+  document.querySelectorAll('[data-dirty]').forEach(el => {
+    el.addEventListener('input', markDirty);
+    el.addEventListener('change', markDirty);
+  });
+
+  function saveChanges() {
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = '…';
+
+    // Simulate async save
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = 'Änderungen speichern';
+      isDirty = false;
+
+      const badge = document.getElementById('saved-badge');
+      badge.classList.add('show');
+      document.getElementById('dirty-hint').style.opacity = '0';
+
+      setTimeout(() => {
+        badge.classList.remove('show');
+        document.getElementById('save-bar').classList.add('hidden');
+        document.getElementById('dirty-hint').style.opacity = '';
+      }, 2200);
+    }, 700);
+  }
+
+  function discardChanges() {
+    if (confirm('Änderungen verwerfen?')) {
+      isDirty = false;
+      document.getElementById('save-bar').classList.add('hidden');
+      // In a real app: reload form state
+    }
+  }
+
+  function confirmDelete() {
+    if (confirm('Kategorie „Magnesium Komplex" wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.')) {
+      alert('→ Kategorie würde gelöscht werden (Demo).');
+    }
+  }
+
+
+  /* ─────────────── Warn on unload if dirty ─────────────── */
+  window.addEventListener('beforeunload', e => {
+    if (isDirty) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+</script>
+
+</body>
+</html>

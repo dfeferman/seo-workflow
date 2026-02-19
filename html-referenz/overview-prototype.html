@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Übersicht – SEO Workflow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Design Tokens (aus src/index.css) ─── */
+    :root {
+      --bg:         #fafbfc;
+      --surface:    #ffffff;
+      --surface2:   #f4f6f8;
+      --border:     #e1e4e8;
+      --border2:    #c9cdd4;
+      --accent:     #5b7fff;
+      --accent-dim: #e8edff;
+      --accent-glow:rgba(91,127,255,.18);
+      --green:      #10b981;
+      --green-dim:  rgba(16,185,129,.10);
+      --yellow:     #f59e0b;
+      --yellow-dim: rgba(245,158,11,.10);
+      --red:        #ef4444;
+      --red-dim:    rgba(239,68,68,.09);
+      --text:       #1a202c;
+      --text-sec:   #4a5568;
+      --muted:      #718096;
+      /* Phase colors */
+      --ph-a: #7c3aed; --ph-a-dim: rgba(124,58,237,.10);
+      --ph-b: #2563eb; --ph-b-dim: rgba(37,99,235,.10);
+      --ph-c: #d97706; --ph-c-dim: rgba(217,119,6,.10);
+      --ph-d: #059669; --ph-d-dim: rgba(5,150,105,.10);
+      --ph-e: #dc2626; --ph-e-dim: rgba(220,38,38,.10);
+      --ph-f: #6b7280; --ph-f-dim: rgba(107,114,128,.10);
+
+      --font-display: 'Crimson Pro', Georgia, serif;
+      --font-ui:      'IBM Plex Sans', system-ui, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+      --radius:       10px;
+      --radius-lg:    16px;
+      --t:            150ms cubic-bezier(.4,0,.2,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font-ui);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Topbar ─── */
+    .topbar {
+      background: rgba(250,251,252,.92);
+      backdrop-filter: blur(20px) saturate(1.6);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .tab-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 28px 0;
+    }
+
+    .tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color var(--t), border-color var(--t);
+      white-space: nowrap;
+    }
+    .tab:hover { color: var(--text-sec); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .tab-spacer { flex: 1; }
+
+    .tab-workflow {
+      margin-right: -28px;
+      padding: 6px 18px 9px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border-bottom-color: var(--accent);
+      border-radius: 8px 8px 0 0;
+    }
+    .tab-workflow:hover { background: #dde5ff; color: #4a6fef; }
+
+    .breadcrumb-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 28px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+    .breadcrumb-row a { color: var(--text-sec); text-decoration: none; }
+    .breadcrumb-row a:hover { color: var(--text); }
+    .breadcrumb-row .cur { color: var(--text); font-weight: 500; }
+    .bc-sep { color: var(--border2); }
+
+    /* ─── Page Layout ─── */
+    .page {
+      flex: 1;
+      padding: 28px 28px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative accent line */
+    .hero::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--accent) 0%, #a78bfa 100%);
+      border-radius: 4px 0 0 4px;
+    }
+
+    .hero-left { min-width: 0; }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.15;
+      letter-spacing: -.01em;
+      margin-bottom: 12px;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-sec);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+
+    .hero-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 520px;
+    }
+
+    /* ─── Circular Progress ─── */
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .ring-wrap {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+
+    .ring-svg {
+      width: 120px;
+      height: 120px;
+      transform: rotate(-90deg);
+    }
+
+    .ring-track {
+      fill: none;
+      stroke: var(--surface2);
+      stroke-width: 10;
+    }
+
+    .ring-fill {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 221; /* 283 * (1 - 0.22) */
+      transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);
+    }
+
+    .ring-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ring-pct {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .ring-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 20px;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(91,127,255,.28);
+      transition: background var(--t), box-shadow var(--t), transform var(--t);
+      white-space: nowrap;
+    }
+    .btn-primary:hover { background: #4a6fef; box-shadow: 0 4px 16px rgba(91,127,255,.38); }
+    .btn-primary:active { transform: scale(.98); }
+
+    /* ─── KPI Strip ─── */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.03);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: border-color var(--t), box-shadow var(--t);
+    }
+    .kpi:hover {
+      border-color: var(--border2);
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+
+    .kpi-value {
+      font-family: var(--font-display);
+      font-size: 34px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1;
+      letter-spacing: -.02em;
+    }
+
+    .kpi-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .kpi-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    /* ─── Phase Pipeline ─── */
+    .pipeline-section {}
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: .01em;
+    }
+
+    .section-rule {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section-action {
+      font-size: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .section-action:hover { text-decoration: underline; }
+
+    .pipeline {
+      display: flex;
+      gap: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
+
+    .pipeline-phase {
+      flex: 1;
+      padding: 16px 16px 14px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      transition: background var(--t);
+      cursor: pointer;
+    }
+    .pipeline-phase:last-child { border-right: none; }
+    .pipeline-phase:hover { background: var(--surface2); }
+
+    .pipeline-phase.done { background: rgba(16,185,129,.03); }
+    .pipeline-phase.active { background: rgba(91,127,255,.03); }
+    .pipeline-phase.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent);
+    }
+
+    .ph-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ph-badge {
+      width: 26px; height: 26px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .ph-status {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .ph-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .ph-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .ph-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ph-bar {
+      flex: 1;
+      height: 5px;
+      background: var(--surface2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .ph-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+
+    .ph-count {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* Phase color variants */
+    .ph-A .ph-badge { background: var(--ph-a-dim); color: var(--ph-a); }
+    .ph-A .ph-bar-fill { background: var(--ph-a); }
+    .ph-A .ph-status { color: var(--green); }
+
+    .ph-B .ph-badge { background: var(--ph-b-dim); color: var(--ph-b); }
+    .ph-B .ph-bar-fill { background: var(--ph-b); }
+    .ph-B .ph-status { color: var(--accent); }
+
+    .ph-C .ph-badge { background: var(--ph-c-dim); color: var(--ph-c); }
+    .ph-C .ph-bar-fill { background: var(--ph-c); }
+    .ph-C .ph-status { color: var(--muted); }
+
+    .ph-D .ph-badge { background: var(--ph-d-dim); color: var(--ph-d); }
+    .ph-D .ph-bar-fill { background: var(--ph-d); }
+    .ph-D .ph-status { color: var(--muted); }
+
+    .ph-E .ph-badge { background: var(--ph-e-dim); color: var(--ph-e); }
+    .ph-E .ph-bar-fill { background: var(--ph-e); }
+    .ph-E .ph-status { color: var(--muted); }
+
+    .ph-F .ph-badge { background: var(--ph-f-dim); color: var(--ph-f); }
+    .ph-F .ph-bar-fill { background: var(--ph-f); }
+    .ph-F .ph-status { color: var(--muted); }
+
+    /* ─── Bento Grid ─── */
+    .bento {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 14px;
+    }
+
+    .bento-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: border-color var(--t), box-shadow var(--t);
+    }
+    .bento-card:hover {
+      border-color: var(--border2);
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    }
+
+    .bento-wide { grid-column: span 2; }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .card-icon {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      background: var(--surface2);
+      flex-shrink: 0;
+    }
+
+    .card-link {
+      font-size: 11px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .card-link:hover { text-decoration: underline; }
+
+    /* ─── Activity Feed ─── */
+    .activity {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .act-item {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      align-items: flex-start;
+    }
+    .act-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .act-item:first-child { padding-top: 0; }
+
+    .act-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .act-dot.done { background: var(--green); }
+    .act-dot.active { background: var(--yellow); box-shadow: 0 0 0 3px var(--yellow-dim); }
+
+    .act-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .act-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ─── Next Steps ─── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .step {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background var(--t), border-color var(--t);
+    }
+
+    .step-warn {
+      background: var(--yellow-dim);
+      border-color: rgba(245,158,11,.2);
+    }
+
+    .step-info {
+      background: var(--accent-dim);
+      border-color: rgba(91,127,255,.18);
+    }
+
+    .step-icon {
+      font-size: 15px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .step-text {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-sec);
+    }
+
+    .step-text strong { color: var(--text); font-weight: 600; }
+
+    /* ─── Quick Stats list ─── */
+    .qstats {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .qstat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .qstat-row:last-child { border-bottom: none; }
+
+    .qstat-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .qstat-value {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    /* ─── Subcategory chips ─── */
+    .subcat-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .subcat-chip {
+      padding: 5px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-sec);
+      cursor: pointer;
+      transition: border-color var(--t), color var(--t), background var(--t);
+      text-decoration: none;
+    }
+    .subcat-chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .subcat-chip .chip-prog {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Topbar ── -->
+<header class="topbar">
+  <div class="tab-row">
+    <a href="#" class="tab active">📊 Übersicht</a>
+    <a href="#" class="tab">📚 Aus Vorlage</a>
+    <a href="#" class="tab">✎ Metadaten</a>
+    <a href="#" class="tab">⬇ Export</a>
+    <span class="tab-spacer"></span>
+    <a href="#" class="tab tab-workflow">→ Workflow</a>
+  </div>
+  <nav class="breadcrumb-row" aria-label="Breadcrumb">
+    <a href="#">Mein Shop-Projekt</a>
+    <span class="bc-sep">›</span>
+    <a href="#">Nahrungsergänzung</a>
+    <span class="bc-sep">›</span>
+    <span class="cur">Magnesium Komplex</span>
+    <span class="bc-sep">›</span>
+    <span class="cur">Übersicht</span>
+  </nav>
+</header>
+
+<!-- ── Page ── -->
+<main class="page">
+
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-eyebrow">Kategorie · Hub-Seite</div>
+      <h1 class="hero-title">Magnesium Komplex</h1>
+      <div class="hero-badges">
+        <span class="badge">🎯 Sportler &amp; Aktive</span>
+        <span class="badge">🎯 Stressgeplagte</span>
+        <span class="badge">🏪 Arzneimittel-Shop</span>
+        <span class="badge">3 Unterkategorien</span>
+      </div>
+      <p class="hero-desc">
+        Hub-Kategorie mit Magnesium Citrat, Malat und Bisglycinat als Spoke-Seiten.
+        Phase&nbsp;A abgeschlossen, Phase&nbsp;B aktiv — 1 von 2 Artefakten fertig.
+      </p>
+    </div>
+
+    <div class="hero-right">
+      <div class="ring-wrap">
+        <svg class="ring-svg" viewBox="0 0 100 100">
+          <circle class="ring-track" cx="50" cy="50" r="45"/>
+          <circle class="ring-fill" cx="50" cy="50" r="45" id="ring"/>
+        </svg>
+        <div class="ring-center">
+          <span class="ring-pct">22%</span>
+          <span class="ring-label">Fortschritt</span>
+        </div>
+      </div>
+      <button class="btn-primary">→ Weiter zu Phase B</button>
+    </div>
+  </div>
+
+  <!-- ── KPI Strip ── -->
+  <div class="kpi-strip">
+    <div class="kpi">
+      <div class="kpi-value" style="color:var(--green);">5</div>
+      <div class="kpi-label">Artefakte fertig</div>
+      <div class="kpi-sub"><span class="kpi-dot" style="background:var(--green)"></span>von 18 gesamt</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-value" style="color:var(--yellow);">1</div>
+      <div class="kpi-label">In Arbeit</div>
+      <div class="kpi-sub"><span class="kpi-dot" style="background:var(--yellow)"></span>B1.1 Mapping</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-value">12</div>
+      <div class="kpi-label">Noch offen</div>
+      <div class="kpi-sub"><span class="kpi-dot" style="background:var(--border2)"></span>Phasen C – F</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-value">~6h</div>
+      <div class="kpi-label">Verbleibend</div>
+      <div class="kpi-sub" style="color:var(--muted)">Schätzung</div>
+    </div>
+  </div>
+
+  <!-- ── Phase Pipeline ── -->
+  <div class="pipeline-section">
+    <div class="section-header">
+      <span class="section-title">Workflow-Phasen</span>
+      <span class="section-rule"></span>
+      <a href="#" class="section-action">Alle öffnen →</a>
+    </div>
+    <div class="pipeline">
+
+      <div class="pipeline-phase ph-A done">
+        <div class="ph-head">
+          <div class="ph-badge">A</div>
+          <span class="ph-status">✓ Fertig</span>
+        </div>
+        <div>
+          <div class="ph-name">Recherche &amp; SERP</div>
+          <div class="ph-desc">Intent, Quellen, FAQ</div>
+        </div>
+        <div class="ph-bar-wrap">
+          <div class="ph-bar"><div class="ph-bar-fill" style="width:100%"></div></div>
+          <span class="ph-count">4/4</span>
+        </div>
+      </div>
+
+      <div class="pipeline-phase ph-B active">
+        <div class="ph-head">
+          <div class="ph-badge">B</div>
+          <span class="ph-status" style="color:var(--accent)">● Aktiv</span>
+        </div>
+        <div>
+          <div class="ph-name">Mapping &amp; Links</div>
+          <div class="ph-desc">Keywords, Interlinking</div>
+        </div>
+        <div class="ph-bar-wrap">
+          <div class="ph-bar"><div class="ph-bar-fill" style="width:50%"></div></div>
+          <span class="ph-count">1/2</span>
+        </div>
+      </div>
+
+      <div class="pipeline-phase ph-C">
+        <div class="ph-head">
+          <div class="ph-badge">C</div>
+          <span class="ph-status">– Offen</span>
+        </div>
+        <div>
+          <div class="ph-name">Content-Briefing</div>
+          <div class="ph-desc">Outline, FAQ, Links</div>
+        </div>
+        <div class="ph-bar-wrap">
+          <div class="ph-bar"><div class="ph-bar-fill" style="width:0%"></div></div>
+          <span class="ph-count">0/3</span>
+        </div>
+      </div>
+
+      <div class="pipeline-phase ph-D">
+        <div class="ph-head">
+          <div class="ph-badge">D</div>
+          <span class="ph-status">– Offen</span>
+        </div>
+        <div>
+          <div class="ph-name">Textschreibung</div>
+          <div class="ph-desc">Hub-Text, Module</div>
+        </div>
+        <div class="ph-bar-wrap">
+          <div class="ph-bar"><div class="ph-bar-fill" style="width:0%"></div></div>
+          <span class="ph-count">0/5</span>
+        </div>
+      </div>
+
+      <div class="pipeline-phase ph-E">
+        <div class="ph-head">
+          <div class="ph-badge">E</div>
+          <span class="ph-status">– Offen</span>
+        </div>
+        <div>
+          <div class="ph-name">SEO-Optimierung</div>
+          <div class="ph-desc">SurferSEO, Schema</div>
+        </div>
+        <div class="ph-bar-wrap">
+          <div class="ph-bar"><div class="ph-bar-fill" style="width:0%"></div></div>
+          <span class="ph-count">0/2</span>
+        </div>
+      </div>
+
+      <div class="pipeline-phase ph-F">
+        <div class="ph-head">
+          <div class="ph-badge">F</div>
+          <span class="ph-status">– Offen</span>
+        </div>
+        <div>
+          <div class="ph-name">QA &amp; Freigabe</div>
+          <div class="ph-desc">YMYL, E-E-A-T</div>
+        </div>
+        <div class="ph-bar-wrap">
+          <div class="ph-bar"><div class="ph-bar-fill" style="width:0%"></div></div>
+          <span class="ph-count">0/2</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Bento Grid ── -->
+  <div class="bento">
+
+    <!-- Aktivitäten (wide) -->
+    <div class="bento-card bento-wide">
+      <div class="card-head">
+        <div class="card-title">
+          <div class="card-icon">🕐</div>
+          Letzte Aktivitäten
+        </div>
+        <a href="#" class="card-link">Alle anzeigen →</a>
+      </div>
+      <div class="activity">
+        <div class="act-item">
+          <div class="act-dot active"></div>
+          <div>
+            <div class="act-title">B1.1 Keyword-Mapping gestartet</div>
+            <div class="act-meta">Heute · 14:32 · Phase B</div>
+          </div>
+        </div>
+        <div class="act-item">
+          <div class="act-dot done"></div>
+          <div>
+            <div class="act-title">A3 FAQ-Pool abgeschlossen</div>
+            <div class="act-meta">Heute · 11:18 · Phase A</div>
+          </div>
+        </div>
+        <div class="act-item">
+          <div class="act-dot done"></div>
+          <div>
+            <div class="act-title">A2.1 Quellen recherchiert</div>
+            <div class="act-meta">Gestern · 16:45 · Phase A</div>
+          </div>
+        </div>
+        <div class="act-item">
+          <div class="act-dot done"></div>
+          <div>
+            <div class="act-title">A1.2 Hub/Spoke-Struktur definiert</div>
+            <div class="act-meta">Gestern · 15:20 · Phase A</div>
+          </div>
+        </div>
+        <div class="act-item">
+          <div class="act-dot done"></div>
+          <div>
+            <div class="act-title">A1 SERP-Analyse durchgeführt</div>
+            <div class="act-meta">Gestern · 14:12 · Phase A</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nächste Schritte -->
+    <div class="bento-card">
+      <div class="card-head">
+        <div class="card-title">
+          <div class="card-icon">⚡</div>
+          Nächste Schritte
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step step-warn">
+          <span class="step-icon">⏳</span>
+          <div class="step-text">
+            <strong>B1.1 Mapping</strong> abschließen – wartet auf Input aus Phase A
+          </div>
+        </div>
+        <div class="step step-info">
+          <span class="step-icon">💡</span>
+          <div class="step-text">
+            Nächster Schritt: <strong>B2.1 Interlinking-Plan</strong> erstellen
+          </div>
+        </div>
+        <div class="step step-info">
+          <span class="step-icon">📝</span>
+          <div class="step-text">
+            <strong>Phase C</strong> startet sobald B vollständig abgeschlossen ist
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schnellstatistik -->
+    <div class="bento-card">
+      <div class="card-head">
+        <div class="card-title">
+          <div class="card-icon">📈</div>
+          Statistik
+        </div>
+      </div>
+      <div class="qstats">
+        <div class="qstat-row">
+          <span class="qstat-label">Prompts ausgeführt</span>
+          <span class="qstat-value">5</span>
+        </div>
+        <div class="qstat-row">
+          <span class="qstat-label">Ergebnisse gespeichert</span>
+          <span class="qstat-value">4</span>
+        </div>
+        <div class="qstat-row">
+          <span class="qstat-label">Investierte Zeit</span>
+          <span class="qstat-value">~2h</span>
+        </div>
+        <div class="qstat-row">
+          <span class="qstat-label">Gesamtaufwand (Schätzung)</span>
+          <span class="qstat-value">6–8h</span>
+        </div>
+        <div class="qstat-row">
+          <span class="qstat-label">Letzte Bearbeitung</span>
+          <span class="qstat-value">Heute 14:32</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unterkategorien (wide) -->
+    <div class="bento-card bento-wide">
+      <div class="card-head">
+        <div class="card-title">
+          <div class="card-icon">🗂</div>
+          Unterkategorien (Spoke-Seiten)
+        </div>
+        <a href="#" class="card-link">Verwalten →</a>
+      </div>
+      <div class="subcat-chips">
+        <a href="#" class="subcat-chip">Magnesium Citrat <span class="chip-prog">0/18</span></a>
+        <a href="#" class="subcat-chip">Magnesium Malat <span class="chip-prog">0/18</span></a>
+        <a href="#" class="subcat-chip">Magnesium Bisglycinat <span class="chip-prog">0/18</span></a>
+        <a href="#" class="subcat-chip" style="border-style:dashed;color:var(--muted)">+ Hinzufügen</a>
+      </div>
+    </div>
+
+    <!-- Metadaten-Kurzinfo -->
+    <div class="bento-card">
+      <div class="card-head">
+        <div class="card-title">
+          <div class="card-icon">✎</div>
+          Metadaten
+        </div>
+        <a href="#" class="card-link">Bearbeiten →</a>
+      </div>
+      <div class="qstats">
+        <div class="qstat-row">
+          <span class="qstat-label">Shop-Typ</span>
+          <span class="qstat-value">Arzneimittel</span>
+        </div>
+        <div class="qstat-row">
+          <span class="qstat-label">Tonalität</span>
+          <span class="qstat-value" style="font-family:var(--font-ui);font-size:11px;max-width:120px;text-align:right;line-height:1.3">Seriös-medizinisch, leicht verständlich</span>
+        </div>
+        <div class="qstat-row">
+          <span class="qstat-label">No-Gos</span>
+          <span class="qstat-value" style="color:var(--red);font-family:var(--font-ui);font-size:11px">definiert</span>
+        </div>
+        <div class="qstat-row">
+          <span class="qstat-label">USPs</span>
+          <span class="qstat-value">3 eingetragen</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+  /* Animate ring on load */
+  window.addEventListener('load', () => {
+    const ring = document.getElementById('ring');
+    const pct = 0.22;
+    const circumference = 283;
+    ring.style.strokeDashoffset = circumference * (1 - pct);
+  });
+</script>
+
+</body>
+</html>

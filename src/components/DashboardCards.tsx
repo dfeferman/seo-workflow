@@ -1,16 +1,16 @@
 import { Link } from '@tanstack/react-router'
 import type { CategoryRow } from '@/types/database.types'
-import type { CategoryStats, PhaseStat, TimelineItem, HintItem } from '@/hooks/useStats'
+import type { CategoryStats, TimelineItem, HintItem } from '@/hooks/useStats'
 
-const PHASE_BADGE_CLASS: Record<string, string> = {
-  A: 'bg-[#f3e8ff] text-[#7c3aed]',
-  B: 'bg-[#dbeafe] text-[#2563eb]',
-  C: 'bg-[#fef3c7] text-[#d97706]',
-  D: 'bg-[#d1fae5] text-[#059669]',
-  E: 'bg-[#fee2e2] text-[#dc2626]',
-  F: 'bg-[#f3f4f6] text-[#6b7280]',
-  G: 'bg-[#f3f4f6] text-[#6b7280]',
-  X: 'bg-[#f3f4f6] text-[#6b7280]',
+const PHASE_COLORS: Record<string, { bg: string; text: string; bar: string }> = {
+  A: { bg: 'bg-[#f3e8ff]', text: 'text-[#7c3aed]', bar: 'bg-[#7c3aed]' },
+  B: { bg: 'bg-[#dbeafe]', text: 'text-[#2563eb]', bar: 'bg-[#2563eb]' },
+  C: { bg: 'bg-[#fef3c7]', text: 'text-[#d97706]', bar: 'bg-[#d97706]' },
+  D: { bg: 'bg-[#d1fae5]', text: 'text-[#059669]', bar: 'bg-[#059669]' },
+  E: { bg: 'bg-[#fee2e2]', text: 'text-[#dc2626]', bar: 'bg-[#dc2626]' },
+  F: { bg: 'bg-[#f3f4f6]', text: 'text-[#6b7280]', bar: 'bg-[#6b7280]' },
+  G: { bg: 'bg-[#f3f4f6]', text: 'text-[#6b7280]', bar: 'bg-[#6b7280]' },
+  X: { bg: 'bg-[#f3f4f6]', text: 'text-[#6b7280]', bar: 'bg-[#6b7280]' },
 }
 
 function formatRelativeDate(iso: string): string {
@@ -38,6 +38,34 @@ type DashboardCardsProps = {
   isLoading?: boolean
 }
 
+/** SVG Kreisring für Fortschrittsanzeige */
+function ProgressRing({ percent }: { percent: number }) {
+  const r = 45
+  const circumference = 2 * Math.PI * r
+  const offset = circumference * (1 - Math.min(percent, 100) / 100)
+  return (
+    <div className="relative w-28 h-28 flex-shrink-0">
+      <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r={r} fill="none" stroke="var(--surface2)" strokeWidth="9" />
+        <circle
+          cx="50" cy="50" r={r}
+          fill="none"
+          stroke="var(--accent)"
+          strokeWidth="9"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          style={{ transition: 'stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)' }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="font-display text-2xl font-semibold text-text leading-none">{percent}%</span>
+        <span className="font-mono text-[9px] tracking-widest uppercase text-muted mt-0.5">Fortschritt</span>
+      </div>
+    </div>
+  )
+}
+
 export function DashboardCards({
   category,
   stats,
@@ -54,158 +82,197 @@ export function DashboardCards({
   }
 
   const title = category.hub_name || category.name
-  const meta: string[] = []
-  if (category.zielgruppen?.length) meta.push(`🎯 ${category.zielgruppen.join(' · ')}`)
-  if (category.shop_typ) meta.push(`🏪 ${category.shop_typ}`)
+  const badges: string[] = []
+  if (category.zielgruppen?.length) category.zielgruppen.forEach(z => badges.push(`🎯 ${z}`))
+  if (category.shop_typ) badges.push(`🏪 ${category.shop_typ}`)
+
+  const kpis = [
+    {
+      value: String(stats?.doneCount ?? 0),
+      label: 'Artefakte fertig',
+      color: 'text-green',
+      sub: `von ${stats?.total ?? 0} gesamt`,
+      dot: 'bg-green',
+    },
+    {
+      value: String(stats?.activeCount ?? 0),
+      label: 'In Arbeit',
+      color: 'text-yellow',
+      sub: 'Artefakte aktiv',
+      dot: 'bg-yellow',
+    },
+    {
+      value: String(stats?.openCount ?? 0),
+      label: 'Noch offen',
+      color: 'text-text',
+      sub: 'verbleibend',
+      dot: 'bg-[#a0aec0]',
+    },
+    {
+      value: stats?.remainingTimeEstimate ?? '–',
+      label: 'Verbleibend',
+      color: 'text-text',
+      sub: 'Schätzung',
+      dot: null,
+    },
+  ]
 
   return (
-    <div className="p-5 pt-4 pb-7 space-y-5">
-      {/* Hero */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-text tracking-tight mb-2">{title}</h1>
-          {meta.length > 0 && (
+    <div className="p-6 pb-10 space-y-6 max-w-[1100px]">
+
+      {/* ── Hero ── */}
+      <div className="flex items-center gap-6 bg-surface border border-border rounded-xl px-7 py-6 shadow-sm relative overflow-hidden">
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-accent to-[#a78bfa] rounded-l-xl" />
+        <div className="flex-1 min-w-0 pl-4">
+          <div className="font-mono text-[10px] tracking-[.12em] uppercase text-accent mb-2">
+            {category.type === 'category' ? 'Kategorie · Hub-Seite' : 'Blog-Artikel'}
+          </div>
+          <h1 className="font-display text-4xl font-semibold text-text leading-tight mb-3 tracking-tight">
+            {title}
+          </h1>
+          {badges.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
-              {meta.map((m, i) => (
-                <span
-                  key={i}
-                  className="px-2.5 py-1 rounded-md text-2xs font-medium bg-surface2 border border-border text-muted"
-                >
-                  {m}
+              {badges.map((b, i) => (
+                <span key={i} className="px-2.5 py-1 rounded-full text-xs font-medium bg-surface2 border border-border text-text-secondary font-mono">
+                  {b}
                 </span>
               ))}
             </div>
           )}
-          <p className="text-sm text-muted max-w-xl leading-relaxed">
+          <p className="text-sm text-muted leading-relaxed max-w-xl">
             {stats
               ? `${stats.doneCount}/${stats.total} Artefakte abgeschlossen. ${stats.activeCount} in Arbeit, ${stats.openCount} offen.`
               : 'Keine Artefakte in dieser Kategorie.'}
           </p>
         </div>
-        <div className="flex-shrink-0">
-          <div className="bg-accent-light/50 border border-accent/20 rounded-lg px-4 py-3 text-center min-w-[120px]">
-            <div className="text-2xl font-bold text-accent">{stats?.progressPercent ?? 0}%</div>
-            <div className="text-2xs text-muted font-medium uppercase tracking-wide mt-0.5">
-              Fortschritt
-            </div>
-          </div>
+        <div className="flex flex-col items-center gap-3 flex-shrink-0">
+          <ProgressRing percent={stats?.progressPercent ?? 0} />
+          <Link
+            to="/projects/$projectId/categories/$categoryId"
+            params={{ projectId, categoryId }}
+            search={{ open: undefined }}
+            className="py-2 px-5 rounded-lg text-sm font-semibold bg-accent text-white hover:bg-[#4a6fef] transition-colors shadow-sm whitespace-nowrap"
+          >
+            → Weiter zum Workflow
+          </Link>
         </div>
       </div>
 
-      {/* 4 Mini-Stats */}
-      {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-surface2 border border-border rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-text">{stats.doneCount}</div>
-            <div className="text-2xs text-muted mt-1">Artefakte fertig</div>
-          </div>
-          <div className="bg-surface2 border border-border rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-text">{stats.activeCount}</div>
-            <div className="text-2xs text-muted mt-1">In Arbeit</div>
-          </div>
-          <div className="bg-surface2 border border-border rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-text">{stats.openCount}</div>
-            <div className="text-2xs text-muted mt-1">Noch offen</div>
-          </div>
-          <div className="bg-surface2 border border-border rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-text">{stats.remainingTimeEstimate}</div>
-            <div className="text-2xs text-muted mt-1">Verbleibend</div>
-          </div>
-        </div>
-      )}
-
-      {/* 4 Cards Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {stats && (
-          <>
-            <PhaseProgressCard byPhase={stats.byPhase} projectId={projectId} categoryId={categoryId} />
-            <TimelineCard activities={stats.recentActivities} />
-            <HintsCard hints={stats.hints} />
-            <QuickStatsCard stats={stats} />
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function PhaseProgressCard({
-  byPhase,
-  projectId,
-  categoryId,
-}: {
-  byPhase: PhaseStat[]
-  projectId: string
-  categoryId: string
-}) {
-  return (
-    <div className="bg-surface border border-border rounded-xl p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-text flex items-center gap-2">
-          <span>📊</span> Fortschritt pro Phase
-        </h2>
-        <Link
-          to="/projects/$projectId/categories/$categoryId"
-          params={{ projectId, categoryId }}
-          className="text-xs font-medium text-accent hover:underline"
-        >
-          Details →
-        </Link>
-      </div>
-      <div className="space-y-3">
-        {byPhase.map((p) => (
-          <div key={p.phase} className="flex items-center gap-3">
-            <div
-              className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-semibold font-mono flex-shrink-0 ${PHASE_BADGE_CLASS[p.phase] ?? PHASE_BADGE_CLASS.F}`}
-            >
-              {p.phase}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-text">{p.name}</div>
-              {p.desc && <div className="text-2xs text-muted">{p.desc}</div>}
-            </div>
-            <div className="flex flex-col gap-1 items-end min-w-[72px]">
-              <div className="text-2xs font-mono text-muted">
-                <span className="text-accent font-semibold">{p.done}</span> / {p.total}
-              </div>
-              <div className="w-full h-1 bg-surface2 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-accent transition-all duration-300"
-                  style={{ width: p.total ? `${(p.done / p.total) * 100}%` : '0%' }}
-                />
-              </div>
+      {/* ── KPI Strip ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {kpis.map(({ value, label, color, sub, dot }) => (
+          <div key={label} className="bg-surface border border-border rounded-xl p-4 shadow-sm hover:border-[#c9cdd4] transition-all">
+            <div className={`font-display text-4xl font-semibold leading-none mb-1.5 ${color}`}>{value}</div>
+            <div className="font-mono text-[10px] tracking-[.08em] uppercase text-muted">{label}</div>
+            <div className="flex items-center gap-1.5 mt-1.5">
+              {dot && <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dot}`} />}
+              <span className="text-[11px] text-muted">{sub}</span>
             </div>
           </div>
         ))}
       </div>
+
+      {/* ── Phase Pipeline ── */}
+      {stats && stats.byPhase.length > 0 && (
+        <div>
+          <div className="flex items-baseline gap-3 mb-4">
+            <span className="text-sm font-semibold text-text tracking-tight">Workflow-Phasen</span>
+            <div className="flex-1 h-px bg-border" />
+            <Link
+              to="/projects/$projectId/categories/$categoryId"
+              params={{ projectId, categoryId }}
+              search={{ open: undefined }}
+              className="text-xs text-accent font-medium hover:underline whitespace-nowrap"
+            >
+              Alle öffnen →
+            </Link>
+          </div>
+          <div className="flex bg-surface border border-border rounded-xl overflow-hidden shadow-sm">
+            {stats.byPhase.map((p, idx) => {
+              const colors = PHASE_COLORS[p.phase] ?? PHASE_COLORS.F
+              const fillPct = p.total ? Math.round((p.done / p.total) * 100) : 0
+              const isDone = p.done === p.total && p.total > 0
+              const isActive = !isDone && p.done > 0
+              return (
+                <div
+                  key={p.phase}
+                  className={`flex-1 px-3 py-4 flex flex-col gap-2 relative transition-colors
+                    ${idx < stats.byPhase.length - 1 ? 'border-r border-border' : ''}
+                    ${isActive ? 'bg-accent-light/20' : isDone ? 'bg-green/5' : ''}
+                  `}
+                >
+                  {isActive && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-b" />}
+                  {isDone && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green rounded-b" />}
+                  <div className="flex items-center justify-between">
+                    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold font-mono ${colors.bg} ${colors.text}`}>
+                      {p.phase}
+                    </span>
+                    <span className={`font-mono text-[10px] font-medium ${isDone ? 'text-green' : isActive ? 'text-accent' : 'text-muted'}`}>
+                      {isDone ? '✓' : isActive ? '●' : '–'}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-text leading-snug">{p.name}</div>
+                    {p.desc && <div className="text-[11px] text-muted leading-snug mt-0.5">{p.desc}</div>}
+                  </div>
+                  <div className="flex items-center gap-2 mt-auto">
+                    <div className="flex-1 h-1.5 bg-surface2 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${colors.bar}`}
+                        style={{ width: `${fillPct}%` }}
+                      />
+                    </div>
+                    <span className="font-mono text-[10px] text-muted whitespace-nowrap">{p.done}/{p.total}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Bento Grid ── */}
+      {stats && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Reihe 1: Aktivitäten (2 cols) + Nächste Schritte (1 col) */}
+          <div className="lg:col-span-2">
+            <TimelineCard activities={stats.recentActivities} />
+          </div>
+          <div>
+            <HintsCard hints={stats.hints} />
+          </div>
+          {/* Reihe 2: Metadaten (2 cols) + Statistik (1 col) */}
+          <div className="lg:col-span-2">
+            <MetadatenCard category={category} projectId={projectId} categoryId={categoryId} />
+          </div>
+          <div>
+            <QuickStatsCard stats={stats} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 function TimelineCard({ activities }: { activities: TimelineItem[] }) {
   return (
-    <div className="bg-surface border border-border rounded-xl p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-text flex items-center gap-2">
-          <span>🕐</span> Letzte Aktivitäten
-        </h2>
+    <div className="bg-surface border border-border rounded-xl p-5 shadow-sm h-full hover:border-[#c9cdd4] transition-all">
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-surface2 flex items-center justify-center text-sm">🕐</div>
+          <h2 className="text-sm font-semibold text-text">Letzte Aktivitäten</h2>
+        </div>
       </div>
-      <div className="space-y-3">
+      <div className="divide-y divide-border">
         {activities.length === 0 ? (
           <p className="text-sm text-muted py-2">Noch keine Aktivitäten.</p>
         ) : (
           activities.slice(0, 8).map((a, i) => (
-            <div key={`${a.artifactId}-${a.updatedAt}-${i}`} className="flex gap-3 items-start">
-              <div
-                className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
-                  a.status === 'final' ? 'bg-green' : 'bg-yellow'
-                }`}
-              />
+            <div key={`${a.artifactId}-${a.updatedAt}-${i}`} className="flex gap-3 items-start py-2.5 first:pt-0 last:pb-0">
+              <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${a.status === 'final' ? 'bg-green' : 'bg-yellow'}`} />
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-medium text-text">{a.artifactCode} {a.artifactName}</div>
-                <div className="text-2xs text-muted font-mono">
-                  {formatRelativeDate(a.updatedAt)} · Phase {a.phase}
-                </div>
+                <div className="font-mono text-[10px] text-muted mt-0.5">{formatRelativeDate(a.updatedAt)} · Phase {a.phase}</div>
               </div>
             </div>
           ))
@@ -217,11 +284,12 @@ function TimelineCard({ activities }: { activities: TimelineItem[] }) {
 
 function HintsCard({ hints }: { hints: HintItem[] }) {
   return (
-    <div className="bg-surface border border-border rounded-xl p-5">
-      <h2 className="text-sm font-semibold text-text flex items-center gap-2 mb-4">
-        <span>⚠️</span> Hinweise & Nächste Schritte
-      </h2>
-      <div className="space-y-2.5">
+    <div className="bg-surface border border-border rounded-xl p-5 shadow-sm h-full hover:border-[#c9cdd4] transition-all">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-7 h-7 rounded-lg bg-surface2 flex items-center justify-center text-sm">⚡</div>
+        <h2 className="text-sm font-semibold text-text">Nächste Schritte</h2>
+      </div>
+      <div className="flex flex-col gap-2">
         {hints.length === 0 ? (
           <p className="text-sm text-muted py-1">Alles erledigt – keine offenen Hinweise.</p>
         ) : (
@@ -231,11 +299,11 @@ function HintsCard({ hints }: { hints: HintItem[] }) {
               className={`flex gap-2.5 p-3 rounded-lg text-sm ${
                 h.type === 'warning'
                   ? 'bg-yellow/10 border border-yellow/20 text-yellow'
-                  : 'bg-accent-light/50 border border-accent/20 text-text-secondary'
+                  : 'bg-accent-light/60 border border-accent/15 text-text-secondary'
               }`}
             >
-              <span>{h.type === 'warning' ? '⏳' : '💡'}</span>
-              <span className="leading-snug">{h.text}</span>
+              <span className="flex-shrink-0">{h.type === 'warning' ? '⏳' : '💡'}</span>
+              <span className="leading-snug text-xs">{h.text}</span>
             </div>
           ))
         )}
@@ -244,32 +312,60 @@ function HintsCard({ hints }: { hints: HintItem[] }) {
   )
 }
 
-function QuickStatsCard({ stats }: { stats: CategoryStats }) {
-  const lastActivityStr = stats.lastActivityAt
-    ? formatRelativeDate(stats.lastActivityAt)
-    : '–'
+function MetadatenCard({ category, projectId, categoryId }: { category: CategoryRow; projectId: string; categoryId: string }) {
+  const rows = [
+    { label: 'Shop-Typ', value: category.shop_typ || '–' },
+    { label: 'Tonalität', value: category.ton || '–' },
+    { label: 'No-Gos', value: category.no_gos ? 'definiert' : '–', highlight: !!category.no_gos },
+    { label: 'USPs', value: category.usps || '–' },
+  ]
   return (
-    <div className="bg-surface border border-border rounded-xl p-5">
-      <h2 className="text-sm font-semibold text-text flex items-center gap-2 mb-4">
-        <span>📈</span> Schnellstatistik
-      </h2>
-      <div className="space-y-3">
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-muted">Ergebnisse gespeichert</span>
-          <span className="text-sm font-semibold text-text">{stats.resultsCount}</span>
+    <div className="bg-surface border border-border rounded-xl p-5 shadow-sm h-full hover:border-[#c9cdd4] transition-all">
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-surface2 flex items-center justify-center text-sm">✎</div>
+          <h2 className="text-sm font-semibold text-text">Metadaten</h2>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-muted">Artefakte fertig</span>
-          <span className="text-sm font-semibold text-text">{stats.doneCount} / {stats.total}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-muted">Verbleibend (Schätzung)</span>
-          <span className="text-sm font-semibold text-text">{stats.remainingTimeEstimate}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-muted">Letzte Bearbeitung</span>
-          <span className="text-2xs font-mono font-medium text-text">{lastActivityStr}</span>
-        </div>
+        <Link
+          to="/projects/$projectId/categories/$categoryId/settings"
+          params={{ projectId, categoryId }}
+          className="text-xs text-accent font-medium hover:underline"
+        >
+          Bearbeiten →
+        </Link>
+      </div>
+      <div className="divide-y divide-border">
+        {rows.map(({ label, value, highlight }) => (
+          <div key={label} className="flex justify-between items-start gap-4 py-2 first:pt-0 last:pb-0">
+            <span className="text-xs text-muted flex-shrink-0">{label}</span>
+            <span className={`text-xs font-medium text-right leading-snug ${highlight ? 'text-red' : 'text-text'}`}>{value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function QuickStatsCard({ stats }: { stats: CategoryStats }) {
+  const lastActivityStr = stats.lastActivityAt ? formatRelativeDate(stats.lastActivityAt) : '–'
+  return (
+    <div className="bg-surface border border-border rounded-xl p-5 shadow-sm h-full hover:border-[#c9cdd4] transition-all">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-7 h-7 rounded-lg bg-surface2 flex items-center justify-center text-sm">📈</div>
+        <h2 className="text-sm font-semibold text-text">Statistik</h2>
+      </div>
+      <div className="divide-y divide-border">
+        {[
+          { label: 'Ergebnisse gespeichert', value: String(stats.resultsCount) },
+          { label: 'Artefakte fertig', value: `${stats.doneCount} / ${stats.total}` },
+          { label: 'Verbleibend', value: stats.remainingTimeEstimate },
+          { label: 'Letzte Bearbeitung', value: lastActivityStr },
+        ].map(({ label, value }) => (
+          <div key={label} className="flex justify-between items-center py-2 first:pt-0 last:pb-0">
+            <span className="text-xs text-muted">{label}</span>
+            <span className="text-xs font-semibold text-text">{value}</span>
+          </div>
+        ))}
       </div>
     </div>
   )
