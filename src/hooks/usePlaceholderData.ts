@@ -117,9 +117,14 @@ export function usePlaceholderData(categoryId: string | undefined): {
           hubPlaceholders = { ...hub.custom_placeholders }
         }
       }
+      // Unterkategorie-eigene Platzhalter überschreiben Hub-Werte (Einstellungen gelten überall)
+      const categoryPlaceholders =
+        category?.id && category.id !== hubId && category?.custom_placeholders && typeof category.custom_placeholders === 'object'
+          ? category.custom_placeholders
+          : {}
       const { artifacts, latestByArtifactId } = await fetchPlaceholderData(categoryId!)
       const dependencyMap = buildDependencyMap(artifacts, latestByArtifactId)
-      const placeholderMap: PlaceholderMap = { ...hubPlaceholders, ...dependencyMap }
+      const placeholderMap: PlaceholderMap = { ...hubPlaceholders, ...categoryPlaceholders, ...dependencyMap }
       const latestResultByArtifactId = Object.fromEntries(latestByArtifactId)
       return { placeholderMap, latestResultByArtifactId }
     },

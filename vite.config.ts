@@ -7,6 +7,10 @@ import { TanStackRouterVite } from '@tanstack/router-vite-plugin'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
+  test: {
+    environment: 'node',
+    globals: true,
+  },
   plugins: [
     TanStackRouterVite({
       routesDirectory: './src/routes',

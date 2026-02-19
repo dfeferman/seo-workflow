@@ -1,5 +1,43 @@
 import type { ArtifactPhase } from '@/types/database.types'
 import type { ArtifactInsert } from '@/types/database.types'
+import type { TemplateRow } from '@/types/database.types'
+
+const VALID_PHASES: ArtifactPhase[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'X']
+
+/**
+ * Baut Artifact-Inserts für eine Kategorie aus der Template-Bibliothek des Users.
+ * Nur Templates mit gültiger Phase (A–F, G, X) werden übernommen; Reihenfolge: Phase, dann Anzeige.
+ * Wenn keine Templates vorhanden sind, werden keine Artefakte angelegt.
+ */
+export function buildArtifactsFromTemplates(
+  templates: TemplateRow[],
+  categoryId: string
+): Omit<ArtifactInsert, 'id' | 'created_at' | 'updated_at'>[] {
+  if (!templates.length) return []
+  const sorted = [...templates]
+    .filter((t) => {
+      const p = (t.phase?.toUpperCase() ?? '') as ArtifactPhase
+      return VALID_PHASES.includes(p)
+    })
+    .sort((a, b) => {
+      const phaseA = VALID_PHASES.indexOf((a.phase?.toUpperCase() ?? 'A') as ArtifactPhase)
+      const phaseB = VALID_PHASES.indexOf((b.phase?.toUpperCase() ?? 'A') as ArtifactPhase)
+      if (phaseA !== phaseB) return phaseA - phaseB
+      return (a.created_at ?? '').localeCompare(b.created_at ?? '')
+    })
+  return sorted.map((t, i) => {
+    const phase = (t.phase?.toUpperCase() ?? 'A') as ArtifactPhase
+    const artifactCode = t.artifact_code?.trim() || `${phase}-${i + 1}`
+    return {
+      category_id: categoryId,
+      phase,
+      artifact_code: artifactCode,
+      name: t.name?.trim() || 'Unbenannt',
+      prompt_template: t.prompt_template ?? '',
+      display_order: i,
+    }
+  })
+}
 
 export type DefaultArtifactSpec = {
   phase: ArtifactPhase

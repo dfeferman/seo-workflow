@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabase'
-import { getDefaultArtifactsForCategory } from '@/utils/createDefaultArtifacts'
+import { buildArtifactsFromTemplates } from '@/utils/createDefaultArtifacts'
 import type { ContentType } from '@/types/database.types'
 
 export type CreateCategoryInput = {
@@ -18,8 +18,8 @@ export type CreateCategoryInput = {
 }
 
 /**
- * Erstellt eine Kategorie (oder Hub + Unterkategorien), legt Standard-Artefakte an,
- * invalidiert Queries und gibt die ID der angelegten Kategorie zurück (Hub oder Blog).
+ * Erstellt eine Kategorie (oder Hub + Unterkategorien), legt Artefakte aus der Template-Bibliothek an
+ * (nur die in den Phasen A–X vorhandenen Templates), invalidiert Queries und gibt die ID zurück.
  * Redirect erfolgt im Aufrufer (Modal) mit navigate().
  */
 export function useCreateCategory() {
@@ -29,6 +29,16 @@ export function useCreateCategory() {
   const mutation = useMutation({
     mutationFn: async (input: CreateCategoryInput): Promise<{ categoryId: string; projectId: string }> => {
       const { projectId, type, name, hub_name, subcategoryNames, zielgruppen, shop_typ, usps, ton, no_gos } = input
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Nicht angemeldet.')
+      const { data: templates = [], error: templatesError } = await supabase
+        .from('templates')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('phase', { ascending: true })
+        .order('created_at', { ascending: true })
+      if (templatesError) throw templatesError
 
       // Nächste display_order für Top-Level-Kategorien
       const { data: existing } = await supabase
@@ -81,17 +91,21 @@ export function useCreateCategory() {
             .single()
           if (subError) throw subError
           if (subCat?.id) {
-            const subArtifacts = getDefaultArtifactsForCategory(subCat.id, 'category')
-            const { error: subArtError } = await supabase.from('artifacts').insert(subArtifacts)
-            if (subArtError) throw subArtError
+            const subArtifacts = buildArtifactsFromTemplates(templates, subCat.id)
+            if (subArtifacts.length) {
+              const { error: subArtError } = await supabase.from('artifacts').insert(subArtifacts)
+              if (subArtError) throw subArtError
+            }
           }
         }
       }
 
-      // Standard-Artefakte anlegen (an der Hauptkategorie / Hub)
-      const artifacts = getDefaultArtifactsForCategory(mainCategoryId, type)
-      const { error: artError } = await supabase.from('artifacts').insert(artifacts)
-      if (artError) throw artError
+      // Artefakte aus Template-Bibliothek anlegen (an der Hauptkategorie / Hub)
+      const artifacts = buildArtifactsFromTemplates(templates, mainCategoryId)
+      if (artifacts.length) {
+        const { error: artError } = await supabase.from('artifacts').insert(artifacts)
+        if (artError) throw artError
+      }
 
       return { categoryId: mainCategoryId, projectId }
     },

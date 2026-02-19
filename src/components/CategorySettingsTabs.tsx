@@ -338,8 +338,8 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                   Gültig für diese Oberkategorie und alle Unterkategorien. In Vorlagen z. B. als <code className="bg-surface2 px-1 rounded">[MEIN_TAG]</code> nutzbar.
                 </p>
                 <div className="space-y-3">
-                  {Object.entries(customPlaceholders).map(([key, value]) => (
-                    <div key={key} className="flex gap-2 items-start">
+                  {Object.entries(customPlaceholders).map(([key, value], index) => (
+                    <div key={`ph-${index}`} className="flex gap-2 items-start">
                       <input
                         type="text"
                         value={key.startsWith('[') && key.endsWith(']') ? key.slice(1, -1) : key}
