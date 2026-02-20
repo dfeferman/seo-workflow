@@ -33,22 +33,29 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [newName, setNewName] = useState('')
   const [isAdding, setIsAdding] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<CategoryRow | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const handleAdd = async () => {
     const name = newName.trim()
     if (!name) return
+    setAddError(null)
     setIsAdding(true)
     try {
       const nextOrder = subcategories.length
-      await supabase.from('categories').insert({
+      const { error } = await supabase.from('categories').insert({
         project_id: projectId,
         parent_id: categoryId,
         name,
         type: 'category',
         display_order: nextOrder,
       })
+      if (error) {
+        setAddError(error.message)
+        return
+      }
       queryClient.invalidateQueries({ queryKey: ['subcategories', categoryId] })
       queryClient.invalidateQueries({ queryKey: ['all-categories', projectId] })
       queryClient.invalidateQueries({ queryKey: ['category-progress', projectId] })
@@ -61,9 +68,14 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
   }
 
   const handleDelete = async (sub: CategoryRow) => {
+    setDeleteError(null)
     setIsDeleting(true)
     try {
-      await supabase.from('categories').delete().eq('id', sub.id)
+      const { error } = await supabase.from('categories').delete().eq('id', sub.id)
+      if (error) {
+        setDeleteError(error.message)
+        return
+      }
       queryClient.invalidateQueries({ queryKey: ['subcategories', categoryId] })
       queryClient.invalidateQueries({ queryKey: ['all-categories', projectId] })
       queryClient.invalidateQueries({ queryKey: ['category-progress', projectId] })
@@ -159,10 +171,15 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
               onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
               autoFocus
             />
+            {addError && (
+              <p className="text-sm text-red mb-4" role="alert">
+                {addError}
+              </p>
+            )}
             <div className="flex justify-end gap-2">
               <button
                 type="button"
-                onClick={() => !isAdding && setAddModalOpen(false)}
+                onClick={() => { if (!isAdding) { setAddModalOpen(false); setAddError(null) } }}
                 className="px-4 py-2 rounded-lg border border-border text-text-secondary text-sm font-medium hover:bg-surface-2"
               >
                 Abbrechen
@@ -193,10 +210,15 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
             <p className="text-sm text-muted mb-4">
               „{deleteConfirm.name}" und alle zugehörigen Daten werden gelöscht. Dies kann nicht rückgängig gemacht werden.
             </p>
+            {deleteError && (
+              <p className="text-sm text-red mb-4" role="alert">
+                {deleteError}
+              </p>
+            )}
             <div className="flex justify-end gap-2">
               <button
                 type="button"
-                onClick={() => !isDeleting && setDeleteConfirm(null)}
+                onClick={() => { if (!isDeleting) { setDeleteConfirm(null); setDeleteError(null) } }}
                 className="px-4 py-2 rounded-lg border border-border text-text-secondary text-sm font-medium hover:bg-surface-2"
               >
                 Abbrechen

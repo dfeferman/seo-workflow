@@ -40,12 +40,23 @@ Mit **Husky** laufen die Tests automatisch:
 
 Überspringen (nur in Ausnahmen): `git commit --no-verify` bzw. `git push --no-verify`.
 
+## Coverage
+
+**Mit Coverage-Report (Schwellen für `src/utils`):**
+
+```bash
+npm run test:run -- --coverage
+```
+
+- **Schwellen:** Statements/Branches/Functions/Lines für `src/utils` mind. 80 % (Branches 70 %).
+- Report: `coverage/` (HTML: `coverage/index.html`).
+
 ## Getestete Bereiche
 
 | Datei | Inhalt |
 |-------|--------|
 | `src/utils/replacePlaceholders.test.ts` | Platzhalter-Ersetzung ([KATEGORIE], [ZIELGRUPPEN], dependencyMap) |
 | `src/utils/exportCategory.test.ts` | Markdown-Export und kombinierte Ergebnis-Texte |
-| `src/utils/createDefaultArtifacts.test.ts` | Standard-Artefakte (Category/Blog) und `getDefaultArtifactsForCategory` |
+| `src/utils/createDefaultArtifacts.test.ts` | `buildArtifactsFromTemplates`, Standard-Artefakte (Category/Blog), `getDefaultArtifactsForCategory` |
 
 Alle Tests laufen in der **Node**-Umgebung (kein Browser). Supabase wird in diesen Unit-Tests nicht aufgerufen.
