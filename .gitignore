@@ -6,6 +6,9 @@ dist
 *.local
 .tanstack/
 
+# Test coverage (Vitest)
+coverage
+
 # Env (Keys nicht committen)
 .env
 .env.local
