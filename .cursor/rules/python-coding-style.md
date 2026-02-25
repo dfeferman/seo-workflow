@@ -1,7 +1,7 @@
 ---
 description: "Python coding style: PEP 8, type annotations, frozen dataclasses, black/isort/ruff formatting"
 globs: ["**/*.py"]
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Python Coding Style

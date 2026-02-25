@@ -1,7 +1,7 @@
 ---
 description: "Python patterns: Protocol for duck typing, dataclass DTOs, context managers, generators"
 globs: ["**/*.py"]
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Python Patterns
