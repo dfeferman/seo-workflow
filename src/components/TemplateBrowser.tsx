@@ -64,7 +64,7 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
       aria-modal="true"
       aria-label="Template-Bibliothek"
     >
-      <div className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col min-w-0">
+      <div className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-7xl max-h-[99vh] flex flex-col min-w-0">
         <div className="p-5 border-b border-border bg-surface2 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
