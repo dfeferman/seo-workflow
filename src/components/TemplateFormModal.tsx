@@ -25,11 +25,11 @@ function TagInput({ tags, onChange, placeholder }: TagInputProps) {
   }, [input, tags, onChange])
 
   return (
-    <div className="flex flex-wrap gap-1.5 p-2 min-h-[44px] bg-surface border border-border rounded-lg focus-within:ring-2 focus-within:ring-accent">
+    <div className="flex flex-wrap gap-1.5 p-2 min-h-[44px] bg-white border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-slate-400">
       {tags.map((tag, i) => (
         <span
           key={i}
-          className="inline-flex items-center gap-1 px-2 py-1 bg-accent-light border border-accent rounded text-xs text-accent"
+          className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 border border-slate-200 rounded-full text-xs text-slate-700"
         >
           {tag}
           <button
@@ -48,7 +48,7 @@ function TagInput({ tags, onChange, placeholder }: TagInputProps) {
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), add())}
         placeholder={placeholder}
-        className="flex-1 min-w-[100px] bg-transparent border-none py-1 px-1 text-sm text-text outline-none placeholder:text-muted"
+        className="flex-1 min-w-[100px] bg-transparent border-none py-1 px-1 text-sm text-slate-900 outline-none placeholder:text-slate-500"
       />
     </div>
   )
@@ -150,20 +150,20 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
       aria-modal="true"
       aria-labelledby="template-form-title"
     >
-      <div className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <div className="p-5 border-b border-border bg-surface2 flex-shrink-0 flex items-center justify-between">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="p-5 border-b border-slate-200 bg-slate-100 flex-shrink-0 flex items-center justify-between">
           <div>
-            <h2 id="template-form-title" className="text-lg font-bold text-text">
+            <h2 id="template-form-title" className="text-lg font-bold text-slate-900">
               {isEdit ? 'Template bearbeiten' : 'Neues Template anlegen'}
             </h2>
-            <p className="text-sm text-muted mt-0.5">
+            <p className="text-sm text-slate-500 mt-0.5">
               {isEdit ? 'Vorlage in der Bibliothek aktualisieren' : 'Neue Vorlage für Artefakte erstellen'}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-lg border border-border bg-surface text-muted hover:bg-surface-2 hover:text-text flex items-center justify-center"
+            className="w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-900 flex items-center justify-center"
             aria-label="Schließen"
           >
             ✕
@@ -173,44 +173,44 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <div className="p-5 overflow-y-auto flex-1 space-y-5">
             {error && (
-              <p className="text-sm text-red bg-red/10 py-2 px-3 rounded-lg" role="alert">
+              <p className="text-sm text-red-600 bg-red/10 py-2 px-3 rounded-lg" role="alert">
                 {error}
               </p>
             )}
 
             <section>
-              <h3 className="text-sm font-semibold text-text mb-3">Grunddaten</h3>
+              <h3 className="text-sm font-semibold text-slate-900 mb-3">Grunddaten</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1.5">
-                    Name <span className="text-red">*</span>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                    Name <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="z.B. Konkurrenzanalyse Phase A"
-                    className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1.5">Beschreibung</label>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">Beschreibung</label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Wofür dieses Template nützlich ist…"
                     rows={2}
-                    className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent resize-y"
+                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400 resize-y"
                   />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1.5">Phase</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">Phase</label>
                     <select
                       value={phase}
                       onChange={(e) => setPhase(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
                     >
                       {PHASES.map((p) => (
                         <option key={p} value={p}>
@@ -220,13 +220,13 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1.5">Artefakt-Kennung (optional)</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">Artefakt-Kennung (optional)</label>
                     <input
                       type="text"
                       value={artifactCode}
                       onChange={(e) => setArtifactCode(e.target.value)}
                       placeholder="z.B. A1, B2.1"
-                      className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400"
                     />
                   </div>
                 </div>
@@ -234,21 +234,21 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
             </section>
 
             <section>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">
-                Prompt-Template <span className="text-red">*</span>
+              <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                Prompt-Template <span className="text-red-600">*</span>
               </label>
               <textarea
                 value={promptTemplate}
                 onChange={(e) => setPromptTemplate(e.target.value)}
                 placeholder="Das Prompt, das für dieses Artefakt verwendet wird. Platzhalter z.B. [KATEGORIE], [INPUT A]…"
                 rows={8}
-                className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm font-mono text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent resize-y min-h-[120px]"
+                className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-mono text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400 resize-y min-h-[120px]"
                 required
               />
             </section>
 
             <section>
-              <h3 className="text-sm font-semibold text-text mb-2">Tags (optional)</h3>
+              <h3 className="text-sm font-semibold text-slate-900 mb-2">Tags (optional)</h3>
               <TagInput tags={tags} onChange={setTags} placeholder="Tag hinzufügen…" />
               <div className="flex flex-wrap gap-2 mt-2">
                 {SUGGESTED_TAGS.filter((t) => !tags.includes(t)).map((t) => (
@@ -256,7 +256,7 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
                     key={t}
                     type="button"
                     onClick={() => setTags((prev) => [...prev, t])}
-                    className="px-2.5 py-1 rounded-full text-xs font-medium border border-border bg-surface text-text-secondary hover:border-accent hover:bg-accent-light hover:text-accent"
+                    className="px-2.5 py-1 rounded-full text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-accent hover:bg-indigo-50 hover:text-blue-600"
                   >
                     + {t}
                   </button>
@@ -265,18 +265,18 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
             </section>
           </div>
 
-          <div className="p-5 border-t border-border flex justify-end gap-2 flex-shrink-0">
+          <div className="p-5 border-t border-slate-200 flex justify-end gap-2 flex-shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-lg border border-border bg-surface text-text-secondary hover:bg-surface-2 text-sm font-medium"
+              className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-medium"
             >
               Abbrechen
             </button>
             <button
               type="submit"
               disabled={saveTemplate.isPending || updateTemplate.isPending}
-              className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-[#4a6fef] disabled:opacity-50"
+              className="px-3 py-2 rounded-xl bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800 disabled:opacity-50 transition-colors"
             >
               {saveTemplate.isPending || updateTemplate.isPending
                 ? 'Wird gespeichert…'

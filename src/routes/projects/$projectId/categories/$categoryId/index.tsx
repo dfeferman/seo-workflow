@@ -118,19 +118,19 @@ function WorkflowPage() {
     <div className="flex-1 flex min-h-0 overflow-hidden">
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden min-w-0">
         {/* Topbar: Zeile 1 = Aktionen, Zeile 2 = Breadcrumb */}
-      <div className="flex flex-col border-b border-border bg-surface flex-shrink-0">
-        <div className="flex items-center justify-start gap-2 px-5 py-3">
+      <div className="flex flex-col border-b border-slate-100 bg-white flex-shrink-0">
+        <div className="flex items-center justify-start gap-2 px-6 py-3">
           <Link
             to="/projects/$projectId/categories/$categoryId/overview"
             params={{ projectId, categoryId }}
-            className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
+            className="py-2 px-4 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
           >
             📊 Übersicht
           </Link>
           <button
             type="button"
             onClick={() => setTemplateBrowserOpen(true)}
-            className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
+            className="py-2 px-4 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
             title="Template-Bibliothek (⌘K / Strg+K)"
           >
             📚 Templates
@@ -138,26 +138,26 @@ function WorkflowPage() {
           <Link
             to="/projects/$projectId/categories/$categoryId/settings"
             params={{ projectId, categoryId }}
-            className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
+            className="py-2 px-4 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
           >
             ✎ Metadaten
           </Link>
           <button
             type="button"
             onClick={() => setExportModalOpen(true)}
-            className="py-2 px-3.5 rounded-lg text-sm font-medium border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text"
+            className="py-2 px-4 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
           >
             ⬇ Export
           </button>
           <button
             type="button"
             onClick={() => { setTemplateToApply(null); setCreateArtifactOpen(true) }}
-            className="py-2 px-3.5 rounded-lg text-sm font-semibold border border-accent bg-accent text-white hover:bg-[#4a6fef]"
+            className="py-2 px-4 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-colors"
           >
             ＋ Artefakt
           </button>
         </div>
-        <nav className="flex items-center gap-2 px-5 pb-3 text-sm text-muted" aria-label="Breadcrumb">
+        <nav className="flex items-center gap-2 px-6 pb-3 text-sm text-slate-500" aria-label="Breadcrumb">
           <span>{project?.name ?? 'Aktuelles Projekt'}</span>
           {parentCategory && (
             <>
@@ -165,14 +165,14 @@ function WorkflowPage() {
               <Link
                 to="/projects/$projectId/categories/$categoryId"
                 params={{ projectId, categoryId: parentCategory.id }}
-                className="text-text-secondary hover:text-text hover:underline"
+                className="text-slate-600 hover:text-slate-900 hover:underline"
               >
                 {parentCategory.name}
               </Link>
             </>
           )}
           <span aria-hidden>›</span>
-          <span className="text-text font-semibold">
+          <span className="text-slate-900 font-semibold">
             {category?.name ?? '…'}
           </span>
         </nav>
@@ -204,7 +204,7 @@ function WorkflowPage() {
 
           {flashMessage && (
             <div
-              className="fixed bottom-7 right-7 bg-surface border-2 border-green text-green py-3 px-4 rounded-xl text-sm font-semibold shadow-lg z-50 animate-[slideUp_0.2s_ease-out]"
+              className="fixed bottom-7 right-7 bg-white border border-slate-100 py-3 px-4 rounded-xl text-sm font-semibold text-slate-900 shadow-md z-50 animate-[slideUp_0.2s_ease-out]"
               role="status"
               aria-live="polite"
             >

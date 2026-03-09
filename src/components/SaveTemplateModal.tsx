@@ -43,11 +43,11 @@ function TagInput({
   }, [input, tags, onChange])
 
   return (
-    <div className="flex flex-wrap gap-1.5 p-2 min-h-[44px] bg-surface border border-border rounded-lg focus-within:ring-2 focus-within:ring-accent">
+    <div className="flex flex-wrap gap-1.5 p-2 min-h-[44px] bg-white border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-accent">
       {tags.map((tag, i) => (
         <span
           key={i}
-          className="inline-flex items-center gap-1 px-2 py-1 bg-accent-light border border-accent rounded text-xs text-accent"
+          className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-50 border border-accent rounded text-xs text-blue-600"
         >
           {tag}
           <button
@@ -66,7 +66,7 @@ function TagInput({
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), add())}
         placeholder={placeholder}
-        className="flex-1 min-w-[100px] bg-transparent border-none py-1 px-1 text-sm text-text outline-none placeholder:text-muted"
+        className="flex-1 min-w-[100px] bg-transparent border-none py-1 px-1 text-sm text-slate-900 outline-none placeholder:text-slate-500"
       />
     </div>
   )
@@ -122,8 +122,8 @@ export function SaveTemplateModal({ open, onClose, artifact, onSaved }: Props) {
       aria-modal="true"
       aria-labelledby="save-template-title"
     >
-      <div className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
-        <div className="p-5 border-b border-border bg-green/5 flex-shrink-0">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+        <div className="p-5 border-b border-slate-200 bg-green/5 flex-shrink-0">
           <div className="flex items-center justify-between mb-1">
             <div className="w-10 h-10 rounded-xl bg-green flex items-center justify-center text-xl text-white shadow-sm">
               💾
@@ -131,14 +131,14 @@ export function SaveTemplateModal({ open, onClose, artifact, onSaved }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-lg border border-border bg-surface text-muted hover:bg-surface-2 hover:text-text flex items-center justify-center"
+              className="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-900 flex items-center justify-center"
               aria-label="Schließen"
             >
               ✕
             </button>
           </div>
-          <h2 id="save-template-title" className="text-lg font-bold text-text">Als Template speichern</h2>
-          <p className="text-sm text-muted mt-1">
+          <h2 id="save-template-title" className="text-lg font-bold text-slate-900">Als Template speichern</h2>
+          <p className="text-sm text-slate-500 mt-1">
             Dieses Artefakt für zukünftige Projekte wiederverwendbar machen
           </p>
         </div>
@@ -148,10 +148,10 @@ export function SaveTemplateModal({ open, onClose, artifact, onSaved }: Props) {
             {artifact && (
               <>
                 <section>
-                  <h3 className="text-sm font-semibold text-text flex items-center gap-2 mb-3">
+                  <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 mb-3">
                     👁 Aktuelles Artefakt
                   </h3>
-                  <div className="bg-surface2 border border-border rounded-xl p-4">
+                  <div className="bg-slate-100 border border-slate-200 rounded-xl p-4">
                     <div className="flex justify-between items-start mb-2">
                       <div
                         className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold font-mono ${badgeClass}`}
@@ -159,34 +159,34 @@ export function SaveTemplateModal({ open, onClose, artifact, onSaved }: Props) {
                         {artifact.artifact_code || artifact.phase}
                       </div>
                     </div>
-                    <div className="font-semibold text-text text-sm">{artifact.name}</div>
+                    <div className="font-semibold text-slate-900 text-sm">{artifact.name}</div>
                     {artifact.description && (
-                      <div className="text-xs text-muted mt-1">{artifact.description}</div>
+                      <div className="text-xs text-slate-500 mt-1">{artifact.description}</div>
                     )}
                   </div>
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-semibold text-text flex items-center gap-2 mb-3">
+                  <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 mb-3">
                     📝 Template-Informationen
                   </h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-text-secondary mb-1.5">
-                        Template-Name <span className="text-red">*</span>
+                      <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                        Template-Name <span className="text-red-600">*</span>
                       </label>
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="z.B. Meine Konkurrenzanalyse"
-                        className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+                        className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
-                      <p className="text-2xs text-muted mt-1">Wird in der Template-Bibliothek angezeigt</p>
+                      <p className="text-2xs text-slate-500 mt-1">Wird in der Template-Bibliothek angezeigt</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-text-secondary mb-1.5">
+                      <label className="block text-sm font-medium text-slate-600 mb-1.5">
                         Beschreibung
                       </label>
                       <textarea
@@ -194,14 +194,14 @@ export function SaveTemplateModal({ open, onClose, artifact, onSaved }: Props) {
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Wofür dieses Template nützlich ist…"
                         rows={3}
-                        className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent resize-y"
+                        className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                       />
                     </div>
                   </div>
                 </section>
 
                 <section>
-                  <h3 className="text-sm font-semibold text-text flex items-center gap-2 mb-2">
+                  <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 mb-2">
                     🏷️ Tags (optional)
                   </h3>
                   <TagInput tags={tags} onChange={setTags} placeholder="Tag hinzufügen…" />
@@ -211,7 +211,7 @@ export function SaveTemplateModal({ open, onClose, artifact, onSaved }: Props) {
                         key={t}
                         type="button"
                         onClick={() => setTags((prev) => [...prev, t])}
-                        className="px-2.5 py-1 rounded-full text-xs font-medium border border-border bg-surface text-text-secondary hover:border-accent hover:bg-accent-light hover:text-accent"
+                        className="px-2.5 py-1 rounded-full text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-accent hover:bg-indigo-50 hover:text-blue-600"
                       >
                         + {t}
                       </button>
@@ -219,7 +219,7 @@ export function SaveTemplateModal({ open, onClose, artifact, onSaved }: Props) {
                   </div>
                 </section>
 
-                <div className="bg-green/10 border border-green/30 rounded-lg p-3 flex gap-2.5 text-sm text-text-secondary">
+                <div className="bg-green/10 border border-green/30 rounded-lg p-3 flex gap-2.5 text-sm text-slate-600">
                   <span className="text-lg">💡</span>
                   <p>
                     <strong className="text-green">Tipp:</strong> Gespeicherte Templates erscheinen in
@@ -228,7 +228,7 @@ export function SaveTemplateModal({ open, onClose, artifact, onSaved }: Props) {
                 </div>
 
                 {saveTemplate.error && (
-                  <p className="text-sm text-red">
+                  <p className="text-sm text-red-600">
                     {saveTemplate.error instanceof Error ? saveTemplate.error.message : 'Fehler beim Speichern.'}
                   </p>
                 )}
@@ -236,21 +236,21 @@ export function SaveTemplateModal({ open, onClose, artifact, onSaved }: Props) {
             )}
           </div>
 
-          <div className="p-4 border-t border-border bg-surface2 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
+          <div className="p-4 border-t border-slate-200 bg-slate-100 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={includePrompt}
                 onChange={(e) => setIncludePrompt(e.target.checked)}
-                className="w-4 h-4 rounded border-border text-accent focus:ring-accent"
+                className="w-4 h-4 rounded border-slate-200 text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-sm text-text-secondary">Prompt-Template einschließen</span>
+              <span className="text-sm text-slate-600">Prompt-Template einschließen</span>
             </label>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 rounded-lg border border-border bg-surface text-text-secondary text-sm font-semibold hover:bg-surface-2 hover:text-text"
+                className="px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-100 hover:text-slate-900"
               >
                 Abbrechen
               </button>
@@ -274,15 +274,15 @@ export function SaveTemplateModal({ open, onClose, artifact, onSaved }: Props) {
       role="alert"
       aria-live="polite"
     >
-      <div className="bg-surface border border-border rounded-2xl p-8 max-w-md text-center shadow-xl animate-[slideUp_0.3s_ease]">
+      <div className="bg-white border border-slate-200 rounded-2xl p-8 max-w-md text-center shadow-xl animate-[slideUp_0.3s_ease]">
         <div
           className="w-16 h-16 mx-auto mb-5 rounded-full bg-green/20 flex items-center justify-center text-3xl text-green"
           style={{ animation: 'scaleIn 0.4s ease' }}
         >
           ✓
         </div>
-        <h3 className="text-xl font-bold text-text mb-2">Template erfolgreich gespeichert!</h3>
-        <p className="text-sm text-muted leading-relaxed mb-6">
+        <h3 className="text-xl font-bold text-slate-900 mb-2">Template erfolgreich gespeichert!</h3>
+        <p className="text-sm text-slate-500 leading-relaxed mb-6">
           Dein Template „{name}" steht jetzt in der Template-Bibliothek zur Verfügung.
         </p>
         <button

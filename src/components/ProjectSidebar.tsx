@@ -35,7 +35,7 @@ export function ProjectSidebar() {
     <>
       <div className="flex-1 overflow-y-auto overflow-x-hidden py-4">
         <div className="px-3 pb-2 pt-0">
-          <div className="text-2xs text-muted uppercase tracking-wider font-semibold px-2 mb-2">
+          <div className="text-2xs text-slate-500 uppercase tracking-wider font-semibold px-2 mb-2">
             Projekte
           </div>
 
@@ -65,10 +65,10 @@ export function ProjectSidebar() {
         </div>
       </div>
 
-      <div className="mt-auto pt-4 border-t border-border flex-shrink-0 px-4 pb-4 space-y-2">
+      <div className="mt-auto pt-4 border-t border-slate-100 flex-shrink-0 px-4 pb-4 space-y-2">
         <button
           type="button"
-          className="w-full py-2.5 px-3.5 rounded-lg bg-accent text-white text-sm font-semibold flex items-center justify-center gap-1.5 shadow-sm hover:bg-[#4a6fef] hover:shadow transition-all"
+          className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors"
           aria-label="Neues Projekt anlegen"
         >
           ＋ Neues Projekt
@@ -142,10 +142,10 @@ function ProjectRow({
       <button
         type="button"
         onClick={onToggle}
-        className={`w-full py-2 px-2.5 rounded-lg text-sm font-medium flex items-center gap-2.5 transition-all text-left ${
+        className={`w-full py-2 px-2.5 rounded-lg text-sm font-medium flex items-center gap-2.5 transition-colors text-left ${
           isActive
-            ? 'bg-accent-light text-accent'
-            : 'text-text-secondary hover:bg-surface-2 hover:text-text'
+            ? 'bg-slate-100 text-slate-900'
+            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
         }`}
         aria-expanded={isExpanded}
       >
@@ -154,7 +154,7 @@ function ProjectRow({
         </span>
         <span className="flex-1 min-w-0 truncate">{project.name}</span>
         <span
-          className={`w-5 h-5 flex items-center justify-center rounded text-muted flex-shrink-0 transition-transform ${
+          className={`w-5 h-5 flex items-center justify-center rounded text-slate-500 flex-shrink-0 transition-transform ${
             isExpanded ? 'rotate-90' : ''
           }`}
           aria-hidden
@@ -164,7 +164,7 @@ function ProjectRow({
       </button>
 
       {isExpanded && (
-        <div className="ml-2 border-l-2 border-border pl-2 mt-1.5 space-y-3">
+        <div className="ml-2 border-l-2 border-slate-100 pl-2 mt-1.5 space-y-3">
           {isLoading ? (
             <SidebarCategoriesSkeleton count={4} />
           ) : (
@@ -202,7 +202,7 @@ function ProjectRow({
               <button
                 type="button"
                 onClick={onOpenCreateCategory}
-                className="flex items-center gap-1.5 py-1.5 px-2.5 rounded-md text-sm text-accent font-medium hover:bg-accent-light/50 transition-colors mt-1"
+                className="flex items-center gap-1.5 py-1.5 px-2.5 rounded-lg text-sm text-slate-500 font-medium hover:text-slate-900 hover:bg-slate-100 transition-colors mt-1"
               >
                 ＋ Neue Kategorie
               </button>
@@ -255,7 +255,7 @@ function CategoryTreeSection({
 }: CategoryTreeSectionProps) {
   return (
     <div className="mb-3">
-      <div className="flex items-center gap-1.5 py-1 px-2 text-2xs font-semibold text-muted uppercase tracking-wide mb-1">
+      <div className="flex items-center gap-1.5 py-1 px-2 text-2xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
         <span className="text-xs" aria-hidden>
           {icon}
         </span>
@@ -269,10 +269,10 @@ function CategoryTreeSection({
             <div key={node.id} className="mb-3">
               {/* Oberkategorie (Hub) – hebt sich klar ab */}
               <div
-                className={`flex items-center gap-1.5 py-2 px-2.5 rounded-lg border-l-2 transition-all group ${
+                className={`flex items-center gap-1.5 py-2 px-2.5 rounded-lg border-l-2 transition-colors group ${
                   isHubActive
-                    ? 'border-accent bg-accent-light/80 text-accent font-semibold'
-                    : 'border-border bg-surface-2 text-text hover:border-accent/50 hover:bg-surface-2'
+                    ? 'border-slate-400 bg-slate-100 text-slate-900 font-semibold'
+                    : 'border-slate-100 bg-slate-50 text-slate-900 hover:border-slate-200 hover:bg-slate-100'
                 }`}
               >
                 <span className="text-base flex-shrink-0 opacity-80" aria-hidden>
@@ -287,7 +287,7 @@ function CategoryTreeSection({
                   {hubDoneTotal != null && (
                     <span
                       className={`text-2xs font-mono font-medium flex-shrink-0 ml-2 px-1.5 py-0.5 rounded ${
-                        isHubActive ? 'bg-accent/20 text-accent' : 'bg-surface text-muted'
+                        isHubActive ? 'bg-slate-200 text-slate-700' : 'bg-white text-slate-500 border border-slate-100'
                       }`}
                     >
                       {hubDoneTotal.done}/{hubDoneTotal.total}
@@ -301,7 +301,7 @@ function CategoryTreeSection({
                     e.stopPropagation()
                     onDeleteCategory({ id: node.id, name: node.name, hasChildren: true })
                   }}
-                  className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-muted hover:bg-red-100 hover:text-red-600 transition-all flex-shrink-0"
+                  className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-slate-500 hover:bg-red-100 hover:text-red-600 transition-all flex-shrink-0"
                   title="Kategorie und alle Unterkategorien löschen"
                   aria-label={`${node.name} löschen`}
                 >
@@ -309,20 +309,20 @@ function CategoryTreeSection({
                 </button>
               </div>
               {/* Unterkategorien – Tree-Einrückung mit vertikaler Linie */}
-              <div className="ml-3 mt-0.5 border-l-2 border-border pl-2 space-y-0.5">
+              <div className="ml-3 mt-0.5 border-l-2 border-slate-100 pl-2 space-y-0.5">
                 {node.children.map((cat) => {
                   const { done = 0, total = 0 } = progress[cat.id] ?? {}
                   const isActive = currentCategoryId === cat.id
                   return (
                     <div
                       key={cat.id}
-                      className={`flex items-center gap-1 py-1 px-2 rounded-md text-xs transition-all group ${
+                      className={`flex items-center gap-1 py-1 px-2 rounded-lg text-xs transition-colors group ${
                         isActive
-                          ? 'bg-accent-light text-accent font-medium'
-                          : 'text-text-secondary hover:bg-surface-2 hover:text-text'
+                          ? 'bg-slate-100 text-slate-900 font-medium'
+                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                       }`}
                     >
-                      <span className="text-muted flex-shrink-0" aria-hidden>
+                      <span className="text-slate-500 flex-shrink-0" aria-hidden>
                         └
                       </span>
                       <Link
@@ -332,8 +332,8 @@ function CategoryTreeSection({
                       >
                         <span className="truncate min-w-0">{cat.name}</span>
                         <span
-                          className={`text-2xs font-mono font-medium flex-shrink-0 ml-2 px-1.5 py-0.5 rounded ${
-                            isActive ? 'bg-accent/15 text-accent' : 'bg-surface-2 text-muted'
+                          className={`text-2xs font-mono font-medium flex-shrink-0 ml-2 px-1.5 py-0.5 rounded-full ${
+                            isActive ? 'bg-slate-200 text-slate-700' : 'bg-slate-100 text-slate-500'
                           }`}
                         >
                           {done}/{total}
@@ -346,7 +346,7 @@ function CategoryTreeSection({
                           e.stopPropagation()
                           onDeleteCategory({ id: cat.id, name: cat.name, hasChildren: false })
                         }}
-                        className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-muted hover:bg-red-100 hover:text-red-600 transition-all flex-shrink-0"
+                        className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-slate-500 hover:bg-red-100 hover:text-red-600 transition-opacity flex-shrink-0"
                         title="Unterkategorie löschen"
                         aria-label={`${cat.name} löschen`}
                       >
@@ -363,10 +363,10 @@ function CategoryTreeSection({
         const isActive = currentCategoryId === node.id
         return (
           <div
-            className={`flex items-center gap-1 py-1.5 px-2.5 rounded-md text-sm transition-all mb-0.5 group ${
+            className={`flex items-center gap-1 py-1.5 px-2.5 rounded-lg text-sm transition-colors mb-0.5 group ${
               isActive
-                ? 'bg-accent-light text-accent font-medium'
-                : 'text-text-secondary hover:bg-surface-2 hover:text-text'
+                ? 'bg-slate-100 text-slate-900 font-medium'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >
             <Link
@@ -376,8 +376,8 @@ function CategoryTreeSection({
             >
               <span className="truncate min-w-0">{node.name}</span>
               <span
-                className={`text-2xs font-mono font-medium flex-shrink-0 ml-2 px-1.5 py-0.5 rounded ${
-                  isActive ? 'bg-accent/15 text-accent' : 'bg-surface-2 text-muted'
+                className={`text-2xs font-mono font-medium flex-shrink-0 ml-2 px-1.5 py-0.5 rounded-full ${
+                  isActive ? 'bg-slate-200 text-slate-700' : 'bg-slate-100 text-slate-500'
                 }`}
               >
                 {done}/{total}
@@ -390,7 +390,7 @@ function CategoryTreeSection({
                 e.stopPropagation()
                 onDeleteCategory({ id: node.id, name: node.name, hasChildren: false })
               }}
-              className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-muted hover:bg-red-100 hover:text-red-600 transition-all flex-shrink-0"
+              className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-slate-500 hover:bg-red-100 hover:text-red-600 transition-opacity flex-shrink-0"
               title="Kategorie löschen"
               aria-label={`${node.name} löschen`}
             >
@@ -416,7 +416,7 @@ type SectionProps = {
 function Section({ title, icon, items, projectId, progress, currentCategoryId, onDeleteCategory }: SectionProps) {
   return (
     <div className="mb-3">
-      <div className="flex items-center gap-1.5 py-1 px-2 text-2xs font-semibold text-muted uppercase tracking-wide mb-1">
+      <div className="flex items-center gap-1.5 py-1 px-2 text-2xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
         <span className="text-xs" aria-hidden>
           {icon}
         </span>
@@ -428,10 +428,10 @@ function Section({ title, icon, items, projectId, progress, currentCategoryId, o
         return (
           <div
             key={cat.id}
-            className={`flex items-center gap-1 py-1.5 px-2.5 rounded-md text-sm transition-all mb-0.5 group ${
+            className={`flex items-center gap-1 py-1.5 px-2.5 rounded-lg text-sm transition-colors mb-0.5 group ${
               isActive
-                ? 'bg-accent-light text-accent font-medium'
-                : 'text-text-secondary hover:bg-surface-2 hover:text-text'
+                ? 'bg-slate-100 text-slate-900 font-medium'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >
             <Link
@@ -441,8 +441,8 @@ function Section({ title, icon, items, projectId, progress, currentCategoryId, o
             >
               <span className="truncate min-w-0">{cat.name}</span>
               <span
-                className={`text-2xs font-mono font-medium flex-shrink-0 ml-2 px-1.5 py-0.5 rounded ${
-                  isActive ? 'bg-accent/15 text-accent' : 'bg-surface-2 text-muted'
+                className={`text-2xs font-mono font-medium flex-shrink-0 ml-2 px-1.5 py-0.5 rounded-full ${
+                  isActive ? 'bg-slate-200 text-slate-700' : 'bg-slate-100 text-slate-500'
                 }`}
               >
                 {done}/{total}
@@ -455,7 +455,7 @@ function Section({ title, icon, items, projectId, progress, currentCategoryId, o
                 e.stopPropagation()
                 onDeleteCategory({ id: cat.id, name: cat.name, hasChildren: false })
               }}
-              className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-muted hover:bg-red-100 hover:text-red-600 transition-all flex-shrink-0"
+              className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-slate-500 hover:bg-red-100 hover:text-red-600 transition-opacity flex-shrink-0"
               title="Kategorie löschen"
               aria-label={`${cat.name} löschen`}
             >

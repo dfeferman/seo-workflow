@@ -87,7 +87,7 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
 
   if (isLoading) {
     return (
-      <div className="py-8 text-center text-sm text-muted">
+      <div className="py-8 text-center text-sm text-slate-500">
         Unterkategorien laden…
       </div>
     )
@@ -96,14 +96,14 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-text flex items-center gap-2">
+        <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
           <span className="text-lg">📂</span>
           Unterkategorien (Spokes)
         </h3>
         <button
           type="button"
           onClick={() => setAddModalOpen(true)}
-          className="text-sm font-medium text-accent hover:underline"
+          className="text-sm font-medium text-slate-600 hover:text-slate-900 hover:underline"
         >
           + Neue Unterkategorie
         </button>
@@ -111,18 +111,18 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
 
       <div className="flex flex-col gap-2.5">
         {subcategories.length === 0 ? (
-          <p className="text-sm text-muted py-4">Noch keine Unterkategorien. Leg eine neue an.</p>
+          <p className="text-sm text-slate-500 py-4">Noch keine Unterkategorien. Leg eine neue an.</p>
         ) : (
           subcategories.map((sub) => {
             const { done = 0, total = 0 } = progress[sub.id] ?? {}
             return (
               <div
                 key={sub.id}
-                className="flex items-center gap-3 px-4 py-3.5 bg-surface2 border border-border rounded-lg hover:border-[#d0d4d8] hover:bg-surface transition-colors"
+                className="flex items-center gap-3 px-4 py-3.5 bg-slate-100 border border-slate-200 rounded-lg hover:border-[#d0d4d8] hover:bg-white transition-colors"
               >
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-text text-sm">{sub.name}</div>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-muted">
+                  <div className="font-medium text-slate-900 text-sm">{sub.name}</div>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
                     <span>📊 {done}/{total} Artefakte</span>
                     <span>⏱ Erstellt: {formatDate(sub.created_at)}</span>
                   </div>
@@ -131,7 +131,7 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
                   <Link
                     to="/projects/$projectId/categories/$categoryId"
                     params={{ projectId, categoryId: sub.id }}
-                    className="w-8 h-8 rounded-md border border-border bg-surface text-muted flex items-center justify-center text-sm hover:bg-surface-2 hover:text-text"
+                    className="w-8 h-8 rounded-md border border-slate-200 bg-white text-slate-500 flex items-center justify-center text-sm hover:bg-slate-100 hover:text-slate-900"
                     title="Zum Workflow"
                   >
                     →
@@ -139,7 +139,7 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
                   <button
                     type="button"
                     onClick={() => setDeleteConfirm(sub)}
-                    className="w-8 h-8 rounded-md border border-border bg-surface text-muted flex items-center justify-center text-sm hover:bg-red-50 hover:text-red hover:border-red"
+                    className="w-8 h-8 rounded-md border border-slate-200 bg-white text-slate-500 flex items-center justify-center text-sm hover:bg-red-50 hover:text-red-600 hover:border-red"
                     title="Löschen"
                   >
                     🗑
@@ -159,20 +159,20 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
           aria-modal="true"
           aria-label="Neue Unterkategorie"
         >
-          <div className="bg-surface border border-border rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold text-text mb-1">Neue Unterkategorie</h3>
-            <p className="text-sm text-muted mb-4">Name der Spoke-Kategorie</p>
+          <div className="bg-white border border-slate-200 rounded-xl shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">Neue Unterkategorie</h3>
+            <p className="text-sm text-slate-500 mb-4">Name der Spoke-Kategorie</p>
             <input
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="z.B. Händedesinfektion"
-              className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent mb-4"
+              className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-slate-400 mb-4"
               onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
               autoFocus
             />
             {addError && (
-              <p className="text-sm text-red mb-4" role="alert">
+              <p className="text-sm text-red-600 mb-4" role="alert">
                 {addError}
               </p>
             )}
@@ -180,7 +180,7 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
               <button
                 type="button"
                 onClick={() => { if (!isAdding) { setAddModalOpen(false); setAddError(null) } }}
-                className="px-4 py-2 rounded-lg border border-border text-text-secondary text-sm font-medium hover:bg-surface-2"
+                className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50"
               >
                 Abbrechen
               </button>
@@ -188,7 +188,7 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
                 type="button"
                 onClick={handleAdd}
                 disabled={!newName.trim() || isAdding}
-                className="px-4 py-2 rounded-lg bg-accent text-white text-sm font-semibold disabled:opacity-50"
+                className="px-3 py-2 rounded-xl bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800 disabled:opacity-50 transition-colors"
               >
                 {isAdding ? 'Wird angelegt…' : 'Anlegen'}
               </button>
@@ -205,13 +205,13 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
           aria-modal="true"
           aria-label="Unterkategorie löschen"
         >
-          <div className="bg-surface border border-border rounded-xl shadow-xl w-full max-w-sm p-6">
-            <h3 className="text-lg font-semibold text-text mb-2">Unterkategorie löschen?</h3>
-            <p className="text-sm text-muted mb-4">
+          <div className="bg-white border border-slate-200 rounded-xl shadow-xl w-full max-w-sm p-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Unterkategorie löschen?</h3>
+            <p className="text-sm text-slate-500 mb-4">
               „{deleteConfirm.name}" und alle zugehörigen Daten werden gelöscht. Dies kann nicht rückgängig gemacht werden.
             </p>
             {deleteError && (
-              <p className="text-sm text-red mb-4" role="alert">
+              <p className="text-sm text-red-600 mb-4" role="alert">
                 {deleteError}
               </p>
             )}
@@ -219,7 +219,7 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
               <button
                 type="button"
                 onClick={() => { if (!isDeleting) { setDeleteConfirm(null); setDeleteError(null) } }}
-                className="px-4 py-2 rounded-lg border border-border text-text-secondary text-sm font-medium hover:bg-surface-2"
+                className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50"
               >
                 Abbrechen
               </button>

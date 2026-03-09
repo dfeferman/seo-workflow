@@ -16,8 +16,8 @@ function RootComponent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg">
-        <p className="text-muted text-sm">Laden…</p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <p className="text-slate-500 text-sm">Laden…</p>
       </div>
     )
   }
@@ -34,8 +34,8 @@ function RootComponent() {
     <Layout>
       <Suspense
         fallback={
-          <div className="flex-1 flex items-center justify-center bg-surface2">
-            <p className="text-muted text-sm">Laden…</p>
+          <div className="flex-1 flex items-center justify-center bg-slate-100">
+            <p className="text-slate-500 text-sm">Laden…</p>
           </div>
         }
       >

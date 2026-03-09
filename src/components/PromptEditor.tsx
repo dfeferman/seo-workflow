@@ -46,9 +46,9 @@ export function PromptEditor({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-1.5">
-          Prompt <span className="text-red">*</span>
-          <span className="ml-2 text-2xs text-muted font-mono font-normal">
+        <label className="block text-sm font-medium text-slate-600 mb-1.5">
+          Prompt <span className="text-red-600">*</span>
+          <span className="ml-2 text-2xs text-slate-500 font-mono font-normal">
             Platzhalter: [KATEGORIE], [ZIELGRUPPEN], [INPUT A], [BRIEFING], [TEXT], …
           </span>
         </label>
@@ -58,15 +58,15 @@ export function PromptEditor({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={8}
-          className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm font-mono text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent resize-y min-h-[180px]"
+          className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-mono text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-accent resize-y min-h-[180px]"
         />
-        <div className="text-2xs text-muted font-mono text-right mt-1">
+        <div className="text-2xs text-slate-500 font-mono text-right mt-1">
           {value.length} Zeichen
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-2">
+        <label className="block text-sm font-medium text-slate-600 mb-2">
           Verfügbare Platzhalter
         </label>
         <div className="flex flex-wrap gap-2">
@@ -75,7 +75,7 @@ export function PromptEditor({
               key={p}
               type="button"
               onClick={() => insertAtCursor(p)}
-              className="px-3 py-1.5 rounded-full text-xs font-medium border border-border bg-surface text-text-secondary hover:border-accent hover:bg-accent-light hover:text-accent transition-colors"
+              className="px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:border-accent hover:bg-indigo-50 hover:text-blue-600 transition-colors"
             >
               {p}
             </button>
@@ -84,15 +84,15 @@ export function PromptEditor({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-2">
+        <label className="block text-sm font-medium text-slate-600 mb-2">
           Prompt-Vorschau
         </label>
-        <div className="bg-surface2 border border-border rounded-lg p-4 font-mono text-xs text-text-secondary leading-relaxed max-h-[200px] overflow-y-auto whitespace-pre-wrap">
+        <div className="bg-slate-100 border border-slate-200 rounded-lg p-4 font-mono text-xs text-slate-600 leading-relaxed max-h-[200px] overflow-y-auto whitespace-pre-wrap">
           {previewText || (
-            <span className="text-muted">Vorschau wird angezeigt, sobald Platzhalter ersetzt werden.</span>
+            <span className="text-slate-500">Vorschau wird angezeigt, sobald Platzhalter ersetzt werden.</span>
           )}
         </div>
-        <p className="text-2xs text-muted mt-1.5">
+        <p className="text-2xs text-slate-500 mt-1.5">
           So sieht der Prompt mit den Kategorie-Daten aus.
         </p>
       </div>

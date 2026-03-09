@@ -2,70 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design-System – Helles Theme (wie HTML-Prototypen) */
-:root {
-  --bg: #fafbfc;
-  --surface: #ffffff;
-  --surface2: #f4f6f8;
-  --border: #e1e4e8;
-  --accent: #5b7fff;
-  --accent-light: #e8edff;
-  --green: #10b981;
-  --yellow: #f59e0b;
-  --red: #ef4444;
-  --text: #1a202c;
-  --text-secondary: #4a5568;
-  --muted: #718096;
+/* Global Reset – Frontend Design System */
+html,
+body,
+#root {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
 }
 
-@layer base {
-  body {
-    @apply bg-bg text-text font-sans antialiased;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-  }
-}
-
-@layer components {
-  /* Editoriales Section-Label (01 · Titel + Trennlinie) */
-  .section-header {
-    @apply flex items-baseline gap-4 mb-5;
-  }
-  .section-label {
-    @apply font-mono text-xs font-semibold tracking-[.08em] uppercase text-accent flex-shrink-0;
-  }
-  .section-rule {
-    @apply flex-1 h-px bg-border;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Artefakt-Liste: Staggered Reveal */
-@keyframes artifactRowIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+body {
+  @apply bg-slate-50 text-slate-800 font-sans antialiased text-sm;
 }

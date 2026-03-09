@@ -32,8 +32,17 @@ export function PhasePills({
 
   const phasesToShow = PHASE_ORDER.filter((p) => (byPhase.get(p)?.total ?? 0) > 0)
 
+  const progressBarColor =
+    progressPercent >= 100
+      ? 'bg-green-500'
+      : progressPercent > 50
+        ? 'bg-blue-500'
+        : progressPercent > 0
+          ? 'bg-orange-400'
+          : 'bg-slate-200'
+
   return (
-    <div className="flex-shrink-0 bg-surface/90 backdrop-blur-sm border-b border-border/80 px-6 pt-5 pb-5 shadow-[0_1px_0_0_var(--border)]">
+    <div className="flex-shrink-0 bg-white border-b border-slate-100 px-6 pt-5 pb-5 shadow-sm">
       <div className="flex justify-between items-center gap-4 mb-3">
         <div className="flex flex-wrap gap-2">
           {phasesToShow.map((phase) => {
@@ -45,12 +54,12 @@ export function PhasePills({
                 key={phase}
                 type="button"
                 onClick={() => onPhaseClick?.(phase)}
-                className={`py-2 px-4 rounded-xl text-xs font-semibold font-sans tracking-wide transition-all duration-200 border-2 ${
+                className={`py-2 px-4 rounded-lg text-xs font-semibold font-sans tracking-wide transition-colors ${
                   isDone
-                    ? 'bg-green/10 text-green border-green/30 shadow-sm'
+                    ? 'bg-green-50 text-green-600 border border-green-200'
                     : isActive
-                      ? 'bg-accent-light text-accent border-accent shadow-sm'
-                      : 'bg-surface-2/80 text-muted border-transparent hover:border-border hover:text-text-secondary'
+                      ? 'bg-slate-100 text-slate-900'
+                      : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
                 {phase}
@@ -58,15 +67,15 @@ export function PhasePills({
             )
           })}
         </div>
-        <div className="text-sm text-muted font-sans font-medium tabular-nums shrink-0">
-          <span className="text-accent font-bold">{doneCount}</span>
-          <span className="text-muted/80"> / {totalArtifacts}</span>
-          <span className="text-muted ml-0.5"> abgeschlossen</span>
+        <div className="text-sm text-slate-500 font-sans font-medium tabular-nums shrink-0">
+          <span className="text-slate-900 font-bold">{doneCount}</span>
+          <span className="text-slate-500/80"> / {totalArtifacts}</span>
+          <span className="text-slate-500 ml-0.5"> abgeschlossen</span>
         </div>
       </div>
-      <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-accent via-accent to-[#7c3aed] transition-[width] duration-700 ease-out"
+          className={`h-full rounded-full transition-all duration-500 ${progressBarColor}`}
           style={{ width: `${progressPercent}%` }}
         />
       </div>

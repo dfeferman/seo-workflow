@@ -31,7 +31,7 @@ function StatusDot({ status }: { status: ArtifactStatus }) {
   const textClass =
     status === 'done'     ? 'text-green'
     : status === 'active' ? 'text-yellow'
-    : 'text-muted'
+    : 'text-slate-500'
   return (
     <div className={`inline-flex items-center gap-1.5 font-sans text-xs font-semibold tracking-wide ${textClass}`}>
       <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dotClass}`} />
@@ -61,7 +61,7 @@ export function WorkflowTable({
 }: WorkflowTableProps) {
   if (artifacts.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-surface/80 backdrop-blur-[2px] min-h-[320px]">
+      <div className="flex-1 flex items-center justify-center bg-white/80 backdrop-blur-[2px] min-h-[320px]">
         <EmptyState
           icon="📋"
           title="Keine Artefakte"
@@ -72,20 +72,20 @@ export function WorkflowTable({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-surface/80 backdrop-blur-[2px] min-h-0">
+    <div className="flex-1 overflow-y-auto bg-white/80 backdrop-blur-[2px] min-h-0">
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b-2 border-border sticky top-0 bg-surface/95 backdrop-blur-sm z-10 shadow-[0_1px_0_0_var(--border)]">
-            <th className="text-left py-4 px-6 w-[72px] font-sans text-[11px] tracking-widest uppercase text-muted font-semibold">
+          <tr className="border-b border-slate-100 sticky top-0 bg-white/95 backdrop-blur-sm z-10 shadow-[0_1px_0_0_#f1f5f9]">
+            <th className="text-left py-4 px-6 w-[72px] font-sans text-xs tracking-widest uppercase text-slate-500 font-semibold">
               Phase
             </th>
-            <th className="text-left py-4 px-6 font-sans text-[11px] tracking-widest uppercase text-muted font-semibold">
+            <th className="text-left py-4 px-6 font-sans text-xs tracking-widest uppercase text-slate-500 font-semibold">
               Artefakt
             </th>
-            <th className="text-left py-4 px-6 w-[140px] font-sans text-[11px] tracking-widest uppercase text-muted font-semibold">
+            <th className="text-left py-4 px-6 w-[140px] font-sans text-xs tracking-widest uppercase text-slate-500 font-semibold">
               Status
             </th>
-            <th className="text-left py-4 px-6 w-[240px] font-sans text-[11px] tracking-widest uppercase text-muted font-semibold">
+            <th className="text-left py-4 px-6 w-[240px] font-sans text-xs tracking-widest uppercase text-slate-500 font-semibold">
               Aktionen
             </th>
           </tr>
@@ -100,10 +100,10 @@ export function WorkflowTable({
               <tr
                 key={artifact.id}
                 onClick={() => onSelectArtifact(artifact)}
-                className={`border-b border-border/80 transition-[transform,background-color,box-shadow,border-color] duration-200 cursor-pointer group ${
+                className={`border-b border-slate-100 transition-all duration-200 cursor-pointer group ${
                   isSelected
-                    ? 'bg-accent-light/40 border-l-4 border-l-accent shadow-[2px_0_0_0_var(--accent)]'
-                    : 'hover:bg-surface-2/80 border-l-4 border-l-transparent hover:shadow-sm'
+                    ? 'bg-slate-100 border-l-4 border-l-slate-400 hover:shadow-md'
+                    : 'hover:border-slate-200 hover:bg-slate-50/80 border-l-4 border-l-transparent hover:shadow-sm'
                 }`}
                 style={{
                   animation: 'artifactRowIn 0.35s ease-out both',
@@ -121,12 +121,12 @@ export function WorkflowTable({
 
                 {/* Name + Description */}
                 <td className="py-4 px-6 align-middle">
-                  <div className="font-sans text-text text-xs leading-snug tracking-tight">
-                    <span className="font-mono font-semibold text-muted mr-1.5">{artifact.artifact_code}</span>
+                  <div className="font-sans text-slate-900 text-xs leading-snug tracking-tight">
+                    <span className="font-mono font-semibold text-slate-500 mr-1.5">{artifact.artifact_code}</span>
                     <span className="font-semibold">{artifact.name}</span>
                   </div>
                   {artifact.description && (
-                    <div className="font-sans text-xs text-muted mt-1 leading-relaxed max-w-md">{artifact.description}</div>
+                    <div className="font-sans text-xs text-slate-500 mt-1 leading-relaxed max-w-md">{artifact.description}</div>
                   )}
                 </td>
 
@@ -141,7 +141,7 @@ export function WorkflowTable({
                     <button
                       type="button"
                       onClick={() => onCopyPrompt(artifact)}
-                      className="py-2 px-3 rounded-lg text-xs font-semibold border border-accent/30 bg-accent-light text-accent hover:bg-accent hover:text-white hover:border-accent transition-all duration-200"
+                      className="py-2 px-3 rounded-xl text-xs font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
                     >
                       📋 Prompt
                     </button>
@@ -150,10 +150,10 @@ export function WorkflowTable({
                       onClick={() => hasResult && onCopyResult(artifact)}
                       disabled={!hasResult}
                       title={!hasResult ? 'Kein Ergebnis vorhanden' : 'Ergebnis kopieren'}
-                      className={`py-2 px-3 rounded-lg text-xs font-semibold border transition-all duration-200 ${
+                      className={`py-2 px-3 rounded-xl text-xs font-medium border transition-colors ${
                         hasResult
-                          ? 'border-green/30 bg-green/10 text-green hover:bg-green hover:text-white hover:border-green'
-                          : 'border-border bg-surface text-muted opacity-40 cursor-not-allowed'
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                          : 'border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed'
                       }`}
                     >
                       📄 Ergebnis
@@ -162,7 +162,7 @@ export function WorkflowTable({
                       type="button"
                       onClick={() => onSelectArtifact(artifact)}
                       title="Details öffnen"
-                      className="py-2 px-3 rounded-lg text-xs font-semibold border border-border bg-surface text-text-secondary hover:bg-surface-2 hover:text-text transition-all duration-200"
+                      className="py-2 px-3 rounded-xl text-xs font-medium border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                     >
                       ↗
                     </button>
@@ -172,7 +172,7 @@ export function WorkflowTable({
                         onClick={() => onDeleteArtifact(artifact)}
                         title="Artefakt löschen"
                         aria-label={`${artifact.name} löschen`}
-                        className="py-2 px-2.5 rounded-lg text-xs font-medium border border-border bg-surface text-muted hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                        className="py-2 px-2.5 rounded-xl text-xs font-medium border border-slate-200 bg-white text-slate-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-opacity opacity-0 group-hover:opacity-100"
                       >
                         🗑
                       </button>

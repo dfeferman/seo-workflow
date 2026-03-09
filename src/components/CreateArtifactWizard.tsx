@@ -135,27 +135,27 @@ export function CreateArtifactWizard({
       aria-modal="true"
       aria-label="Neues Artefakt anlegen"
     >
-      <div className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <div className="p-6 pb-0 flex-shrink-0 border-b border-border bg-surface2">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="p-6 pb-0 flex-shrink-0 border-b border-slate-200 bg-slate-100">
           <div className="flex items-center justify-between mb-2">
-            <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-xl text-white shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl text-white shadow-sm">
               ✨
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-lg border border-border bg-surface text-muted hover:bg-surface-2 hover:text-text flex items-center justify-center"
+              className="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-900 flex items-center justify-center"
               aria-label="Schließen"
             >
               ✕
             </button>
           </div>
-          <h2 className="text-xl font-bold text-text">Neues Artefakt anlegen</h2>
-          <p className="text-sm text-muted mt-1">
+          <h2 className="text-xl font-bold text-slate-900">Neues Artefakt anlegen</h2>
+          <p className="text-sm text-slate-500 mt-1">
             Erstelle ein benutzerdefiniertes Artefakt für deinen Workflow
           </p>
 
-          <div className="flex items-center gap-2 mt-6 pb-5 border-b border-border">
+          <div className="flex items-center gap-2 mt-6 pb-5 border-b border-slate-200">
             {steps.map((s, i) => (
               <div key={s.num} className="flex items-center gap-2 flex-1">
                 <div
@@ -163,15 +163,15 @@ export function CreateArtifactWizard({
                     step > s.num
                       ? 'bg-green border-green text-white'
                       : step === s.num
-                        ? 'bg-accent border-accent text-white'
-                        : 'bg-surface2 border-border text-muted'
+                        ? 'bg-blue-600 border-accent text-white'
+                        : 'bg-slate-100 border-slate-200 text-slate-500'
                   }`}
                 >
                   {step > s.num ? '✓' : s.num}
                 </div>
                 <span
                   className={`text-xs font-medium ${
-                    step === s.num ? 'text-accent' : step > s.num ? 'text-green' : 'text-muted'
+                    step === s.num ? 'text-blue-600' : step > s.num ? 'text-green' : 'text-slate-500'
                   }`}
                 >
                   {s.label}
@@ -188,27 +188,27 @@ export function CreateArtifactWizard({
           {step === 1 && (
             <div className="space-y-6">
               <section>
-                <h3 className="text-sm font-semibold text-text flex items-center gap-2 mb-3">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 mb-3">
                   📋 Grundinformationen
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1.5">
-                      Artefakt-Name <span className="text-red">*</span>
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                      Artefakt-Name <span className="text-red-600">*</span>
                     </label>
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="z.B. Konkurrenzanalyse"
-                      className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <p className="text-2xs text-muted mt-1">Beschreibender Name für dieses Artefakt</p>
+                    <p className="text-2xs text-slate-500 mt-1">Beschreibender Name für dieses Artefakt</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1.5">
-                      Artefakt-Code <span className="text-red">*</span>
-                      <span className="ml-2 text-2xs text-muted font-mono font-normal">
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                      Artefakt-Code <span className="text-red-600">*</span>
+                      <span className="ml-2 text-2xs text-slate-500 font-mono font-normal">
                         Eindeutig in der Kategorie
                       </span>
                     </label>
@@ -217,12 +217,12 @@ export function CreateArtifactWizard({
                       value={artifactCode}
                       onChange={(e) => setArtifactCode(e.target.value)}
                       placeholder="z.B. A4 oder B2.2"
-                      className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm font-mono text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-mono text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <p className="text-2xs text-muted mt-1">Alphanumerischer Code (z.B. G1, X1.2)</p>
+                    <p className="text-2xs text-slate-500 mt-1">Alphanumerischer Code (z.B. G1, X1.2)</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1.5">
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">
                       Kurzbeschreibung
                     </label>
                     <input
@@ -230,17 +230,17 @@ export function CreateArtifactWizard({
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="z.B. Wettbewerber identifizieren & analysieren"
-                      className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
               </section>
               <section>
-                <h3 className="text-sm font-semibold text-text flex items-center gap-2 mb-3">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 mb-3">
                   🎯 Phase zuordnen
                 </h3>
                 <PhaseSelector value={phase} onChange={setPhase} />
-                <p className="text-xs text-muted mt-3 flex items-center gap-2">
+                <p className="text-xs text-slate-500 mt-3 flex items-center gap-2">
                   💡 Du kannst auch G (Sonstige) oder X (Extra) wählen.
                 </p>
               </section>
@@ -249,7 +249,7 @@ export function CreateArtifactWizard({
 
           {step === 2 && (
             <section>
-              <h3 className="text-sm font-semibold text-text flex items-center gap-2 mb-4">
+              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 mb-4">
                 ✍️ Prompt-Template
               </h3>
               <PromptEditor
@@ -264,18 +264,18 @@ export function CreateArtifactWizard({
           {step === 3 && (
             <div className="space-y-6">
               <section>
-                <h3 className="text-sm font-semibold text-text flex items-center gap-2 mb-3">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 mb-3">
                   ⚙️ Zusätzliche Optionen
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1.5">
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">
                       Empfohlene Quelle
                     </label>
                     <select
                       value={recommendedSource}
                       onChange={(e) => setRecommendedSource(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {SOURCE_OPTIONS.map((o) => (
                         <option key={o.value || 'none'} value={o.value}>
@@ -283,10 +283,10 @@ export function CreateArtifactWizard({
                         </option>
                       ))}
                     </select>
-                    <p className="text-2xs text-muted mt-1">Optional: Welches Tool soll verwendet werden?</p>
+                    <p className="text-2xs text-slate-500 mt-1">Optional: Welches Tool soll verwendet werden?</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1.5">
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">
                       Geschätzte Dauer (Minuten)
                     </label>
                     <input
@@ -298,9 +298,9 @@ export function CreateArtifactWizard({
                         setEstimatedMinutes(v === '' ? null : parseInt(v, 10) || null)
                       }}
                       placeholder="z.B. 20"
-                      className="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <p className="text-2xs text-muted mt-1">Hilft bei der Zeitplanung</p>
+                    <p className="text-2xs text-slate-500 mt-1">Hilft bei der Zeitplanung</p>
                   </div>
                 </div>
               </section>
@@ -308,17 +308,17 @@ export function CreateArtifactWizard({
           )}
 
           {error && (
-            <p className="mt-4 text-sm text-red">{error}</p>
+            <p className="mt-4 text-sm text-red-600">{error}</p>
           )}
         </div>
 
-        <div className="p-5 border-t border-border bg-surface2 flex justify-between items-center gap-4 flex-shrink-0">
+        <div className="p-5 border-t border-slate-200 bg-slate-100 flex justify-between items-center gap-4 flex-shrink-0">
           <div>
             {step > 1 && (
               <button
                 type="button"
                 onClick={() => setStep((s) => s - 1)}
-                className="px-4 py-2.5 rounded-lg border border-border bg-surface text-text-secondary text-sm font-semibold hover:bg-surface-2 hover:text-text"
+                className="px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-100 hover:text-slate-900"
               >
                 ← Zurück
               </button>
@@ -328,7 +328,7 @@ export function CreateArtifactWizard({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-lg border border-border bg-surface text-text-secondary text-sm font-semibold hover:bg-surface-2 hover:text-text"
+              className="px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-100 hover:text-slate-900"
             >
               Abbrechen
             </button>
@@ -337,7 +337,7 @@ export function CreateArtifactWizard({
                 type="button"
                 onClick={() => setStep((s) => s + 1)}
                 disabled={step === 1 && !canStep2}
-                className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4a6fef]"
+                className="px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
               >
                 Weiter →
               </button>
@@ -346,7 +346,7 @@ export function CreateArtifactWizard({
                 type="button"
                 onClick={handleSubmit}
                 disabled={!canSubmit || isSubmitting}
-                className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4a6fef]"
+                className="px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
               >
                 {isSubmitting ? 'Wird angelegt…' : '✓ Artefakt anlegen'}
               </button>

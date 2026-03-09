@@ -5,6 +5,14 @@ alwaysApply: true
 
 # Git Workflow
 
+## WICHTIG: Commit- und Push-Verbot
+
+**Claude darf NIEMALS selbstständig committen oder pushen.**
+- Kein `git commit` — auch nicht auf ausdrückliche Bitte
+- Kein `git push` — auch nicht auf ausdrückliche Bitte
+- Nur der Entwickler darf committen und pushen
+- Claude zeigt fertige Änderungen an und erklärt was committed werden sollte
+
 ## Commit Message Format
 
 ```

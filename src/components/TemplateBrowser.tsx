@@ -64,22 +64,22 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
       aria-modal="true"
       aria-label="Template-Bibliothek"
     >
-      <div className="bg-surface border border-border rounded-2xl shadow-xl w-full max-w-7xl max-h-[99vh] flex flex-col min-w-0">
-        <div className="p-5 border-b border-border bg-surface2 flex-shrink-0">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-7xl max-h-[99vh] flex flex-col min-w-0">
+        <div className="p-5 border-b border-slate-200 bg-slate-100 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center text-xl text-white shadow-sm">
+              <div className="w-11 h-11 rounded-xl bg-blue-600 flex items-center justify-center text-xl text-white shadow-sm">
                 📚
               </div>
               <div>
-                <h2 className="text-lg font-bold text-text">Template-Bibliothek</h2>
-                <p className="text-sm text-muted">Vorlagen auswählen und ins Artefakt übernehmen</p>
+                <h2 className="text-lg font-bold text-slate-900">Template-Bibliothek</h2>
+                <p className="text-sm text-slate-500">Vorlagen auswählen und ins Artefakt übernehmen</p>
               </div>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="w-9 h-9 rounded-lg border border-border bg-surface text-muted hover:bg-surface-2 hover:text-text flex items-center justify-center"
+              className="w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-900 flex items-center justify-center"
               aria-label="Schließen"
             >
               ✕
@@ -89,12 +89,12 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
             <button
               type="button"
               onClick={() => { setTemplateToEdit(null); setFormModalOpen(true) }}
-              className="py-2.5 px-4 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-[#4a6fef] flex items-center gap-2"
+              className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 flex items-center gap-[5px]"
             >
               ＋ Neues Template
             </button>
             <div className="flex-1 min-w-[200px] relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm" aria-hidden>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm" aria-hidden>
                 🔍
               </span>
               <input
@@ -102,23 +102,23 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Templates durchsuchen…"
-                className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+                className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
         </div>
 
         <div className="flex flex-1 min-h-0 overflow-hidden">
-          <aside className="w-52 border-r border-border bg-surface2 p-4 flex-shrink-0 overflow-y-auto">
+          <aside className="w-52 border-r border-slate-200 bg-slate-100 p-4 flex-shrink-0 overflow-y-auto">
             <div className="mb-4">
-              <div className="text-2xs font-semibold text-muted uppercase tracking-wide mb-2">
+              <div className="text-2xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
                 Phase
               </div>
               <button
                 type="button"
                 onClick={() => setPhaseFilter(null)}
                 className={`w-full text-left px-2.5 py-1.5 rounded-md text-sm transition-colors ${
-                  phaseFilter === null ? 'bg-accent-light text-accent font-medium' : 'text-text-secondary hover:bg-surface'
+                  phaseFilter === null ? 'bg-indigo-50 text-blue-600 font-medium' : 'text-slate-600 hover:bg-white'
                 }`}
               >
                 Alle
@@ -129,11 +129,11 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
                   type="button"
                   onClick={() => setPhaseFilter(p)}
                   className={`w-full text-left px-2.5 py-1.5 rounded-md text-sm transition-colors flex justify-between items-center ${
-                    phaseFilter === p ? 'bg-accent-light text-accent font-medium' : 'text-text-secondary hover:bg-surface'
+                    phaseFilter === p ? 'bg-indigo-50 text-blue-600 font-medium' : 'text-slate-600 hover:bg-white'
                   }`}
                 >
                   <span>Phase {p}</span>
-                  <span className="text-2xs font-mono text-muted">{(phaseCounts[p] ?? 0)}</span>
+                  <span className="text-2xs font-mono text-slate-500">{(phaseCounts[p] ?? 0)}</span>
                 </button>
               ))}
             </div>
@@ -141,16 +141,16 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
 
           <div className="flex-1 flex flex-col min-w-0 p-4 overflow-hidden">
             <div className="flex justify-between items-center mb-4 flex-shrink-0">
-              <span className="text-sm text-muted">
-                <strong className="text-text">{filtered.length}</strong> Template
+              <span className="text-sm text-slate-500">
+                <strong className="text-slate-900">{filtered.length}</strong> Template
                 {filtered.length !== 1 ? 's' : ''}
               </span>
-              <div className="flex gap-1 p-1 bg-surface2 rounded-lg">
+              <div className="flex gap-1 p-1 bg-slate-100 rounded-lg">
                 <button
                   type="button"
                   onClick={() => setView('grid')}
                   className={`px-2.5 py-1.5 rounded text-xs font-medium transition-colors ${
-                    view === 'grid' ? 'bg-surface text-text shadow-sm' : 'text-muted hover:text-text'
+                    view === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
                   Grid
@@ -159,7 +159,7 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
                   type="button"
                   onClick={() => setView('list')}
                   className={`px-2.5 py-1.5 rounded text-xs font-medium transition-colors ${
-                    view === 'list' ? 'bg-surface text-text shadow-sm' : 'text-muted hover:text-text'
+                    view === 'list' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
                   Liste

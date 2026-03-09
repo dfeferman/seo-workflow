@@ -37,8 +37,8 @@ export function PhaseSelector({ value, onChange }: PhaseSelectorProps) {
           onClick={() => onChange(phase)}
           className={`p-3 rounded-lg border-2 text-center transition-all ${
             value === phase
-              ? 'border-accent bg-accent-light'
-              : 'border-border bg-surface hover:border-[#d0d4d8] hover:bg-surface2'
+              ? 'border-accent bg-indigo-50'
+              : 'border-slate-200 bg-white hover:border-[#d0d4d8] hover:bg-slate-100'
           }`}
         >
           <div
@@ -50,7 +50,7 @@ export function PhaseSelector({ value, onChange }: PhaseSelectorProps) {
           </div>
           <div
             className={`text-2xs font-semibold ${
-              value === phase ? 'text-accent' : 'text-muted'
+              value === phase ? 'text-blue-600' : 'text-slate-500'
             }`}
           >
             {label}

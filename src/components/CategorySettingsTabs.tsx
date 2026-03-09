@@ -43,12 +43,12 @@ function TagsField({
 
   return (
     <div>
-      <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">{label}</label>
-      <div className="flex flex-wrap gap-1.5 p-2 min-h-[44px] bg-surface2 border border-border rounded-lg focus-within:ring-2 focus-within:ring-accent focus-within:border-accent transition-all">
+      <label className="block text-xs font-medium text-slate-700 mb-1.5 tracking-wide">{label}</label>
+      <div className="flex flex-wrap gap-1.5 p-2 min-h-[44px] bg-slate-50 border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-slate-400 transition-all">
         {tags.map((tag, i) => (
           <span
             key={i}
-            className="inline-flex items-center gap-1 px-2.5 py-1 bg-accent-light border border-accent/30 rounded-full text-xs font-medium text-accent"
+            className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-full text-xs font-medium text-slate-700"
           >
             {tag}
             <button
@@ -67,7 +67,7 @@ function TagsField({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), add())}
           placeholder={placeholder}
-          className="flex-1 min-w-[100px] bg-transparent border-none py-1 px-1 text-sm text-text outline-none placeholder:text-muted"
+          className="flex-1 min-w-[100px] bg-transparent border-none py-1 px-1 text-sm text-slate-800 outline-none placeholder:text-slate-500"
         />
       </div>
     </div>
@@ -77,9 +77,9 @@ function TagsField({
 /** Editoriales Section-Header mit nummeriertem Label + Trennlinie */
 function SectionHeader({ number, label }: { number: string; label: string }) {
   return (
-    <div className="section-header">
-      <span className="section-label">{number} · {label}</span>
-      <div className="section-rule" />
+    <div className="flex items-baseline gap-4 mb-5">
+      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex-shrink-0">{number} · {label}</span>
+      <div className="flex-1 h-px bg-slate-200" />
     </div>
   )
 }
@@ -199,7 +199,7 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
 
   if (!category) {
     return (
-      <div className="py-12 text-center text-muted text-sm">
+      <div className="py-12 text-center text-slate-500 text-sm">
         Kategorie wird geladen…
       </div>
     )
@@ -208,7 +208,7 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* Inner sub-tabs (Metadaten / Unterkategorien / Erweitert) */}
-      <div className="flex gap-0 px-7 pt-2 pb-0 border-b border-border bg-bg flex-shrink-0">
+      <div className="flex gap-0 px-7 pt-2 pb-0 border-b border-slate-200 bg-slate-50 flex-shrink-0">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -216,8 +216,8 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
             onClick={() => setActiveTab(tab.id)}
             className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab.id
-                ? 'border-accent text-accent'
-                : 'border-transparent text-muted hover:text-text-secondary'
+                ? 'border-slate-400 text-slate-900 bg-slate-50'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
             {tab.label}
@@ -225,7 +225,7 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
         ))}
         {/* Typ-Badge */}
         <div className="ml-auto flex items-center pb-2.5">
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-accent-light text-accent border border-accent/20">
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
             {isCategory ? '🏷️ Kategorie' : '📝 Blog'}
           </span>
         </div>
@@ -239,21 +239,21 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
               {/* 01 · Grunddaten */}
               <section>
                 <SectionHeader number="01" label="Grunddaten" />
-                <div className="bg-surface border border-border rounded-xl p-6 shadow-sm space-y-4">
+                <div className="bg-white border border-slate-100 rounded-xl p-6 space-y-4">
                   <div>
-                    <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">
-                      Name <span className="text-red">*</span>
+                    <label className="block text-xs font-medium text-slate-700 mb-1.5 tracking-wide">
+                      Name <span className="text-red-600">*</span>
                     </label>
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-slate-400 transition-all"
                     />
                   </div>
                   {isCategory && (
                     <div>
-                      <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">
+                      <label className="block text-xs font-medium text-slate-700 mb-1.5 tracking-wide">
                         Hub-Seite Name
                       </label>
                       <input
@@ -261,7 +261,7 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                         value={hubName}
                         onChange={(e) => setHubName(e.target.value)}
                         placeholder="z.B. Oberkategorie Hub"
-                        className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                        className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-slate-400 transition-all"
                       />
                     </div>
                   )}
@@ -271,7 +271,7 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
               {/* 02 · Zielgruppe & Shop */}
               <section>
                 <SectionHeader number="02" label="Zielgruppe & Shop" />
-                <div className="bg-surface border border-border rounded-xl p-6 shadow-sm space-y-4">
+                <div className="bg-white border border-slate-100 rounded-xl p-6 space-y-4">
                   <TagsField
                     tags={zielgruppen}
                     onChange={setZielgruppen}
@@ -280,13 +280,13 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                   />
                   {isCategory && (
                     <div>
-                      <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">
+                      <label className="block text-xs font-medium text-slate-700 mb-1.5 tracking-wide">
                         Shop-Typ
                       </label>
                       <select
                         value={shopTyp}
                         onChange={(e) => setShopTyp(e.target.value)}
-                        className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                        className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-slate-400 transition-all"
                       >
                         {SHOP_TYP_OPTIONS.map((opt) => (
                           <option key={opt} value={opt}>
@@ -302,9 +302,9 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
               {/* 03 · Content-Richtlinien */}
               <section>
                 <SectionHeader number="03" label="Content-Richtlinien" />
-                <div className="bg-surface border border-border rounded-xl p-6 shadow-sm space-y-4">
+                <div className="bg-white border border-slate-100 rounded-xl p-6 space-y-4">
                   <div>
-                    <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">
+                    <label className="block text-xs font-medium text-slate-700 mb-1.5 tracking-wide">
                       Tonalität
                     </label>
                     <input
@@ -312,11 +312,11 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                       value={ton}
                       onChange={(e) => setTon(e.target.value)}
                       placeholder="z.B. Seriös-medizinisch, leicht verständlich"
-                      className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-slate-400 transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">
+                    <label className="block text-xs font-medium text-slate-700 mb-1.5 tracking-wide">
                       No-Gos / Verbotene Aussagen
                     </label>
                     <textarea
@@ -324,12 +324,12 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                       onChange={(e) => setNoGos(e.target.value)}
                       placeholder="Was darf NICHT geschrieben werden?"
                       rows={3}
-                      className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent resize-y min-h-[80px] transition-all"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-slate-400 resize-y min-h-[80px] transition-all"
                     />
                   </div>
                   {isCategory && (
                     <div>
-                      <label className="block text-xs font-medium text-text-secondary mb-1.5 tracking-wide">
+                      <label className="block text-xs font-medium text-slate-700 mb-1.5 tracking-wide">
                         USPs
                       </label>
                       <input
@@ -337,7 +337,7 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                         value={usps}
                         onChange={(e) => setUsps(e.target.value)}
                         placeholder="Unique Selling Points"
-                        className="w-full px-3 py-2.5 bg-surface2 border border-border rounded-lg text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                        className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-slate-400 transition-all"
                       />
                     </div>
                   )}
@@ -348,11 +348,11 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
 
             {/* Platzhalter-Panel (nur Hub) */}
             {isHub && (
-              <section className="bg-surface border border-border rounded-xl p-6 shadow-sm w-full max-w-md flex-shrink-0 self-start">
+              <section className="bg-white border border-slate-100 rounded-xl p-6 w-full max-w-md flex-shrink-0 self-start">
                 <SectionHeader number="04" label="Platzhalter" />
-                <p className="text-xs text-muted mb-4 leading-relaxed">
+                <p className="text-xs text-slate-500 mb-4 leading-relaxed">
                   Gültig für diese Oberkategorie und alle Unterkategorien. In Vorlagen z. B. als{' '}
-                  <code className="bg-surface2 px-1.5 py-0.5 rounded font-mono text-[11px]">[MEIN_TAG]</code> nutzbar.
+                  <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">[MEIN_TAG]</code> nutzbar.
                 </p>
                 <div className="space-y-3">
                   {Object.entries(customPlaceholders).map(([key, value], index) => (
@@ -372,19 +372,19 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                           })
                         }}
                         placeholder="MEIN_TAG"
-                        className="flex-1 min-w-0 px-2.5 py-2 bg-surface2 border border-border rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                        className="flex-1 min-w-0 px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
                       />
                       <input
                         type="text"
                         value={value}
                         onChange={(e) => setPlaceholder(key, e.target.value)}
                         placeholder="Ersetzungstext"
-                        className="flex-1 min-w-0 px-2.5 py-2 bg-surface2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                        className="flex-1 min-w-0 px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
                       />
                       <button
                         type="button"
                         onClick={() => removePlaceholder(key)}
-                        className="p-2 text-muted hover:text-red transition-colors rounded"
+                        className="p-2 text-slate-500 hover:text-red-600 transition-colors rounded"
                         aria-label="Platzhalter entfernen"
                       >
                         ✕
@@ -395,7 +395,7 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                 <button
                   type="button"
                   onClick={addPlaceholder}
-                  className="mt-4 text-sm text-accent hover:underline font-medium transition-colors"
+                  className="mt-4 text-sm text-slate-600 hover:text-slate-900 hover:underline font-medium transition-colors"
                 >
                   + Platzhalter hinzufügen
                 </button>
@@ -412,7 +412,7 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                 categoryId={category.id}
               />
             ) : (
-              <p className="text-sm text-muted py-4">
+              <p className="text-sm text-slate-500 py-4">
                 Unterkategorien können nur bei Hub-Kategorien (Top-Level) verwaltet werden.
                 {category.parent_id && ' Diese Kategorie ist eine Unterkategorie.'}
               </p>
@@ -421,7 +421,7 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
         )}
 
         {activeTab === 'erweitert' && (
-          <div className="max-w-2xl text-sm text-muted py-4">
+          <div className="max-w-2xl text-sm text-slate-500 py-4">
             Erweiterte Einstellungen (z. B. Export, Archiv) können hier später ergänzt werden.
           </div>
         )}
