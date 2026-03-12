@@ -523,7 +523,7 @@ CREATE POLICY "Users can delete own projects"
 3. Linke Sidebar mit Filtern
 4. Template-Karten (mit Preview)
 5. Suchfeld
-6. "Template verwenden"-Button → lädt ins Artefakt-Formular
+6. "Template anlegen"-Button → lädt ins Artefakt-Formular
 7. 10 Standard-Templates in DB seeden
 
 **Dateien**:

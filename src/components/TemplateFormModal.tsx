@@ -150,7 +150,7 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
       aria-modal="true"
       aria-labelledby="template-form-title"
     >
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-[46rem] max-h-[99vh] flex flex-col">
         <div className="p-5 border-b border-slate-200 bg-slate-100 flex-shrink-0 flex items-center justify-between">
           <div>
             <h2 id="template-form-title" className="text-lg font-bold text-slate-900">
@@ -241,8 +241,8 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
                 value={promptTemplate}
                 onChange={(e) => setPromptTemplate(e.target.value)}
                 placeholder="Das Prompt, das für dieses Artefakt verwendet wird. Platzhalter z.B. [KATEGORIE], [INPUT A]…"
-                rows={8}
-                className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-mono text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400 resize-y min-h-[120px]"
+                rows={13}
+                className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-mono text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400 resize-y min-h-[286px]"
                 required
               />
             </section>

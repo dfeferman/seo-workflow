@@ -15,6 +15,7 @@ function category(overrides: Partial<CategoryRow> = {}): CategoryRow {
     usps: 'Schnell, günstig',
     ton: 'Freundlich',
     no_gos: 'Keine Duplicate Content',
+    custom_placeholders: null,
     display_order: 0,
     created_at: '',
     updated_at: '',
@@ -66,9 +67,57 @@ describe('replacePlaceholders', () => {
     expect(replacePlaceholders('[KATEGORIE]', cat, deps)).toBe('Überschrieben')
   })
 
+  it('ersetzt [LINKS] aus dependencyMap', () => {
+    const cat = category({ name: 'K1' })
+    const deps = { '[LINKS]': 'Interlinking-Plan-Text' }
+    expect(replacePlaceholders('[LINKS]', cat, deps)).toBe('Interlinking-Plan-Text')
+  })
+
+  it('lässt [INPUT A] sichtbar wenn in dependencyMap leer (z. B. nach Phase-Output-Löschen)', () => {
+    const cat = category({ name: 'K1' })
+    const deps = { '[INPUT A]': '' }
+    expect(replacePlaceholders('Eingabe: [INPUT A] Ende', cat, deps)).toBe('Eingabe: [INPUT A] Ende')
+  })
+
   it('behandelt null/undefined dependencyMap', () => {
     const cat = category({ name: 'K1' })
     expect(replacePlaceholders('[KATEGORIE]', cat, null)).toBe('K1')
     expect(replacePlaceholders('[KATEGORIE]', cat, undefined)).toBe('K1')
+  })
+
+  describe('phaseOutputs', () => {
+    it('ersetzt [OUTPUT_A] aus phaseOutputs', () => {
+      const cat = category({ name: 'K1' })
+      expect(
+        replacePlaceholders('Basis: [OUTPUT_A]', cat, null, { A: 'Phase-A-Output' })
+      ).toBe('Basis: Phase-A-Output')
+    })
+
+    it('ersetzt mehrere Phase-Outputs', () => {
+      const cat = category({ name: 'K1' })
+      expect(
+        replacePlaceholders('[OUTPUT_A] und [OUTPUT_B]', cat, null, { A: 'AAA', B: 'BBB' })
+      ).toBe('AAA und BBB')
+    })
+
+    it('lässt [OUTPUT_X] stehen wenn Phase nicht in phaseOutputs', () => {
+      const cat = category({ name: 'K1' })
+      expect(
+        replacePlaceholders('[OUTPUT_C]', cat, null, { A: 'AAA' })
+      ).toBe('[OUTPUT_C]')
+    })
+
+    it('behandelt null/undefined phaseOutputs', () => {
+      const cat = category({ name: 'K1' })
+      expect(replacePlaceholders('[OUTPUT_A]', cat, null, null)).toBe('[OUTPUT_A]')
+      expect(replacePlaceholders('[OUTPUT_A]', cat, null, undefined)).toBe('[OUTPUT_A]')
+    })
+
+    it('kombiniert dependencyMap und phaseOutputs', () => {
+      const cat = category({ name: 'K1' })
+      expect(
+        replacePlaceholders('[KATEGORIE] [INPUT A] [OUTPUT_A]', cat, { '[INPUT A]': 'IA' }, { A: 'OA' })
+      ).toBe('K1 IA OA')
+    })
   })
 })

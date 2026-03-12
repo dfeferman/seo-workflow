@@ -20,6 +20,7 @@ function artifact(overrides: Partial<ArtifactRow> = {}): ArtifactRow {
     display_order: 0,
     created_at: '',
     updated_at: '',
+    template_id: null,
     ...overrides,
   }
 }

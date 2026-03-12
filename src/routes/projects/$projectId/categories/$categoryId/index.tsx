@@ -13,6 +13,7 @@ import { SaveTemplateModal } from '@/components/SaveTemplateModal'
 import { ExportModal } from '@/components/ExportModal'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { WorkflowTableSkeleton } from '@/components/LoadingSkeleton'
+import { PhaseOutputSection } from '@/components/PhaseOutputSection'
 import { useDeleteArtifact } from '@/hooks/useDeleteArtifact'
 import type { TemplateRow } from '@/types/database.types'
 import type { ArtifactRow } from '@/types/database.types'
@@ -184,8 +185,16 @@ function WorkflowPage() {
             artifacts={artifacts}
             statusMap={statusMap}
             activePhase={activePhase}
-            onPhaseClick={setActivePhase}
+            onPhaseClick={(phase) => setActivePhase((p) => p === phase ? null : phase)}
           />
+
+          {activePhase && (
+            <PhaseOutputSection
+              categoryId={categoryId}
+              phase={activePhase}
+              onCopyFlash={setFlashMessage}
+            />
+          )}
 
           {/* Table */}
           {artifactsLoading ? (

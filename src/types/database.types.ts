@@ -100,6 +100,7 @@ export interface Database {
           display_order: number
           created_at: string
           updated_at: string
+          template_id: string | null
         }
         Insert: {
           id?: string
@@ -114,6 +115,7 @@ export interface Database {
           display_order?: number
           created_at?: string
           updated_at?: string
+          template_id?: string | null
         }
         Update: {
           id?: string
@@ -128,6 +130,7 @@ export interface Database {
           display_order?: number
           created_at?: string
           updated_at?: string
+          template_id?: string | null
         }
       }
       artifact_results: {
@@ -188,6 +191,67 @@ export interface Database {
           created_at?: string
         }
       }
+      phase_output_templates: {
+        Row: {
+          id: string
+          user_id: string
+          phase: ArtifactPhase
+          template_text: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          phase: ArtifactPhase
+          template_text?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          phase?: ArtifactPhase
+          template_text?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      category_phase_outputs: {
+        Row: {
+          id: string
+          category_id: string
+          phase: ArtifactPhase
+          output_text: string | null
+          version: number
+          status: ResultStatus
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          category_id: string
+          phase: ArtifactPhase
+          output_text?: string | null
+          version?: number
+          status?: ResultStatus
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          category_id?: string
+          phase?: ArtifactPhase
+          output_text?: string | null
+          version?: number
+          status?: ResultStatus
+          created_at?: string
+          updated_at?: string
+        }
+      }
       templates: {
         Row: {
           id: string
@@ -240,6 +304,8 @@ export type ArtifactRow = Database['public']['Tables']['artifacts']['Row']
 export type ArtifactResultRow = Database['public']['Tables']['artifact_results']['Row']
 export type ArtifactDependencyRow = Database['public']['Tables']['artifact_dependencies']['Row']
 export type TemplateRow = Database['public']['Tables']['templates']['Row']
+export type PhaseOutputTemplateRow = Database['public']['Tables']['phase_output_templates']['Row']
+export type CategoryPhaseOutputRow = Database['public']['Tables']['category_phase_outputs']['Row']
 
 export type ProjectInsert = Database['public']['Tables']['projects']['Insert']
 export type CategoryInsert = Database['public']['Tables']['categories']['Insert']
@@ -247,3 +313,5 @@ export type ArtifactInsert = Database['public']['Tables']['artifacts']['Insert']
 export type ArtifactResultInsert = Database['public']['Tables']['artifact_results']['Insert']
 export type ArtifactDependencyInsert = Database['public']['Tables']['artifact_dependencies']['Insert']
 export type TemplateInsert = Database['public']['Tables']['templates']['Insert']
+export type PhaseOutputTemplateInsert = Database['public']['Tables']['phase_output_templates']['Insert']
+export type CategoryPhaseOutputInsert = Database['public']['Tables']['category_phase_outputs']['Insert']

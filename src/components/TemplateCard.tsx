@@ -19,6 +19,10 @@ type TemplateCardProps = {
   onUse: (template: TemplateRow) => void
   onEdit?: (template: TemplateRow) => void
   onDelete?: (template: TemplateRow) => void
+  /** Sync dieses Templates in bestehende verknüpfte Artefakte */
+  onSyncToArtifacts?: (template: TemplateRow) => void
+  /** ID des Templates, das gerade gesynct wird (für Loading-State) */
+  syncingTemplateId?: string | null
 }
 
 function truncatePrompt(text: string, max: number): string {
@@ -26,7 +30,7 @@ function truncatePrompt(text: string, max: number): string {
   return text.slice(0, max).trim() + '…'
 }
 
-export function TemplateCard({ template, view, onUse, onEdit, onDelete }: TemplateCardProps) {
+export function TemplateCard({ template, view, onUse, onEdit, onDelete, onSyncToArtifacts, syncingTemplateId }: TemplateCardProps) {
   const phase = template.phase?.toUpperCase() || 'A'
   const badgeClass = PHASE_BADGE_CLASS[phase] ?? PHASE_BADGE_CLASS.F
   const preview = truncatePrompt(template.prompt_template, PREVIEW_MAX)
@@ -88,8 +92,18 @@ export function TemplateCard({ template, view, onUse, onEdit, onDelete }: Templa
             onClick={() => onUse(template)}
             className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-blue-600 text-2xs font-medium hover:bg-indigo-50 hover:border-blue-600 whitespace-nowrap shrink-0"
           >
-            Template verwenden
+            Template anlegen
           </button>
+          {onSyncToArtifacts && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onSyncToArtifacts(template) }}
+              disabled={syncingTemplateId === template.id}
+              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-2xs font-medium hover:bg-slate-50 hover:border-slate-300 whitespace-nowrap shrink-0 disabled:opacity-50"
+            >
+              {syncingTemplateId === template.id ? '…' : 'In Artefakte übernehmen'}
+            </button>
+          )}
         </div>
       </div>
     )
@@ -156,8 +170,18 @@ export function TemplateCard({ template, view, onUse, onEdit, onDelete }: Templa
             onClick={() => onUse(template)}
             className="px-2.5 py-1.5 rounded-lg border border-blue-600 bg-indigo-50 text-blue-600 text-2xs font-medium hover:bg-blue-600/20 whitespace-nowrap shrink-0"
           >
-            Template verwenden
+            Template anlegen
           </button>
+          {onSyncToArtifacts && (
+            <button
+              type="button"
+              onClick={() => onSyncToArtifacts(template)}
+              disabled={syncingTemplateId === template.id}
+              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-2xs font-medium hover:bg-slate-50 whitespace-nowrap shrink-0 disabled:opacity-50"
+            >
+              {syncingTemplateId === template.id ? '…' : 'In Artefakte übernehmen'}
+            </button>
+          )}
         </div>
       </div>
     </div>

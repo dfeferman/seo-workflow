@@ -3,7 +3,11 @@ import { replacePlaceholders } from '@/utils/replacePlaceholders'
 import { usePlaceholderData } from '@/hooks/usePlaceholderData'
 import type { CategoryRow } from '@/types/database.types'
 
-const PLACEHOLDERS = ['[KATEGORIE]', '[ZIELGRUPPEN]', '[USPs]', '[TON]', '[NO-GOS]', '[SHOP-TYP]', '[INPUT A]', '[BRIEFING]', '[TEXT]']
+const PLACEHOLDERS = [
+  '[KATEGORIE]', '[ZIELGRUPPEN]', '[USPs]', '[TON]', '[NO-GOS]', '[SHOP-TYP]',
+  '[INPUT A]', '[INPUT B]', '[INPUT C]', '[INPUT D]', '[INPUT E]',
+  '[BRIEFING]', '[TEXT]', '[LINKS]',
+]
 
 type PromptEditorProps = {
   value: string

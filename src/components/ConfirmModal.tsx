@@ -37,12 +37,12 @@ export function ConfirmModal({
           {title}
         </h2>
         <p className="text-sm text-slate-600 mb-6">{message}</p>
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-wrap justify-end gap-2 sm:flex-nowrap">
           <button
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="px-4 py-2 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+            className="order-2 sm:order-1 px-4 py-2 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
           >
             Abbrechen
           </button>
@@ -50,9 +50,9 @@ export function ConfirmModal({
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className={`min-w-[100px] px-4 py-2 rounded-lg text-sm font-semibold text-white flex-shrink-0 ${
+            className={`order-1 sm:order-2 min-w-[100px] px-4 py-2 rounded-lg text-sm font-semibold text-white flex-shrink-0 ${
               isDanger
-                ? 'bg-red hover:opacity-90'
+                ? 'bg-red-600 hover:bg-red-700'
                 : 'bg-blue-600 hover:bg-blue-700'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >

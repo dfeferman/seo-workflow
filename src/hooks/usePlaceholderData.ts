@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import type { ArtifactRow } from '@/types/database.types'
+import type { ArtifactRow, ArtifactPhase } from '@/types/database.types'
 
 export type PlaceholderMap = Record<string, string>
 
@@ -42,8 +42,10 @@ async function fetchPlaceholderData(
  * - [INPUT <artifact_code>]: Ergebnis des Artefakts mit diesem Code (z. B. [INPUT C1])
  * - [BRIEFING]: Ergebnis von C1
  * - [TEXT]: Ergebnis von D1
+ * - [LINKS]: Ergebnis von B2 (oder B2.1 als Fallback)
+ * Exportiert für Unit-Tests.
  */
-function buildDependencyMap(
+export function buildDependencyMap(
   artifacts: ArtifactRow[],
   latestByArtifactId: Map<string, string>
 ): PlaceholderMap {
@@ -80,8 +82,43 @@ function buildDependencyMap(
 
   if (codeToText.has('C1')) result['[BRIEFING]'] = codeToText.get('C1')!
   if (codeToText.has('D1')) result['[TEXT]'] = codeToText.get('D1')!
+  if (codeToText.has('B2')) result['[LINKS]'] = codeToText.get('B2')!
+  else if (codeToText.has('B2.1')) result['[LINKS]'] = codeToText.get('B2.1')!
 
   return result
+}
+
+/** Zeilen-Format von category_phase_outputs (phase, output_text). */
+export type PhaseOutputRow = { phase: string; output_text: string | null }
+
+/**
+ * Überschreibt dependencyMap mit category_phase_outputs; setzt [INPUT X], [BRIEFING], [TEXT]
+ * für Phasen ohne Eintrag auf ''. (Kein Geister-Wert nach Löschen des Phase-Outputs.)
+ * Exportiert für Unit-Tests.
+ */
+export function applyPhaseOutputOverrides(
+  dependencyMap: PlaceholderMap,
+  phaseOutputRows: PhaseOutputRow[]
+): void {
+  const seenPhases = new Set<string>()
+  for (const row of phaseOutputRows) {
+    if (!seenPhases.has(row.phase) && row.output_text) {
+      seenPhases.add(row.phase)
+      const phase = row.phase as ArtifactPhase
+      dependencyMap[`[INPUT ${phase}]`] = row.output_text
+      if (phase === 'C') dependencyMap['[BRIEFING]'] = row.output_text
+      if (phase === 'E') dependencyMap['[TEXT]'] = row.output_text
+      else if (phase === 'D' && !seenPhases.has('E')) dependencyMap['[TEXT]'] = row.output_text
+    }
+  }
+  const allPhases = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'X'] as const
+  for (const phase of allPhases) {
+    if (!seenPhases.has(phase)) {
+      dependencyMap[`[INPUT ${phase}]`] = ''
+    }
+  }
+  if (!seenPhases.has('C')) dependencyMap['[BRIEFING]'] = ''
+  if (!seenPhases.has('D') && !seenPhases.has('E')) dependencyMap['[TEXT]'] = ''
 }
 
 /**
@@ -124,6 +161,15 @@ export function usePlaceholderData(categoryId: string | undefined): {
           : {}
       const { artifacts, latestByArtifactId } = await fetchPlaceholderData(categoryId!)
       const dependencyMap = buildDependencyMap(artifacts, latestByArtifactId)
+
+      // Kompilierte Phase-Outputs laden und als primäre [INPUT X]-Quelle verwenden; fehlende Phasen leeren
+      const { data: phaseOutputRows } = await supabase
+        .from('category_phase_outputs')
+        .select('phase, output_text, version')
+        .eq('category_id', categoryId!)
+        .order('version', { ascending: false })
+      applyPhaseOutputOverrides(dependencyMap, phaseOutputRows ?? [])
+
       const placeholderMap: PlaceholderMap = { ...hubPlaceholders, ...categoryPlaceholders, ...dependencyMap }
       const latestResultByArtifactId = Object.fromEntries(latestByArtifactId)
       return { placeholderMap, latestResultByArtifactId }

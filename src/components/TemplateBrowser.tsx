@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { useTemplates } from '@/hooks/useTemplates'
 import { useDeleteTemplate } from '@/hooks/useDeleteTemplate'
+import { useSyncTemplateToArtifacts } from '@/hooks/useSyncTemplateToArtifacts'
 import { TemplateCard } from '@/components/TemplateCard'
 import { TemplateFormModal } from '@/components/TemplateFormModal'
 import { ConfirmModal } from '@/components/ConfirmModal'
@@ -24,9 +25,11 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
   const [formModalOpen, setFormModalOpen] = useState(false)
   const [templateToEdit, setTemplateToEdit] = useState<TemplateRow | null>(null)
   const [templateToDelete, setTemplateToDelete] = useState<TemplateRow | null>(null)
+  const [syncMessage, setSyncMessage] = useState<string | null>(null)
 
   const { data: templates = [], isLoading } = useTemplates()
   const deleteTemplate = useDeleteTemplate()
+  const syncToArtifacts = useSyncTemplateToArtifacts()
 
   const filtered = useMemo(() => {
     let list = templates
@@ -64,7 +67,7 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
       aria-modal="true"
       aria-label="Template-Bibliothek"
     >
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-7xl max-h-[99vh] flex flex-col min-w-0">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-[96rem] min-h-[80vh] max-h-[99vh] flex flex-col min-w-0">
         <div className="p-5 border-b border-slate-200 bg-slate-100 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -106,6 +109,11 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
               />
             </div>
           </div>
+          {syncMessage && (
+            <p className="mt-2 text-sm text-slate-600 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2" role="status">
+              {syncMessage}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -193,6 +201,23 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
                       }}
                       onEdit={(tmpl) => { setTemplateToEdit(tmpl); setFormModalOpen(true) }}
                       onDelete={(tmpl) => setTemplateToDelete(tmpl)}
+                      onSyncToArtifacts={(tmpl) => {
+                        syncToArtifacts.mutate(tmpl.id, {
+                          onSuccess: (data) => {
+                            setSyncMessage(
+                              data.count === 0
+                                ? 'Keine verknüpften Artefakte.'
+                                : `${data.count} Artefakt(e) aktualisiert.`
+                            )
+                            setTimeout(() => setSyncMessage(null), 3000)
+                          },
+                          onError: (err) => {
+                            setSyncMessage(`Fehler: ${err.message}`)
+                            setTimeout(() => setSyncMessage(null), 5000)
+                          },
+                        })
+                      }}
+                      syncingTemplateId={syncToArtifacts.isPending ? syncToArtifacts.variables : null}
                     />
                   ))}
                 </div>
@@ -209,6 +234,23 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
                       }}
                       onEdit={(tmpl) => { setTemplateToEdit(tmpl); setFormModalOpen(true) }}
                       onDelete={(tmpl) => setTemplateToDelete(tmpl)}
+                      onSyncToArtifacts={(tmpl) => {
+                        syncToArtifacts.mutate(tmpl.id, {
+                          onSuccess: (data) => {
+                            setSyncMessage(
+                              data.count === 0
+                                ? 'Keine verknüpften Artefakte.'
+                                : `${data.count} Artefakt(e) aktualisiert.`
+                            )
+                            setTimeout(() => setSyncMessage(null), 3000)
+                          },
+                          onError: (err) => {
+                            setSyncMessage(`Fehler: ${err.message}`)
+                            setTimeout(() => setSyncMessage(null), 5000)
+                          },
+                        })
+                      }}
+                      syncingTemplateId={syncToArtifacts.isPending ? syncToArtifacts.variables : null}
                     />
                   ))}
                 </div>

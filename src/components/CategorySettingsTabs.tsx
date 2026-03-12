@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useUpdateCategory, type CategoryUpdatePayload } from '@/hooks/useUpdateCategory'
 import { SaveBar } from '@/components/SaveBar'
 import { SubcategoryList } from '@/components/SubcategoryList'
+import { PhaseOutputTemplateEditor } from '@/components/PhaseOutputTemplateEditor'
 import type { CategoryRow } from '@/types/database.types'
 
 const SHOP_TYP_OPTIONS = [
@@ -12,7 +13,7 @@ const SHOP_TYP_OPTIONS = [
   'Fachhandel mit Onlineshop',
 ]
 
-type TabId = 'metadaten' | 'unterkategorien' | 'erweitert'
+type TabId = 'metadaten' | 'unterkategorien' | 'phase-outputs' | 'erweitert'
 
 type Props = {
   category: CategoryRow | null
@@ -194,6 +195,7 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
   const tabs: { id: TabId; label: string }[] = [
     { id: 'metadaten', label: 'Metadaten' },
     { id: 'unterkategorien', label: 'Unterkategorien' },
+    { id: 'phase-outputs', label: 'Phase-Outputs' },
     { id: 'erweitert', label: 'Erweitert' },
   ]
 
@@ -417,6 +419,12 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
                 {category.parent_id && ' Diese Kategorie ist eine Unterkategorie.'}
               </p>
             )}
+          </div>
+        )}
+
+        {activeTab === 'phase-outputs' && (
+          <div className="max-w-3xl">
+            <PhaseOutputTemplateEditor />
           </div>
         )}
 

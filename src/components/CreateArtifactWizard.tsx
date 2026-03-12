@@ -94,6 +94,7 @@ export function CreateArtifactWizard({
         recommended_source: recommendedSource || null,
         estimated_duration_minutes: estimatedMinutes ?? null,
         display_order: nextDisplayOrder,
+        template_id: initialFromTemplate?.id ?? null,
       })
       if (err) throw err
       queryClient.invalidateQueries({ queryKey: ['artifacts', categoryId] })
