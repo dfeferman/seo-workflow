@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useUpdateCategory, type CategoryUpdatePayload } from '@/hooks/useUpdateCategory'
+import { useCategoryReferenceDocs, useUpsertCategoryReferenceDoc, useDeleteCategoryReferenceDoc } from '@/hooks/useCategoryReferenceDocs'
+import type { CategoryReferenceDocRow } from '@/types/database.types'
 import { SaveBar } from '@/components/SaveBar'
 import { SubcategoryList } from '@/components/SubcategoryList'
 import { PhaseOutputTemplateEditor } from '@/components/PhaseOutputTemplateEditor'
@@ -96,8 +98,14 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
   const [ton, setTon] = useState('')
   const [noGos, setNoGos] = useState('')
   const [customPlaceholders, setCustomPlaceholders] = useState<Record<string, string>>({})
+  const [editingDocId, setEditingDocId] = useState<string | null>(null)
+  const [docTitle, setDocTitle] = useState('')
+  const [docContent, setDocContent] = useState('')
 
   const updateCategory = useUpdateCategory(category?.id, projectId)
+  const { data: referenceDocs = [] } = useCategoryReferenceDocs(category?.id)
+  const upsertDoc = useUpsertCategoryReferenceDoc()
+  const deleteDoc = useDeleteCategoryReferenceDoc()
 
   const syncFromCategory = useCallback((categoryData?: CategoryRow | null) => {
     const c = categoryData ?? category
@@ -192,6 +200,44 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
     setCustomPlaceholders((prev) => ({ ...prev, [newKey]: '' }))
   }
 
+  const handleExportDoc = (doc: CategoryReferenceDocRow) => {
+    const blob = new Blob([doc.content ?? ''], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const safeTitle = doc.title?.trim() || 'referenz'
+    a.href = url
+    a.download = safeTitle.toLowerCase().endsWith('.md') ? safeTitle : `${safeTitle}.md`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const startNewDoc = () => {
+    setEditingDocId(null)
+    setDocTitle('')
+    setDocContent('')
+  }
+
+  const startEditDoc = (id: string, title: string, content: string) => {
+    setEditingDocId(id)
+    setDocTitle(title)
+    setDocContent(content)
+  }
+
+  const handleSaveDoc = () => {
+    if (!category?.id || !docTitle.trim()) return
+    upsertDoc.mutate({
+      id: editingDocId ?? undefined,
+      category_id: category.id,
+      title: docTitle.trim(),
+      content: docContent,
+    })
+    setEditingDocId(null)
+    setDocTitle('')
+    setDocContent('')
+  }
+
   const tabs: { id: TabId; label: string }[] = [
     { id: 'metadaten', label: 'Metadaten' },
     { id: 'unterkategorien', label: 'Unterkategorien' },
@@ -236,7 +282,7 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
       <div className="flex-1 overflow-y-auto p-7">
         {activeTab === 'metadaten' && (
           <div className={`flex gap-8 ${isHub ? 'flex-row' : ''} max-w-5xl`}>
-            <div className="space-y-7 flex-1 min-w-0 max-w-2xl">
+            <div className="space-y-7 w-full max-w-md">
 
               {/* 01 · Grunddaten */}
               <section>
@@ -348,61 +394,150 @@ export function CategorySettingsTabs({ category, projectId, onDirtyChange }: Pro
 
             </div>
 
-            {/* Platzhalter-Panel (nur Hub) */}
-            {isHub && (
-              <section className="bg-white border border-slate-100 rounded-xl p-6 w-full max-w-md flex-shrink-0 self-start">
-                <SectionHeader number="04" label="Platzhalter" />
-                <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-                  Gültig für diese Oberkategorie und alle Unterkategorien. In Vorlagen z. B. als{' '}
-                  <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">[MEIN_TAG]</code> nutzbar.
-                </p>
-                <div className="space-y-3">
-                  {Object.entries(customPlaceholders).map(([key, value], index) => (
-                    <div key={`ph-${index}`} className="flex gap-2 items-start">
-                      <input
-                        type="text"
-                        value={key.startsWith('[') && key.endsWith(']') ? key.slice(1, -1) : key}
-                        onChange={(e) => {
-                          const v = e.target.value
-                          if (!v.trim()) return
-                          const norm = normalizePlaceholderKey(v)
-                          setCustomPlaceholders((prev) => {
-                            const next = { ...prev }
-                            delete next[key]
-                            next[norm] = value
-                            return next
-                          })
-                        }}
-                        placeholder="MEIN_TAG"
-                        className="flex-1 min-w-0 px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
-                      />
-                      <input
-                        type="text"
-                        value={value}
-                        onChange={(e) => setPlaceholder(key, e.target.value)}
-                        placeholder="Ersetzungstext"
-                        className="flex-1 min-w-0 px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
-                      />
+            <div className="w-full max-w-md flex-shrink-0 self-start">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+                {/* 04 · Platzhalter (links, behält seine Breite) */}
+                {isHub && (
+                  <section className="bg-white border border-slate-100 rounded-xl p-6 w-full max-w-md">
+                    <SectionHeader number="04" label="Platzhalter" />
+                    <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                      Gültig für diese Oberkategorie und alle Unterkategorien. In Vorlagen z. B. als{' '}
+                      <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">[MEIN_TAG]</code> nutzbar.
+                    </p>
+                    <div className="space-y-3">
+                      {Object.entries(customPlaceholders).map(([key, value], index) => (
+                        <div key={`ph-${index}`} className="flex gap-2 items-start">
+                          <input
+                            type="text"
+                            value={key.startsWith('[') && key.endsWith(']') ? key.slice(1, -1) : key}
+                            onChange={(e) => {
+                              const v = e.target.value
+                              if (!v.trim()) return
+                              const norm = normalizePlaceholderKey(v)
+                              setCustomPlaceholders((prev) => {
+                                const next = { ...prev }
+                                delete next[key]
+                                next[norm] = value
+                                return next
+                              })
+                            }}
+                            placeholder="MEIN_TAG"
+                            className="flex-1 min-w-0 px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
+                          />
+                          <input
+                            type="text"
+                            value={value}
+                            onChange={(e) => setPlaceholder(key, e.target.value)}
+                            placeholder="Ersetzungstext"
+                            className="flex-1 min-w-0 px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removePlaceholder(key)}
+                            className="p-2 text-slate-500 hover:text-red-600 transition-colors rounded"
+                            aria-label="Platzhalter entfernen"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addPlaceholder}
+                      className="mt-4 text-sm text-slate-600 hover:text-slate-900 hover:underline font-medium transition-colors"
+                    >
+                      + Platzhalter hinzufügen
+                    </button>
+                  </section>
+                )}
+
+                {/* 05 · Referenz-Dokumente (.md) – rechts von 04, mit eigener Breite */}
+                <section className="bg-white border border-slate-100 rounded-xl p-6 w-full lg:flex-1">
+                  <SectionHeader number="05" label="Referenz-Dokumente (.md)" />
+                  <p className="text-xs text-slate-500 mb-3 leading-relaxed">
+                    Hier kannst du Markdown-Dokumente (Guidelines, Briefings, Beispiele) für diese Kategorie speichern.
+                    Beim Arbeiten mit den Artefakten kannst du sie mit einem Klick kopieren und in ChatGPT oder Perplexity einfügen.
+                  </p>
+                  <div className="space-y-2 mb-4 max-h-52 overflow-y-auto">
+                    {referenceDocs.length === 0 && (
+                      <p className="text-xs text-slate-400">Noch keine Referenz-Dokumente angelegt.</p>
+                    )}
+                    {referenceDocs.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg border border-indigo-100 bg-indigo-50/80"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => startEditDoc(doc.id, doc.title, doc.content)}
+                          className="text-xs font-semibold text-indigo-900 hover:text-indigo-950 truncate text-left flex-1"
+                        >
+                          {doc.title}
+                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => void navigator.clipboard.writeText(doc.content ?? '')}
+                            className="px-2 py-1 rounded text-2xs font-medium border border-indigo-200 bg-white text-indigo-700 hover:bg-indigo-50"
+                          >
+                            Kopieren
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleExportDoc(doc)}
+                            className="px-2 py-1 rounded text-2xs font-medium border border-indigo-200 bg-white text-indigo-700 hover:bg-indigo-50"
+                          >
+                            .md
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteDoc.mutate({ id: doc.id, category_id: doc.category_id })}
+                            className="p-1.5 text-slate-400 hover:text-red-600 rounded"
+                            aria-label="Referenz-Dokument löschen"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={docTitle}
+                      onChange={(e) => setDocTitle(e.target.value)}
+                      placeholder="Titel, z.B. Guidelines.md"
+                      className="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all"
+                    />
+                    <textarea
+                      value={docContent}
+                      onChange={(e) => setDocContent(e.target.value)}
+                      placeholder="Markdown-Inhalt…"
+                      rows={5}
+                      className="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-xs font-mono text-slate-800 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400 resize-y min-h-[120px]"
+                    />
+                    <div className="flex items-center justify-between mt-1">
                       <button
                         type="button"
-                        onClick={() => removePlaceholder(key)}
-                        className="p-2 text-slate-500 hover:text-red-600 transition-colors rounded"
-                        aria-label="Platzhalter entfernen"
+                        onClick={startNewDoc}
+                        className="text-xs text-slate-500 hover:text-slate-700"
                       >
-                        ✕
+                        Neu anfangen
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveDoc}
+                        disabled={!docTitle.trim() || upsertDoc.isPending || !category?.id}
+                        className="px-3 py-1.5 rounded-lg bg-gray-900 text-white text-xs font-semibold hover:bg-gray-800 disabled:opacity-50"
+                      >
+                        {editingDocId ? 'Änderungen speichern' : 'Dokument speichern'}
                       </button>
                     </div>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={addPlaceholder}
-                  className="mt-4 text-sm text-slate-600 hover:text-slate-900 hover:underline font-medium transition-colors"
-                >
-                  + Platzhalter hinzufügen
-                </button>
-              </section>
-            )}
+                  </div>
+                </section>
+              </div>
+            </div>
           </div>
         )}
 

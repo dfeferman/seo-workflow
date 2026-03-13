@@ -57,6 +57,19 @@ function buildPhaseOutputReplacements(
 }
 
 /**
+ * Platzhalter aus Metadaten (04 · Platzhalter) – für die Auswahl im Template-Editor.
+ * Nur diese festen Kategorie-Metadaten-Platzhalter; müssen in Templates verwendet werden.
+ */
+export const PROMPT_PLACEHOLDERS = [
+  '[KATEGORIE]',
+  '[ZIELGRUPPEN]',
+  '[USPs]',
+  '[TON]',
+  '[NO-GOS]',
+  '[SHOP-TYP]',
+] as const
+
+/**
  * Ersetzt Platzhalter im Prompt-Template durch Kategorie-Metadaten.
  * Optional: dynamische Platzhalter (z. B. [INPUT A], [BRIEFING], [TEXT]) aus dependencyMap.
  * Optional: Phase-Outputs ([OUTPUT_A], [OUTPUT_B], …) aus phaseOutputs.

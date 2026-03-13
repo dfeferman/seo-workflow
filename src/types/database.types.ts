@@ -133,6 +133,35 @@ export interface Database {
           template_id?: string | null
         }
       }
+      category_reference_docs: {
+        Row: {
+          id: string
+          category_id: string
+          title: string
+          content: string
+          display_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          category_id: string
+          title: string
+          content?: string
+          display_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          category_id?: string
+          title?: string
+          content?: string
+          display_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
       artifact_results: {
         Row: {
           id: string
@@ -252,6 +281,11 @@ export interface Database {
           updated_at?: string
         }
       }
+
+export type CategoryRow = Database['public']['Tables']['categories']['Row']
+export type TemplateRow = Database['public']['Tables']['templates']['Row']
+export type CategoryPhaseOutputRow = Database['public']['Tables']['category_phase_outputs']['Row']
+export type CategoryReferenceDocRow = Database['public']['Tables']['category_reference_docs']['Row']
       templates: {
         Row: {
           id: string

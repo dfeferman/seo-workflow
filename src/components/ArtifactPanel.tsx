@@ -5,6 +5,7 @@ import { usePlaceholderData } from '@/hooks/usePlaceholderData'
 import { useUpdateArtifact } from '@/hooks/useUpdateArtifact'
 import { PhaseInputReference } from '@/components/PhaseInputReference'
 import { ConfirmModal } from '@/components/ConfirmModal'
+import { useCategoryReferenceDocs } from '@/hooks/useCategoryReferenceDocs'
 import type { ArtifactRow } from '@/types/database.types'
 import type { CategoryRow } from '@/types/database.types'
 import type { ArtifactStatus } from '@/hooks/useArtifacts'
@@ -54,6 +55,7 @@ export function ArtifactPanel({
   const [resetPromptConfirmOpen, setResetPromptConfirmOpen] = useState(false)
 
   const updateArtifact = useUpdateArtifact()
+  const { data: referenceDocs = [] } = useCategoryReferenceDocs(artifact.category_id)
 
   const {
     latestResult,
@@ -274,6 +276,36 @@ export function ArtifactPanel({
 
         {/* Phase-Input Referenz */}
         <PhaseInputReference phase={artifact.phase} categoryId={artifact.category_id} />
+
+        {/* Referenz-Dokumente (.md) */}
+        {referenceDocs.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-2xs font-semibold uppercase tracking-wider text-slate-500">
+                Referenz-Dokumente (.md)
+              </span>
+            </div>
+            <div className="space-y-1.5">
+              {referenceDocs.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="flex items-center justify-between gap-2 px-2 py-1 rounded-lg bg-slate-50 border border-slate-200"
+                >
+                  <span className="text-xs font-medium text-slate-700 truncate flex-1">
+                    {doc.title}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void navigator.clipboard.writeText(doc.content)}
+                    className="py-1 px-2 rounded text-2xs font-medium border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                  >
+                    📋 Kopieren
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Ergebnis */}
         <section>

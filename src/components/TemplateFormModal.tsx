@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useSaveTemplate } from '@/hooks/useSaveTemplate'
 import { useUpdateTemplate } from '@/hooks/useUpdateTemplate'
+import { useCategory } from '@/hooks/useCategory'
+import { PROMPT_PLACEHOLDERS } from '@/utils/replacePlaceholders'
 import type { TemplateRow } from '@/types/database.types'
 
 const PHASES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'X'] as const
@@ -59,10 +61,12 @@ type Props = {
   onClose: () => void
   /** Bei null: neues Template anlegen; sonst: bestehendes bearbeiten */
   template: TemplateRow | null
+  /** Kategorie-Kontext: lädt benutzerdefinierte Platzhalter aus „04 · Platzhalter“ (Metadaten) */
+  categoryId?: string
   onSaved?: () => void
 }
 
-export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
+export function TemplateFormModal({ open, onClose, template, onSaved, categoryId }: Props) {
   const isEdit = template != null
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -71,6 +75,28 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
   const [promptTemplate, setPromptTemplate] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
+  const promptTextareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const { data: category } = useCategory(categoryId)
+  const { data: hubCategory } = useCategory(category?.parent_id ?? undefined)
+
+  const hubPlaceholders =
+    hubCategory?.custom_placeholders && typeof hubCategory.custom_placeholders === 'object'
+      ? hubCategory.custom_placeholders
+      : {}
+  const categoryPlaceholders =
+    category?.custom_placeholders && typeof category.custom_placeholders === 'object'
+      ? category.custom_placeholders
+      : {}
+  const isHub = category != null && category.parent_id == null
+  const mergedCustom = isHub ? categoryPlaceholders : { ...hubPlaceholders, ...categoryPlaceholders }
+  const customPlaceholderKeys = Object.keys(mergedCustom).filter(
+    (k) => k.startsWith('[') && k.endsWith(']')
+  )
+  const allPlaceholders = [
+    ...PROMPT_PLACEHOLDERS,
+    ...customPlaceholderKeys.filter((k) => !PROMPT_PLACEHOLDERS.includes(k as (typeof PROMPT_PLACEHOLDERS)[number])),
+  ]
 
   const saveTemplate = useSaveTemplate()
   const updateTemplate = useUpdateTemplate()
@@ -96,6 +122,24 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
     }
   }, [open, template])
 
+  const insertPlaceholder = useCallback((placeholder: string) => {
+    const ta = promptTextareaRef.current
+    if (ta) {
+      const start = ta.selectionStart
+      const end = ta.selectionEnd
+      const before = promptTemplate.slice(0, start)
+      const after = promptTemplate.slice(end)
+      setPromptTemplate(before + placeholder + after)
+      requestAnimationFrame(() => {
+        ta.focus()
+        const newPos = start + placeholder.length
+        ta.setSelectionRange(newPos, newPos)
+      })
+    } else {
+      setPromptTemplate((prev) => prev + placeholder)
+    }
+  }, [promptTemplate])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -105,6 +149,10 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
     }
     if (!promptTemplate.trim()) {
       setError('Bitte ein Prompt-Template angeben.')
+      return
+    }
+    if (!artifactCode.trim()) {
+      setError('Bitte Artefakt-Kennung / Output angeben.')
       return
     }
     const phaseChar = phase as (typeof PHASES)[number]
@@ -119,7 +167,7 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
           name: name.trim(),
           description: description.trim() || null,
           phase: phaseChar,
-          artifact_code: artifactCode.trim() || null,
+          artifact_code: artifactCode.trim(),
           prompt_template: promptTemplate.trim(),
           tags: tags.length ? tags : null,
         })
@@ -128,7 +176,7 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
           name: name.trim(),
           description: description.trim() || null,
           phase: phaseChar,
-          artifact_code: artifactCode.trim() || null,
+          artifact_code: artifactCode.trim(),
           prompt_template: promptTemplate.trim(),
           tags: tags.length ? tags : null,
         })
@@ -220,13 +268,16 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-1.5">Artefakt-Kennung (optional)</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                      Artefakt-Kennung / Output <span className="text-red-600">*</span>
+                    </label>
                     <input
                       type="text"
                       value={artifactCode}
                       onChange={(e) => setArtifactCode(e.target.value)}
                       placeholder="z.B. A1, B2.1"
                       className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                      required
                     />
                   </div>
                 </div>
@@ -237,7 +288,23 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
               <label className="block text-sm font-medium text-slate-600 mb-1.5">
                 Prompt-Template <span className="text-red-600">*</span>
               </label>
+              <p className="text-xs text-slate-500 mb-2">
+                Platzhalter aus Metadaten (04) – per Klick an Cursorposition einfügen:
+              </p>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {allPlaceholders.map((ph) => (
+                  <button
+                    key={ph}
+                    type="button"
+                    onClick={() => insertPlaceholder(ph)}
+                    className="px-2 py-1 rounded text-xs font-mono bg-slate-100 border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:border-slate-300 hover:text-slate-900"
+                  >
+                    {ph}
+                  </button>
+                ))}
+              </div>
               <textarea
+                ref={promptTextareaRef}
                 value={promptTemplate}
                 onChange={(e) => setPromptTemplate(e.target.value)}
                 placeholder="Das Prompt, das für dieses Artefakt verwendet wird. Platzhalter z.B. [KATEGORIE], [INPUT A]…"
@@ -245,6 +312,12 @@ export function TemplateFormModal({ open, onClose, template, onSaved }: Props) {
                 className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-mono text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400 resize-y min-h-[286px]"
                 required
               />
+              <div className="mt-3 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-600">
+                <span className="font-medium text-slate-700">Output-Platzhalter für andere Phasen:</span>{' '}
+                <code className="font-mono text-slate-800 bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                  INPUT [<span className="text-slate-900">{artifactCode.trim() || '…'}</span>]
+                </code>
+              </div>
             </section>
 
             <section>

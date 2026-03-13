@@ -14,11 +14,13 @@ const PHASES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'X'] as const
 
 type Props = {
   open: boolean
+  /** Aktuelle Kategorie – für Platzhalter aus „04 · Platzhalter“ (Metadaten) */
+  categoryId?: string
   onClose: () => void
   onUseTemplate: (template: TemplateRow) => void
 }
 
-export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
+export function TemplateBrowser({ open, onClose, onUseTemplate, categoryId }: Props) {
   const [search, setSearch] = useState('')
   const [phaseFilter, setPhaseFilter] = useState<string | null>(null)
   const [view, setView] = useState<'grid' | 'list'>('grid')
@@ -268,6 +270,7 @@ export function TemplateBrowser({ open, onClose, onUseTemplate }: Props) {
       {formModalOpen && (
         <TemplateFormModal
           open={true}
+          categoryId={categoryId}
           onClose={() => { setFormModalOpen(false); setTemplateToEdit(null) }}
           template={templateToEdit}
           onSaved={() => {}}

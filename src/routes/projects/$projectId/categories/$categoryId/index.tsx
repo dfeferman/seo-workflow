@@ -238,6 +238,7 @@ function WorkflowPage() {
       {templateBrowserOpen && (
         <TemplateBrowser
           open={true}
+          categoryId={categoryId}
           onClose={() => setTemplateBrowserOpen(false)}
           onUseTemplate={(t) => {
             setTemplateToApply(t)
