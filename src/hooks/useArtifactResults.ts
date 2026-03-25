@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import type { ArtifactResultRow } from '@/types/database.types'
 
 export function useArtifactResults(artifactId: string | undefined) {
@@ -9,13 +9,7 @@ export function useArtifactResults(artifactId: string | undefined) {
     queryKey: ['artifact-results', artifactId],
     queryFn: async (): Promise<ArtifactResultRow[]> => {
       if (!artifactId) return []
-      const { data, error } = await supabase
-        .from('artifact_results')
-        .select('*')
-        .eq('artifact_id', artifactId)
-        .order('version', { ascending: false })
-      if (error) throw error
-      return data ?? []
+      return apiClient.artifactResults.getByArtifact(artifactId)
     },
     enabled: !!artifactId,
   })
@@ -30,27 +24,7 @@ export function useArtifactResults(artifactId: string | undefined) {
       result_text: string
       source?: string
     }) => {
-      const { data: existing } = await supabase
-        .from('artifact_results')
-        .select('version')
-        .eq('artifact_id', artifact_id)
-        .order('version', { ascending: false })
-        .limit(1)
-        .single()
-      const nextVersion = (existing?.version ?? 0) + 1
-      const { data, error } = await supabase
-        .from('artifact_results')
-        .insert({
-          artifact_id,
-          result_text,
-          source,
-          version: nextVersion,
-          status: 'draft',
-        })
-        .select()
-        .single()
-      if (error) throw error
-      return data
+      return apiClient.artifactResults.create({ artifact_id, result_text, source })
     },
     onSuccess: (_data, { artifact_id }) => {
       void queryClient.invalidateQueries({ queryKey: ['artifact-results', artifact_id] })
@@ -61,17 +35,8 @@ export function useArtifactResults(artifactId: string | undefined) {
   })
 
   const setResultFinal = useMutation({
-    mutationFn: async ({
-      result_id,
-    }: {
-      result_id: string
-      artifact_id: string
-    }) => {
-      const { error } = await supabase
-        .from('artifact_results')
-        .update({ status: 'final' })
-        .eq('id', result_id)
-      if (error) throw error
+    mutationFn: async ({ result_id }: { result_id: string; artifact_id: string }) => {
+      await apiClient.artifactResults.update(result_id, { status: 'final' })
     },
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['artifact-results', variables.artifact_id] })

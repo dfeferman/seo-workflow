@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import type { ArtifactRow } from '@/types/database.types'
 
 /**
@@ -12,8 +12,7 @@ export function useDeleteArtifact(categoryId: string | undefined) {
 
   return useMutation({
     mutationFn: async (artifactId: string) => {
-      const { error } = await supabase.from('artifacts').delete().eq('id', artifactId)
-      if (error) throw error
+      await apiClient.artifacts.delete(artifactId)
     },
     onMutate: async (artifactId: string) => {
       if (!categoryId) return

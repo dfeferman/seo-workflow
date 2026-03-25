@@ -1,13 +1,20 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-import type { Database } from '@/types/database.types'
-
-type ArtifactUpdate = Database['public']['Tables']['artifacts']['Update']
+import { apiClient } from '@/lib/apiClient'
 
 export type UpdateArtifactInput = {
   id: string
   categoryId: string
-} & Partial<Pick<ArtifactUpdate, 'name' | 'description' | 'prompt_template' | 'phase' | 'artifact_code' | 'recommended_source' | 'estimated_duration_minutes' | 'display_order' | 'template_id'>>
+} & Partial<{
+  name: string
+  description: string | null
+  prompt_template: string
+  phase: string
+  artifact_code: string
+  recommended_source: string | null
+  estimated_duration_minutes: number | null
+  display_order: number
+  template_id: string | null
+}>
 
 /**
  * Artefakt aktualisieren (z. B. prompt_template, name, description).
@@ -17,16 +24,8 @@ export function useUpdateArtifact() {
 
   return useMutation({
     mutationFn: async (input: UpdateArtifactInput) => {
-      const { id, categoryId, ...payload } = input
-      const update: ArtifactUpdate = {
-        ...payload,
-        updated_at: new Date().toISOString(),
-      }
-      const { error } = await supabase
-        .from('artifacts')
-        .update(update)
-        .eq('id', id)
-      if (error) throw error
+      const { id, categoryId: _categoryId, ...payload } = input
+      await apiClient.artifacts.update(id, payload)
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({

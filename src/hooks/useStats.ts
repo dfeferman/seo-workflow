@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import { useArtifacts } from './useArtifacts'
 import { useArtifactStatusMap } from './useArtifacts'
 import type { ArtifactPhase } from '@/types/database.types'
@@ -51,6 +51,8 @@ export type CategoryStats = {
   lastActivityAt: string | null
 }
 
+type RecentRow = { artifact_id: string; status: 'draft' | 'final'; updated_at: string }
+
 /**
  * Lädt Artefakte + Status, dann letzte Aktivitäten (artifact_results).
  * Berechnet Fortschritt, pro Phase, Timeline, Hinweise und verbleibende Zeit.
@@ -68,16 +70,23 @@ export function useStats(categoryId: string | undefined): {
 
   const { data: recentResults = [] } = useQuery({
     queryKey: ['recent-activity', categoryId, artifactIds],
-    queryFn: async (): Promise<{ artifact_id: string; status: 'draft' | 'final'; updated_at: string }[]> => {
+    queryFn: async (): Promise<RecentRow[]> => {
       if (artifactIds.length === 0) return []
-      const { data, error } = await supabase
-        .from('artifact_results')
-        .select('artifact_id, status, updated_at')
-        .in('artifact_id', artifactIds)
-        .order('updated_at', { ascending: false })
-        .limit(15)
-      if (error) throw error
-      return (data ?? []) as { artifact_id: string; status: 'draft' | 'final'; updated_at: string }[]
+      const lists = await Promise.all(
+        artifactIds.map((id) => apiClient.artifactResults.getByArtifact(id))
+      )
+      const flat: RecentRow[] = lists
+        .flat()
+        .map((r) => ({
+          artifact_id: r.artifact_id as string,
+          status: r.status as 'draft' | 'final',
+          updated_at: r.updated_at as string,
+        }))
+        .sort(
+          (a, b) =>
+            new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+        )
+      return flat.slice(0, 15)
     },
     enabled: !!categoryId && artifactIds.length > 0,
   })

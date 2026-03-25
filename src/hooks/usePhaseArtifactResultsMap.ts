@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import type { ArtifactPhase } from '@/types/database.types'
 
 /**
@@ -10,34 +10,32 @@ export function usePhaseArtifactResultsMap(categoryId: string, phase: ArtifactPh
   return useQuery({
     queryKey: ['phase-artifact-results-map', categoryId, phase],
     queryFn: async (): Promise<Map<string, string>> => {
-      const { data: artifacts, error: artError } = await supabase
-        .from('artifacts')
-        .select('id, artifact_code')
-        .eq('category_id', categoryId)
-        .eq('phase', phase)
-      if (artError) throw artError
-      if (!artifacts?.length) return new Map()
+      const allArts = await apiClient.artifacts.getByCategory(categoryId)
+      const artifacts = allArts.filter(
+        (a) => String(a.phase).toUpperCase() === String(phase).toUpperCase()
+      )
+      if (!artifacts.length) return new Map()
 
-      const artifactIds = artifacts.map((a) => a.id)
-      const { data: results, error: resError } = await supabase
-        .from('artifact_results')
-        .select('artifact_id, result_text, version')
-        .in('artifact_id', artifactIds)
-        .order('version', { ascending: false })
-      if (resError) throw resError
+      const artifactIds = artifacts.map((a) => a.id as string)
+      const resultLists = await Promise.all(
+        artifactIds.map((id) => apiClient.artifactResults.getByArtifact(id))
+      )
 
-      // Pro artifact_id nur die neueste Version mit Text behalten
       const latestByArtifactId = new Map<string, string>()
-      for (const r of results ?? []) {
-        if (!latestByArtifactId.has(r.artifact_id) && r.result_text) {
-          latestByArtifactId.set(r.artifact_id, r.result_text)
+      resultLists.forEach((rows, i) => {
+        const aid = artifactIds[i]!
+        for (const r of rows) {
+          if (!latestByArtifactId.has(aid) && r.result_text) {
+            latestByArtifactId.set(aid, r.result_text as string)
+            break
+          }
         }
-      }
+      })
 
       const map = new Map<string, string>()
       for (const a of artifacts) {
-        const text = latestByArtifactId.get(a.id)
-        if (text) map.set(a.artifact_code, text)
+        const text = latestByArtifactId.get(a.id as string)
+        if (text) map.set(a.artifact_code as string, text)
       }
       return map
     },
