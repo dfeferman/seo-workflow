@@ -53,17 +53,17 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     return
   }
 
-  const versionRes = await pool.query(
-    `SELECT COALESCE(MAX(version), 0) + 1 AS next_version
-     FROM artifact_results WHERE artifact_id = $1`,
-    [artifact_id]
-  )
-  const nextVersion = Number(versionRes.rows[0].next_version)
-
   const result = await pool.query(
-    `INSERT INTO artifact_results (artifact_id, result_text, source, version, status)
-     VALUES ($1, $2, $3, $4, 'draft') RETURNING *`,
-    [artifact_id, result_text ?? null, source, nextVersion]
+    `WITH next_version AS (
+       SELECT COALESCE(MAX(version), 0) + 1 AS v
+       FROM artifact_results
+       WHERE artifact_id = $1
+     )
+     INSERT INTO artifact_results (artifact_id, result_text, source, version, status)
+     SELECT $1, $2, $3, v, $4
+     FROM next_version
+     RETURNING *`,
+    [artifact_id, result_text ?? null, source, 'draft']
   )
   res.status(201).json(result.rows[0])
 })

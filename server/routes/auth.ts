@@ -19,12 +19,21 @@ router.post('/register', async (req, res) => {
     res.status(400).json({ error: 'email and password required' })
     return
   }
+  const trimmedEmail = String(email).trim()
+  if (!trimmedEmail.includes('@') || !trimmedEmail.slice(trimmedEmail.indexOf('@')).includes('.')) {
+    res.status(400).json({ error: 'Invalid email format' })
+    return
+  }
+  if (String(password).length < 8) {
+    res.status(400).json({ error: 'Password must be at least 8 characters' })
+    return
+  }
   try {
     const password_hash = await bcrypt.hash(password, 10)
     const result = await pool.query(
       `INSERT INTO users (email, password_hash) VALUES ($1, $2)
        RETURNING id, email, created_at`,
-      [email, password_hash]
+      [trimmedEmail, password_hash]
     )
     const user = result.rows[0]
     res.status(201).json({ user, token: signToken(user.id) })
@@ -45,30 +54,49 @@ router.post('/login', async (req, res) => {
     res.status(400).json({ error: 'email and password required' })
     return
   }
-  const result = await pool.query(
-    `SELECT id, email, password_hash FROM users WHERE email = $1`,
-    [email]
-  )
-  const user = result.rows[0]
-  if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-    res.status(401).json({ error: 'Invalid credentials' })
+  const trimmedEmail = String(email).trim()
+  if (!trimmedEmail.includes('@') || !trimmedEmail.slice(trimmedEmail.indexOf('@')).includes('.')) {
+    res.status(400).json({ error: 'Invalid email format' })
     return
   }
-  const { password_hash: _, ...safeUser } = user
-  res.json({ user: safeUser, token: signToken(user.id) })
+  if (String(password).length < 8) {
+    res.status(400).json({ error: 'Password must be at least 8 characters' })
+    return
+  }
+  try {
+    const result = await pool.query(
+      `SELECT id, email, password_hash FROM users WHERE email = $1`,
+      [trimmedEmail]
+    )
+    const user = result.rows[0]
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+      res.status(401).json({ error: 'Invalid credentials' })
+      return
+    }
+    const { password_hash: _, ...safeUser } = user
+    res.json({ user: safeUser, token: signToken(user.id) })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
 })
 
 // GET /api/auth/me
 router.get('/me', requireAuth, async (req: AuthRequest, res: Response) => {
-  const result = await pool.query(
-    `SELECT id, email, created_at FROM users WHERE id = $1`,
-    [req.userId]
-  )
-  if (!result.rows[0]) {
-    res.status(404).json({ error: 'User not found' })
-    return
+  try {
+    const result = await pool.query(
+      `SELECT id, email, created_at FROM users WHERE id = $1`,
+      [req.userId]
+    )
+    if (!result.rows[0]) {
+      res.status(404).json({ error: 'User not found' })
+      return
+    }
+    res.json(result.rows[0])
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Internal server error' })
   }
-  res.json(result.rows[0])
 })
 
 export default router

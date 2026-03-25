@@ -39,16 +39,17 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     res.status(403).json({ error: 'Forbidden' })
     return
   }
-  const vRes = await pool.query(
-    `SELECT COALESCE(MAX(version), 0) + 1 AS next FROM category_phase_outputs
-     WHERE category_id = $1 AND phase = $2`,
-    [category_id, phase]
-  )
-  const nextVersion = Number(vRes.rows[0].next)
   const result = await pool.query(
-    `INSERT INTO category_phase_outputs (category_id, phase, output_text, version, status)
-     VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-    [category_id, phase, output_text ?? null, nextVersion, status ?? 'draft']
+    `WITH next_version AS (
+       SELECT COALESCE(MAX(version), 0) + 1 AS v
+       FROM category_phase_outputs
+       WHERE category_id = $1 AND phase = $2
+     )
+     INSERT INTO category_phase_outputs (category_id, phase, output_text, version, status)
+     SELECT $1, $2, $3, v, $4
+     FROM next_version
+     RETURNING *`,
+    [category_id, phase, output_text ?? null, status ?? 'draft']
   )
   res.status(201).json(result.rows[0])
 })
