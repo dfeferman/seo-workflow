@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useSubcategories } from '@/hooks/useSubcategories'
 import { useCategoryProgress } from '@/hooks/useCategoryProgress'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import { useQueryClient } from '@tanstack/react-query'
 import type { CategoryRow } from '@/types/database.types'
 
@@ -26,7 +26,7 @@ function formatDate(iso: string) {
 
 export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Props) {
   const queryClient = useQueryClient()
-  const { data: subcategories = [], isLoading } = useSubcategories(categoryId)
+  const { data: subcategories = [], isLoading } = useSubcategories(projectId, categoryId)
   const subcategoryIds = subcategories.map((c) => c.id)
   const progress = useCategoryProgress(projectId, subcategoryIds)
 
@@ -45,18 +45,19 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
     setIsAdding(true)
     try {
       const nextOrder = subcategories.length
-      const { error } = await supabase.from('categories').insert({
-        project_id: projectId,
-        parent_id: categoryId,
-        name,
-        type: 'category',
-        display_order: nextOrder,
-      })
-      if (error) {
-        setAddError(error.message)
+      try {
+        await apiClient.categories.create({
+          project_id: projectId,
+          parent_id: categoryId,
+          name,
+          type: 'category',
+          display_order: nextOrder,
+        })
+      } catch (e) {
+        setAddError(e instanceof Error ? e.message : 'Speichern fehlgeschlagen')
         return
       }
-      queryClient.invalidateQueries({ queryKey: ['subcategories', categoryId] })
+      queryClient.invalidateQueries({ queryKey: ['subcategories', projectId, categoryId] })
       queryClient.invalidateQueries({ queryKey: ['all-categories', projectId] })
       queryClient.invalidateQueries({ queryKey: ['category-progress', projectId] })
       setNewName('')
@@ -71,12 +72,13 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
     setDeleteError(null)
     setIsDeleting(true)
     try {
-      const { error } = await supabase.from('categories').delete().eq('id', sub.id)
-      if (error) {
-        setDeleteError(error.message)
+      try {
+        await apiClient.categories.delete(sub.id)
+      } catch (e) {
+        setDeleteError(e instanceof Error ? e.message : 'Löschen fehlgeschlagen')
         return
       }
-      queryClient.invalidateQueries({ queryKey: ['subcategories', categoryId] })
+      queryClient.invalidateQueries({ queryKey: ['subcategories', projectId, categoryId] })
       queryClient.invalidateQueries({ queryKey: ['all-categories', projectId] })
       queryClient.invalidateQueries({ queryKey: ['category-progress', projectId] })
       setDeleteConfirm(null)

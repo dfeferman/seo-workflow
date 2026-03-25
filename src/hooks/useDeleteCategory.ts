@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import type { CategoryRow } from '@/types/database.types'
 
 /** Entfernt eine Kategorie und alle Unterkategorien rekursiv aus einer flachen Liste. */
@@ -30,8 +30,7 @@ export function useDeleteCategory(projectId: string | undefined) {
 
   return useMutation({
     mutationFn: async (categoryId: string) => {
-      const { error } = await supabase.from('categories').delete().eq('id', categoryId)
-      if (error) throw error
+      await apiClient.categories.delete(categoryId)
     },
     onMutate: async (categoryId: string) => {
       if (!projectId) return
@@ -57,6 +56,7 @@ export function useDeleteCategory(projectId: string | undefined) {
         queryClient.invalidateQueries({ queryKey: ['all-categories', projectId] })
         queryClient.invalidateQueries({ queryKey: ['categories', projectId] })
       }
+      queryClient.invalidateQueries({ queryKey: ['subcategories'] })
       queryClient.removeQueries({ queryKey: ['artifacts', categoryId] })
       queryClient.invalidateQueries({ queryKey: ['artifact-status-map'] })
     },

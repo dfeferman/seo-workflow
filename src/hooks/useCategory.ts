@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import type { CategoryRow } from '@/types/database.types'
 
 export function useCategory(categoryId: string | undefined) {
@@ -7,13 +7,7 @@ export function useCategory(categoryId: string | undefined) {
     queryKey: ['category', categoryId],
     queryFn: async (): Promise<CategoryRow | null> => {
       if (!categoryId) return null
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('id', categoryId)
-        .single()
-      if (error) throw error
-      return data
+      return apiClient.categories.getById(categoryId)
     },
     enabled: !!categoryId,
   })

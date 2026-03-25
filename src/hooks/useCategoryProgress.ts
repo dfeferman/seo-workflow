@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import { useCategories } from './useCategories'
 
 export type CategoryProgressMap = Record<string, { done: number; total: number }>
@@ -19,20 +19,25 @@ export function useCategoryProgress(
   const { data: result } = useQuery({
     queryKey: ['category-progress', projectId, categoryIds],
     queryFn: async () => {
-      if (categoryIds.length === 0) return { artifacts: [] as { id: string; category_id: string }[], results: new Set<string>() }
-      const { data: artifacts, error: e1 } = await supabase
-        .from('artifacts')
-        .select('id, category_id')
-        .in('category_id', categoryIds)
-      if (e1) throw e1
-      const artifactIds = (artifacts ?? []).map((a) => a.id)
-      if (artifactIds.length === 0) return { artifacts: artifacts ?? [], results: new Set<string>() }
-      const { data: results, error: e2 } = await supabase
-        .from('artifact_results')
-        .select('artifact_id')
-        .in('artifact_id', artifactIds)
-      if (e2) throw e2
-      return { artifacts: artifacts ?? [], results: new Set<string>((results ?? []).map((r) => r.artifact_id)) }
+      if (categoryIds.length === 0) {
+        return { artifacts: [] as { id: string; category_id: string }[], results: new Set<string>() }
+      }
+      const artifactLists = await Promise.all(
+        categoryIds.map((cid) => apiClient.artifacts.getByCategory(cid))
+      )
+      const artifacts = artifactLists.flat() as { id: string; category_id: string }[]
+      const artifactIds = artifacts.map((a) => a.id)
+      if (artifactIds.length === 0) {
+        return { artifacts, results: new Set<string>() }
+      }
+      const resultLists = await Promise.all(
+        artifactIds.map((aid) => apiClient.artifactResults.getByArtifact(aid))
+      )
+      const results = new Set<string>()
+      resultLists.forEach((rows, i) => {
+        if (rows?.length) results.add(artifactIds[i]!)
+      })
+      return { artifacts, results }
     },
     enabled: categoryIds.length > 0,
   })

@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import { buildArtifactsFromTemplates } from '@/utils/createDefaultArtifacts'
-import type { ContentType } from '@/types/database.types'
+import type { ContentType, TemplateRow } from '@/types/database.types'
 
 export type CreateCategoryInput = {
   projectId: string
@@ -30,81 +30,57 @@ export function useCreateCategory() {
     mutationFn: async (input: CreateCategoryInput): Promise<{ categoryId: string; projectId: string }> => {
       const { projectId, type, name, hub_name, subcategoryNames, zielgruppen, shop_typ, usps, ton, no_gos } = input
 
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Nicht angemeldet.')
-      const { data: templates = [], error: templatesError } = await supabase
-        .from('templates')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('phase', { ascending: true })
-        .order('created_at', { ascending: true })
-      if (templatesError) throw templatesError
+      const rawTemplates = await apiClient.templates.getAll()
+      const templates: TemplateRow[] = [...rawTemplates].sort((a, b) => {
+        const pa = String(a.phase ?? '')
+        const pb = String(b.phase ?? '')
+        if (pa !== pb) return pa.localeCompare(pb)
+        return String(a.created_at ?? '').localeCompare(String(b.created_at ?? ''))
+      })
 
-      // Nächste display_order für Top-Level-Kategorien
-      const { data: existing } = await supabase
-        .from('categories')
-        .select('display_order')
-        .eq('project_id', projectId)
-        .is('parent_id', null)
-        .order('display_order', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-      const nextOrder = (existing?.display_order ?? -1) + 1
+      const existingAll = await apiClient.categories.getByProject(projectId)
+      const roots = existingAll.filter((c) => c.parent_id == null)
+      const maxOrder = roots.reduce((m, c) => Math.max(m, c.display_order ?? 0), -1)
+      const nextOrder = maxOrder + 1
 
-      const { data: category, error: catError } = await supabase
-        .from('categories')
-        .insert({
-          project_id: projectId,
-          parent_id: null,
-          name,
-          type,
-          hub_name: type === 'category' ? (hub_name || name) : null,
-          zielgruppen: zielgruppen.length ? zielgruppen : null,
-          shop_typ: type === 'category' ? shop_typ ?? null : null,
-          usps: usps || null,
-          ton: ton || null,
-          no_gos: no_gos || null,
-          display_order: nextOrder,
-        })
-        .select('id')
-        .single()
-      if (catError) throw catError
-      if (!category) throw new Error('Kategorie konnte nicht erstellt werden.')
+      const category = await apiClient.categories.create({
+        project_id: projectId,
+        parent_id: null,
+        name,
+        type,
+        hub_name: type === 'category' ? hub_name || name : null,
+        zielgruppen: zielgruppen.length ? zielgruppen : null,
+        shop_typ: type === 'category' ? shop_typ ?? null : null,
+        usps: usps || null,
+        ton: ton || null,
+        no_gos: no_gos || null,
+        display_order: nextOrder,
+      })
+      const mainCategoryId = category.id as string
 
-      const mainCategoryId = category.id
-
-      // Optional: Unterkategorien (nur bei type category) – jede mit Fehlerprüfung und Standard-Artefakten
       if (type === 'category' && subcategoryNames?.length) {
         for (let i = 0; i < subcategoryNames.length; i++) {
           const subName = subcategoryNames[i].trim()
           if (!subName) continue
-          const { data: subCat, error: subError } = await supabase
-            .from('categories')
-            .insert({
-              project_id: projectId,
-              parent_id: mainCategoryId,
-              name: subName,
-              type: 'category',
-              display_order: i,
-            })
-            .select('id')
-            .single()
-          if (subError) throw subError
+          const subCat = await apiClient.categories.create({
+            project_id: projectId,
+            parent_id: mainCategoryId,
+            name: subName,
+            type: 'category',
+            display_order: i,
+          })
           if (subCat?.id) {
-            const subArtifacts = buildArtifactsFromTemplates(templates, subCat.id)
-            if (subArtifacts.length) {
-              const { error: subArtError } = await supabase.from('artifacts').insert(subArtifacts)
-              if (subArtError) throw subArtError
+            const subArtifacts = buildArtifactsFromTemplates(templates, subCat.id as string)
+            for (const row of subArtifacts) {
+              await apiClient.artifacts.create(row)
             }
           }
         }
       }
 
-      // Artefakte aus Template-Bibliothek anlegen (an der Hauptkategorie / Hub)
       const artifacts = buildArtifactsFromTemplates(templates, mainCategoryId)
-      if (artifacts.length) {
-        const { error: artError } = await supabase.from('artifacts').insert(artifacts)
-        if (artError) throw artError
+      for (const row of artifacts) {
+        await apiClient.artifacts.create(row)
       }
 
       return { categoryId: mainCategoryId, projectId }
@@ -113,6 +89,7 @@ export function useCreateCategory() {
       queryClient.invalidateQueries({ queryKey: ['all-categories', projectId] })
       queryClient.invalidateQueries({ queryKey: ['categories', projectId] })
       queryClient.invalidateQueries({ queryKey: ['category-progress', projectId] })
+      queryClient.invalidateQueries({ queryKey: ['subcategories'] })
     },
   })
 
@@ -121,6 +98,7 @@ export function useCreateCategory() {
     navigate({
       to: '/projects/$projectId/categories/$categoryId',
       params: { projectId: result.projectId, categoryId: result.categoryId },
+      search: {},
     })
   }
 

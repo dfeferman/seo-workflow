@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import type { CategoryRow } from '@/types/database.types'
 
 /**
@@ -10,14 +10,10 @@ export function useCategories(projectId: string | undefined) {
     queryKey: ['categories', projectId],
     queryFn: async (): Promise<CategoryRow[]> => {
       if (!projectId) return []
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('project_id', projectId)
-        .is('parent_id', null)
-        .order('display_order', { ascending: true })
-      if (error) throw error
-      return data ?? []
+      const all = await apiClient.categories.getByProject(projectId)
+      return all
+        .filter((c: CategoryRow) => c.parent_id == null)
+        .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
     },
     enabled: !!projectId,
   })
@@ -31,13 +27,8 @@ export function useAllCategories(projectId: string | undefined) {
     queryKey: ['all-categories', projectId],
     queryFn: async (): Promise<CategoryRow[]> => {
       if (!projectId) return []
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('project_id', projectId)
-        .order('display_order', { ascending: true })
-      if (error) throw error
-      return data ?? []
+      const all = await apiClient.categories.getByProject(projectId)
+      return [...all].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
     },
     enabled: !!projectId,
   })
@@ -57,6 +48,6 @@ export function buildCategoryTree(categories: CategoryRow[]) {
   }
   return roots.map((r) => ({
     ...r,
-    children: (byParent.get(r.id) ?? []),
+    children: byParent.get(r.id) ?? [],
   }))
 }
