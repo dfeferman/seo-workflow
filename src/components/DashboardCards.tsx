@@ -83,7 +83,7 @@ export function DashboardCards({
 
   const title = category.hub_name || category.name
   const badges: string[] = []
-  if (category.zielgruppen?.length) category.zielgruppen.forEach(z => badges.push(`🎯 ${z}`))
+  if (category.zielgruppen?.length) category.zielgruppen.forEach((z: string) => badges.push(`🎯 ${z}`))
   if (category.shop_typ) badges.push(`🏪 ${category.shop_typ}`)
 
   const kpis = [

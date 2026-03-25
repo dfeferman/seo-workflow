@@ -41,7 +41,7 @@ export function TemplateBrowser({ open, onClose, onUseTemplate, categoryId }: Pr
         (t) =>
           t.name.toLowerCase().includes(q) ||
           (t.description?.toLowerCase().includes(q)) ||
-          (t.tags?.some((tag) => tag.toLowerCase().includes(q))) ||
+          (t.tags?.some((tag: string) => tag.toLowerCase().includes(q))) ||
           t.prompt_template.toLowerCase().includes(q)
       )
     }

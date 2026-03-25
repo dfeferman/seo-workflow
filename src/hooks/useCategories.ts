@@ -34,8 +34,10 @@ export function useAllCategories(projectId: string | undefined) {
   })
 }
 
+export type CategoryTreeNode = CategoryRow & { children: CategoryRow[] }
+
 /** Baum: Hubs mit children (Unterkategorien). */
-export function buildCategoryTree(categories: CategoryRow[]) {
+export function buildCategoryTree(categories: CategoryRow[]): CategoryTreeNode[] {
   const roots = categories.filter((c) => c.parent_id == null)
   const byParent = new Map<string | null, CategoryRow[]>()
   for (const c of categories) {

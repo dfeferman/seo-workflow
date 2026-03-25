@@ -18,7 +18,7 @@ export function useSavePhaseOutputTemplate() {
     mutationFn: async (input: SavePhaseOutputTemplateInput) => {
       return apiClient.phaseOutputTemplates.upsert(input.phase, {
         template_text: input.template_text,
-        description: input.description ?? null,
+        ...(input.description != null ? { description: input.description } : {}),
       })
     },
     onSuccess: () => {

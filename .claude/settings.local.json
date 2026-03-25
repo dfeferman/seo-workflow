@@ -13,7 +13,16 @@
       "Bash(cd \"C:\\\\Development\\\\SEO-workflow\" && npx supabase link --project-ref tkkemleubrajawxsdktp 2>&1)",
       "Bash(cd \"C:\\\\Development\\\\SEO-workflow\" && npx vitest run 2>&1 | tail -8)",
       "Bash(cd \"C:\\\\Development\\\\SEO-workflow\" && npm run test:run 2>&1)",
-      "Bash(cd \"C:\\\\Development\\\\SEO-workflow\" && npx tsc -b --noEmit 2>&1)"
+      "Bash(cd \"C:\\\\Development\\\\SEO-workflow\" && npx tsc -b --noEmit 2>&1)",
+      "Bash(npm install:*)",
+      "Bash(npm list:*)",
+      "Bash(npm ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vitest:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run:*)",
+      "Bash(grep:*)"
     ]
   }
 }

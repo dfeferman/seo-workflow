@@ -39,6 +39,7 @@ function CategorySettingsPage() {
           <Link
             to="/projects/$projectId/categories/$categoryId"
             params={{ projectId, categoryId }}
+            search={{ open: undefined }}
             className="py-2 px-4 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
           >
             ⬇ Export
@@ -46,6 +47,7 @@ function CategorySettingsPage() {
           <Link
             to="/projects/$projectId/categories/$categoryId"
             params={{ projectId, categoryId }}
+            search={{ open: undefined }}
             className="py-2 px-4 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-800 transition-colors"
           >
             ＋ Artefakt
@@ -59,6 +61,7 @@ function CategorySettingsPage() {
               <Link
                 to="/projects/$projectId/categories/$categoryId"
                 params={{ projectId, categoryId: parentCategory.id }}
+                search={{ open: undefined }}
                 className="text-slate-600 hover:text-slate-900 hover:underline"
               >
                 {parentCategory.name}

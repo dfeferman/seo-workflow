@@ -18,7 +18,7 @@ import { useDeleteArtifact } from '@/hooks/useDeleteArtifact'
 import type { TemplateRow } from '@/types/database.types'
 import type { ArtifactRow } from '@/types/database.types'
 import type { ArtifactPhase } from '@/types/database.types'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import { replacePlaceholders } from '@/utils/replacePlaceholders'
 
 export const Route = createFileRoute('/projects/$projectId/categories/$categoryId/')({
@@ -92,15 +92,10 @@ function WorkflowPage() {
   )
 
   const handleCopyResult = useCallback(async (artifact: ArtifactRow) => {
-    const { data } = await supabase
-      .from('artifact_results')
-      .select('result_text')
-      .eq('artifact_id', artifact.id)
-      .order('version', { ascending: false })
-      .limit(1)
-      .single()
-    if (data?.result_text) {
-      void navigator.clipboard.writeText(data.result_text).then(() => setFlashMessage('Kopiert!'))
+    const rows = await apiClient.artifactResults.getByArtifact(artifact.id)
+    const text = rows[0]?.result_text
+    if (text) {
+      void navigator.clipboard.writeText(String(text)).then(() => setFlashMessage('Kopiert!'))
     }
   }, [])
 
@@ -166,6 +161,7 @@ function WorkflowPage() {
               <Link
                 to="/projects/$projectId/categories/$categoryId"
                 params={{ projectId, categoryId: parentCategory.id }}
+                search={{ open: undefined }}
                 className="text-slate-600 hover:text-slate-900 hover:underline"
               >
                 {parentCategory.name}

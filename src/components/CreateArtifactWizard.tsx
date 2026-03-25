@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import { PhaseSelector } from '@/components/PhaseSelector'
 import { PromptEditor } from '@/components/PromptEditor'
 import type { CategoryRow } from '@/types/database.types'
@@ -84,7 +84,7 @@ export function CreateArtifactWizard({
     setError(null)
     setIsSubmitting(true)
     try {
-      const { error: err } = await supabase.from('artifacts').insert({
+      await apiClient.artifacts.create({
         category_id: categoryId,
         phase: phase!,
         artifact_code: artifactCode.trim(),
@@ -96,7 +96,6 @@ export function CreateArtifactWizard({
         display_order: nextDisplayOrder,
         template_id: initialFromTemplate?.id ?? null,
       })
-      if (err) throw err
       queryClient.invalidateQueries({ queryKey: ['artifacts', categoryId] })
       queryClient.invalidateQueries({ queryKey: ['artifact-status-map', categoryId] })
       queryClient.invalidateQueries({ queryKey: ['category-progress', projectId] })

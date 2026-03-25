@@ -133,6 +133,7 @@ export function SubcategoryList({ projectId, categoryId, onAddSubcategory }: Pro
                   <Link
                     to="/projects/$projectId/categories/$categoryId"
                     params={{ projectId, categoryId: sub.id }}
+                    search={{ open: undefined }}
                     className="w-8 h-8 rounded-md border border-slate-200 bg-white text-slate-500 flex items-center justify-center text-sm hover:bg-slate-100 hover:text-slate-900"
                     title="Zum Workflow"
                   >

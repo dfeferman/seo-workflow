@@ -1,5 +1,4 @@
-// Zentrales API-Abstraktionslayer. Alle Hooks importieren nur noch apiClient.
-// Niemals supabase direkt in Hooks verwenden.
+// Zentrales API-Abstraktionslayer. Alle Datenzugriffe laufen über dieses Modul.
 
 const BASE_URL = '' // Vite-Proxy leitet /api/* weiter; in Prod: gleicher Origin
 

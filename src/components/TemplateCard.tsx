@@ -54,7 +54,7 @@ export function TemplateCard({ template, view, onUse, onEdit, onDelete, onSyncTo
         </div>
         {template.tags?.length ? (
           <div className="flex gap-1.5 flex-shrink-0 flex-wrap">
-            {template.tags.slice(0, 3).map((t) => (
+            {template.tags.slice(0, 3).map((t: string) => (
               <span
                 key={t}
                 className="px-2 py-0.5 rounded bg-slate-100 text-2xs text-slate-500 uppercase font-medium truncate max-w-[72px]"
@@ -119,7 +119,7 @@ export function TemplateCard({ template, view, onUse, onEdit, onDelete, onSyncTo
         </div>
         {template.tags?.length ? (
           <div className="flex gap-1 flex-wrap justify-end min-w-0">
-            {template.tags.slice(0, 3).map((t) => (
+            {template.tags.slice(0, 3).map((t: string) => (
               <span
                 key={t}
                 className="px-2 py-0.5 rounded bg-slate-100 text-2xs text-slate-500 uppercase font-medium truncate max-w-[80px]"

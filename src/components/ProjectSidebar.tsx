@@ -9,7 +9,7 @@ import { ConfirmModal } from '@/components/ConfirmModal'
 import { UserMenu } from '@/components/UserMenu'
 import { SidebarProjectsSkeleton, SidebarCategoriesSkeleton } from '@/components/LoadingSkeleton'
 import { EmptyState } from '@/components/EmptyState'
-import type { CategoryRow } from '@/types/database.types'
+import type { CategoryRow, ProjectRow } from '@/types/database.types'
 
 export function ProjectSidebar() {
   const params = useParams({ strict: false }) as { projectId?: string; categoryId?: string }
@@ -91,7 +91,7 @@ export function ProjectSidebar() {
 type DeleteConfirmState = { id: string; name: string; hasChildren: boolean } | null
 
 type ProjectRowProps = {
-  project: { id: string; name: string }
+  project: ProjectRow
   isExpanded: boolean
   onToggle: () => void
   currentProjectId: string | null
@@ -281,6 +281,7 @@ function CategoryTreeSection({
                 <Link
                   to="/projects/$projectId/categories/$categoryId"
                   params={{ projectId, categoryId: node.id }}
+                  search={{ open: undefined }}
                   className="flex items-center justify-between flex-1 min-w-0"
                 >
                   <span className="truncate min-w-0 text-sm font-semibold">{node.name}</span>
@@ -328,6 +329,7 @@ function CategoryTreeSection({
                       <Link
                         to="/projects/$projectId/categories/$categoryId"
                         params={{ projectId, categoryId: cat.id }}
+                        search={{ open: undefined }}
                         className="flex items-center justify-between flex-1 min-w-0"
                       >
                         <span className="truncate min-w-0">{cat.name}</span>
@@ -372,6 +374,7 @@ function CategoryTreeSection({
             <Link
               to="/projects/$projectId/categories/$categoryId"
               params={{ projectId, categoryId: node.id }}
+              search={{ open: undefined }}
               className="flex items-center justify-between flex-1 min-w-0"
             >
               <span className="truncate min-w-0">{node.name}</span>
@@ -437,6 +440,7 @@ function Section({ title, icon, items, projectId, progress, currentCategoryId, o
             <Link
               to="/projects/$projectId/categories/$categoryId"
               params={{ projectId, categoryId: cat.id }}
+              search={{ open: undefined }}
               className="flex items-center justify-between flex-1 min-w-0"
             >
               <span className="truncate min-w-0">{cat.name}</span>

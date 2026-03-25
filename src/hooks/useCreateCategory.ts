@@ -98,7 +98,7 @@ export function useCreateCategory() {
     navigate({
       to: '/projects/$projectId/categories/$categoryId',
       params: { projectId: result.projectId, categoryId: result.categoryId },
-      search: {},
+      search: { open: undefined },
     })
   }
 
