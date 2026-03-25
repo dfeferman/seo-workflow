@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import type { ArtifactRow, ArtifactPhase } from '@/types/database.types'
 
 export type PlaceholderMap = Record<string, string>
@@ -10,29 +10,24 @@ export type PlaceholderMap = Record<string, string>
 async function fetchPlaceholderData(
   categoryId: string
 ): Promise<{ artifacts: ArtifactRow[]; latestByArtifactId: Map<string, string> }> {
-  const { data: artifacts, error: e1 } = await supabase
-    .from('artifacts')
-    .select('*')
-    .eq('category_id', categoryId)
-    .order('display_order', { ascending: true })
-  if (e1) throw e1
-  const list = artifacts ?? []
+  const list = (await apiClient.artifacts.getByCategory(categoryId)) as ArtifactRow[]
   const artifactIds = list.map((a) => a.id)
   if (artifactIds.length === 0) {
     return { artifacts: list, latestByArtifactId: new Map() }
   }
-  const { data: results, error: e2 } = await supabase
-    .from('artifact_results')
-    .select('artifact_id, result_text, version')
-    .in('artifact_id', artifactIds)
-    .order('version', { ascending: false })
-  if (e2) throw e2
+  const lists = await Promise.all(
+    artifactIds.map((id) => apiClient.artifactResults.getByArtifact(id))
+  )
   const latestByArtifactId = new Map<string, string>()
-  for (const row of results ?? []) {
-    if (!latestByArtifactId.has(row.artifact_id) && row.result_text != null && row.result_text.trim() !== '') {
-      latestByArtifactId.set(row.artifact_id, row.result_text.trim())
+  lists.forEach((rows, i) => {
+    const aid = artifactIds[i]!
+    for (const row of rows) {
+      const t = row.result_text
+      if (t != null && String(t).trim() !== '' && !latestByArtifactId.has(aid)) {
+        latestByArtifactId.set(aid, String(t).trim())
+      }
     }
-  }
+  })
   return { artifacts: list, latestByArtifactId }
 }
 
@@ -134,41 +129,32 @@ export function usePlaceholderData(categoryId: string | undefined): {
   const query = useQuery({
     queryKey: ['placeholder-data', categoryId],
     queryFn: async () => {
-      const { data: category, error: catErr } = await supabase
-        .from('categories')
-        .select('id, parent_id, custom_placeholders')
-        .eq('id', categoryId!)
-        .single()
-      if (catErr) throw catErr
-      const hubId = category?.parent_id ?? category?.id ?? categoryId!
+      const category = await apiClient.categories.getById(categoryId!)
+      const hubId = (category?.parent_id ?? category?.id ?? categoryId!) as string
       let hubPlaceholders: Record<string, string> = {}
       if (hubId === category?.id && category?.custom_placeholders && typeof category.custom_placeholders === 'object') {
-        hubPlaceholders = { ...category.custom_placeholders }
+        hubPlaceholders = { ...(category.custom_placeholders as Record<string, string>) }
       } else if (hubId !== category?.id) {
-        const { data: hub } = await supabase
-          .from('categories')
-          .select('custom_placeholders')
-          .eq('id', hubId)
-          .single()
+        const hub = await apiClient.categories.getById(hubId)
         if (hub?.custom_placeholders && typeof hub.custom_placeholders === 'object') {
-          hubPlaceholders = { ...hub.custom_placeholders }
+          hubPlaceholders = { ...(hub.custom_placeholders as Record<string, string>) }
         }
       }
-      // Unterkategorie-eigene Platzhalter überschreiben Hub-Werte (Einstellungen gelten überall)
       const categoryPlaceholders =
         category?.id && category.id !== hubId && category?.custom_placeholders && typeof category.custom_placeholders === 'object'
-          ? category.custom_placeholders
+          ? (category.custom_placeholders as Record<string, string>)
           : {}
       const { artifacts, latestByArtifactId } = await fetchPlaceholderData(categoryId!)
       const dependencyMap = buildDependencyMap(artifacts, latestByArtifactId)
 
-      // Kompilierte Phase-Outputs laden und als primäre [INPUT X]-Quelle verwenden; fehlende Phasen leeren
-      const { data: phaseOutputRows } = await supabase
-        .from('category_phase_outputs')
-        .select('phase, output_text, version')
-        .eq('category_id', categoryId!)
-        .order('version', { ascending: false })
-      applyPhaseOutputOverrides(dependencyMap, phaseOutputRows ?? [])
+      const phaseRowsRaw = await apiClient.categoryPhaseOutputs.getByCategory(categoryId!)
+      const phaseOutputRows = [...phaseRowsRaw].sort(
+        (a, b) => (b.version ?? 0) - (a.version ?? 0)
+      )
+      applyPhaseOutputOverrides(
+        dependencyMap,
+        phaseOutputRows.map((r) => ({ phase: String(r.phase), output_text: r.output_text ?? null }))
+      )
 
       const placeholderMap: PlaceholderMap = { ...hubPlaceholders, ...categoryPlaceholders, ...dependencyMap }
       const latestResultByArtifactId = Object.fromEntries(latestByArtifactId)

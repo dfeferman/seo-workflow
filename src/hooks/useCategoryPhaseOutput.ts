@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import type { ArtifactPhase, CategoryPhaseOutputRow } from '@/types/database.types'
 
 /**
@@ -10,16 +10,11 @@ export function useCategoryPhaseOutput(categoryId: string, phase: ArtifactPhase)
   return useQuery({
     queryKey: ['category_phase_outputs', categoryId, phase],
     queryFn: async (): Promise<CategoryPhaseOutputRow | null> => {
-      const { data, error } = await supabase
-        .from('category_phase_outputs')
-        .select('*')
-        .eq('category_id', categoryId)
-        .eq('phase', phase)
-        .order('version', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-      if (error) throw error
-      return data
+      const rows = await apiClient.categoryPhaseOutputs.getByCategory(categoryId)
+      const forPhase = rows
+        .filter((r) => String(r.phase) === String(phase))
+        .sort((a, b) => (b.version ?? 0) - (a.version ?? 0))
+      return (forPhase[0] as CategoryPhaseOutputRow) ?? null
     },
     enabled: !!categoryId,
   })
@@ -33,20 +28,14 @@ export function useCategoryPhaseOutputs(categoryId: string) {
   return useQuery({
     queryKey: ['category_phase_outputs', categoryId],
     queryFn: async (): Promise<Record<ArtifactPhase, string>> => {
-      const { data, error } = await supabase
-        .from('category_phase_outputs')
-        .select('phase, output_text, version')
-        .eq('category_id', categoryId)
-        .order('version', { ascending: false })
-      if (error) throw error
-
-      // Pro Phase nur die neueste Version behalten
+      const data = await apiClient.categoryPhaseOutputs.getByCategory(categoryId)
       const result = {} as Record<ArtifactPhase, string>
       const seen = new Set<string>()
-      for (const row of (data ?? [])) {
-        if (!seen.has(row.phase)) {
-          seen.add(row.phase)
-          result[row.phase as ArtifactPhase] = row.output_text ?? ''
+      for (const row of data) {
+        const ph = String(row.phase)
+        if (!seen.has(ph)) {
+          seen.add(ph)
+          result[ph as ArtifactPhase] = row.output_text ?? ''
         }
       }
       return result

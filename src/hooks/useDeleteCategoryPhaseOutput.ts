@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import type { ArtifactPhase } from '@/types/database.types'
 
 export type DeleteCategoryPhaseOutputInput = {
@@ -16,12 +16,11 @@ export function useDeleteCategoryPhaseOutput() {
 
   return useMutation({
     mutationFn: async (input: DeleteCategoryPhaseOutputInput) => {
-      const { error } = await supabase
-        .from('category_phase_outputs')
-        .delete()
-        .eq('category_id', input.categoryId)
-        .eq('phase', input.phase)
-      if (error) throw error
+      const rows = await apiClient.categoryPhaseOutputs.getByCategory(input.categoryId)
+      const toDelete = rows.filter((r) => String(r.phase) === String(input.phase))
+      for (const r of toDelete) {
+        await apiClient.categoryPhaseOutputs.delete(r.id as string)
+      }
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({

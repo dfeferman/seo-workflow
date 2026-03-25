@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 
 /**
  * Template löschen. Zuerst template_id bei allen verknüpften Artefakten
@@ -10,17 +10,11 @@ export function useDeleteTemplate() {
 
   return useMutation({
     mutationFn: async (templateId: string) => {
-      const { error: unlinkError } = await supabase
-        .from('artifacts')
-        .update({
-          template_id: null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('template_id', templateId)
-      if (unlinkError) throw unlinkError
-
-      const { error } = await supabase.from('templates').delete().eq('id', templateId)
-      if (error) throw error
+      const linked = await apiClient.artifacts.getByTemplate(templateId)
+      for (const row of linked) {
+        await apiClient.artifacts.update(row.id as string, { template_id: null })
+      }
+      await apiClient.templates.delete(templateId)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['templates'] })

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 import type { ArtifactPhase, ResultStatus } from '@/types/database.types'
 
 export type SaveCategoryPhaseOutputInput = {
@@ -17,32 +17,12 @@ export function useSaveCategoryPhaseOutput() {
 
   return useMutation({
     mutationFn: async (input: SaveCategoryPhaseOutputInput) => {
-      // Aktuelle höchste Version ermitteln
-      const { data: latest, error: fetchError } = await supabase
-        .from('category_phase_outputs')
-        .select('version')
-        .eq('category_id', input.categoryId)
-        .eq('phase', input.phase)
-        .order('version', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-      if (fetchError) throw fetchError
-
-      const nextVersion = (latest?.version ?? 0) + 1
-
-      const { data, error } = await supabase
-        .from('category_phase_outputs')
-        .insert({
-          category_id: input.categoryId,
-          phase: input.phase,
-          output_text: input.outputText,
-          version: nextVersion,
-          status: input.status ?? 'draft',
-        })
-        .select('id, version')
-        .single()
-      if (error) throw error
-      return data
+      return apiClient.categoryPhaseOutputs.create({
+        category_id: input.categoryId,
+        phase: input.phase,
+        output_text: input.outputText,
+        status: input.status ?? 'draft',
+      })
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({

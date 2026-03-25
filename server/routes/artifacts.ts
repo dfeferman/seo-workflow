@@ -30,6 +30,38 @@ router.get('/by-category/:categoryId', async (req: AuthRequest, res: Response) =
   res.json(result.rows)
 })
 
+// GET /api/artifacts/by-template/:templateId — für Template→Artefakt-Sync (nur eigene Projekte)
+router.get('/by-template/:templateId', async (req: AuthRequest, res: Response) => {
+  const templateId = routeParamOne(req.params.templateId)
+  const result = await pool.query(
+    `SELECT a.id, a.template_id, a.artifact_code, a.phase FROM artifacts a
+     JOIN categories c ON c.id = a.category_id
+     JOIN projects p ON p.id = c.project_id
+     WHERE a.template_id = $1 AND p.user_id = $2`,
+    [templateId, req.userId]
+  )
+  res.json(result.rows)
+})
+
+// GET /api/artifacts/by-phase-code?phase=B&code=B2.1
+router.get('/by-phase-code', async (req: AuthRequest, res: Response) => {
+  const phase = typeof req.query.phase === 'string' ? req.query.phase : ''
+  const code = typeof req.query.code === 'string' ? req.query.code : ''
+  if (!phase || !code) {
+    res.status(400).json({ error: 'phase and code query params required' })
+    return
+  }
+  const phaseNorm = phase.toUpperCase().trim().slice(0, 1)
+  const result = await pool.query(
+    `SELECT a.id, a.template_id, a.artifact_code, a.phase FROM artifacts a
+     JOIN categories c ON c.id = a.category_id
+     JOIN projects p ON p.id = c.project_id
+     WHERE a.phase = $1 AND a.artifact_code = $2 AND p.user_id = $3`,
+    [phaseNorm, code.trim(), req.userId]
+  )
+  res.json(result.rows)
+})
+
 // GET /api/artifacts/:id
 router.get('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)

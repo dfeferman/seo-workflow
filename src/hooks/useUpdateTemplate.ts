@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { apiClient } from '@/lib/apiClient'
 
 export type UpdateTemplateInput = {
   id: string
@@ -21,29 +21,19 @@ export function useUpdateTemplate() {
   return useMutation({
     mutationFn: async (input: UpdateTemplateInput) => {
       const promptText = input.prompt_template?.trim() || ' '
-      const { error: templateError } = await supabase
-        .from('templates')
-        .update({
-          name: input.name.trim(),
-          description: input.description?.trim() || null,
-          phase: input.phase,
-          artifact_code: input.artifact_code?.trim() || null,
-          prompt_template: promptText,
-          tags: input.tags?.length ? input.tags : null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', input.id)
-      if (templateError) throw templateError
+      await apiClient.templates.update(input.id, {
+        name: input.name.trim(),
+        description: input.description?.trim() || null,
+        phase: input.phase,
+        artifact_code: input.artifact_code?.trim() || null,
+        prompt_template: promptText,
+        tags: input.tags?.length ? input.tags : null,
+      })
 
-      // Sync: alle Artefakte mit diesem Template auf den neuen Prompt-Text setzen
-      const { error: syncError } = await supabase
-        .from('artifacts')
-        .update({
-          prompt_template: promptText,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('template_id', input.id)
-      if (syncError) throw syncError
+      const linked = await apiClient.artifacts.getByTemplate(input.id)
+      for (const row of linked) {
+        await apiClient.artifacts.update(row.id as string, { prompt_template: promptText })
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['templates'] })

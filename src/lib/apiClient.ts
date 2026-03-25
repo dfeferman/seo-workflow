@@ -63,6 +63,13 @@ export const apiClient = {
   artifacts: {
     getByCategory: (categoryId: string) =>
       request<any[]>('GET', `/api/artifacts/by-category/${categoryId}`),
+    getByTemplate: (templateId: string) =>
+      request<any[]>('GET', `/api/artifacts/by-template/${templateId}`),
+    getByPhaseCode: (phase: string, artifactCode: string) =>
+      request<any[]>(
+        'GET',
+        `/api/artifacts/by-phase-code?phase=${encodeURIComponent(phase)}&code=${encodeURIComponent(artifactCode)}`
+      ),
     getById: (id: string) => request<any>('GET', `/api/artifacts/${id}`),
     create: (data: any) => request<any>('POST', '/api/artifacts', data),
     update: (id: string, data: any) => request<any>('PUT', `/api/artifacts/${id}`, data),
