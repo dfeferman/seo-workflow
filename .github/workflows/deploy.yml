@@ -1,4 +1,4 @@
-name: Build & Deploy APPNAME
+name: Build & Deploy SEO Workflow
 
 on:
   push:
@@ -28,4 +28,4 @@ jobs:
           context: .
           file: ./docker/Dockerfile
           push: true
-          tags: ghcr.io/dfeferman/APPNAME:latest
+          tags: ghcr.io/dfeferman/seo-workflow:latest
