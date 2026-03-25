@@ -1,0 +1,31 @@
+name: Build & Deploy APPNAME
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: In GitHub Container Registry einloggen
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker Image bauen und pushen
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          push: true
+          tags: ghcr.io/dfeferman/APPNAME:latest
