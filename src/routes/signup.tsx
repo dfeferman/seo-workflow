@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/hooks/useAuth'
 
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
@@ -8,24 +8,31 @@ export const Route = createFileRoute('/signup')({
 
 function SignupPage() {
   const navigate = useNavigate()
+  const { user, register } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const registeredOk = useRef(false)
+
+  useEffect(() => {
+    if (registeredOk.current && user) {
+      registeredOk.current = false
+      navigate({ to: '/' })
+    }
+  }, [user, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
     try {
-      const { error: err } = await supabase.auth.signUp({ email, password })
-      if (err) {
-        setError(err.message)
-        return
-      }
+      await register(email, password)
       setSuccess(true)
-      setTimeout(() => navigate({ to: '/' }), 1500)
+      registeredOk.current = true
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Registrierung fehlgeschlagen')
     } finally {
       setLoading(false)
     }
@@ -39,9 +46,7 @@ function SignupPage() {
             ✓
           </div>
           <h2 className="text-lg font-semibold text-slate-900 mb-2">Konto erstellt</h2>
-          <p className="text-sm text-slate-500">
-            Du wirst gleich weitergeleitet. Prüfe ggf. deine E-Mails zur Bestätigung.
-          </p>
+          <p className="text-sm text-slate-500">Du wirst gleich weitergeleitet.</p>
         </div>
       </div>
     )

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 
 export const Route = createFileRoute('/login')({
@@ -9,7 +8,7 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, signIn } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -28,13 +27,10 @@ function LoginPage() {
     setError(null)
     setLoading(true)
     try {
-      const { error: err } = await supabase.auth.signInWithPassword({ email, password })
-      if (err) {
-        setError(err.message)
-        return
-      }
+      await signIn(email, password)
       signedInSuccess.current = true
-      // Navigation passiert im useEffect, sobald der AuthProvider den User gesetzt hat
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Anmeldung fehlgeschlagen')
     } finally {
       setLoading(false)
     }
