@@ -1,6 +1,10 @@
+import { config as loadDotenv } from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { defineConfig } from 'vite'
+
+// Vitest lädt Module vor Test-Dateien; .env muss vor Import von server/db.ts gesetzt sein.
+loadDotenv()
 import react from '@vitejs/plugin-react'
 import { TanStackRouterVite } from '@tanstack/router-vite-plugin'
 
