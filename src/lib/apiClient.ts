@@ -2,28 +2,58 @@
 
 const BASE_URL = '' // Vite-Proxy leitet /api/* weiter; in Prod: gleicher Origin
 
+let _token: string | null = null
+let _isRefreshing = false
+
 function getToken(): string | null {
-  return localStorage.getItem('auth_token')
+  return _token
 }
 
 export function setToken(token: string): void {
-  localStorage.setItem('auth_token', token)
+  _token = token
 }
 
 export function clearToken(): void {
-  localStorage.removeItem('auth_token')
+  _token = null
 }
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+async function request<T>(
+  method: string,
+  path: string,
+  body?: unknown,
+  skipRetry = false
+): Promise<T> {
   const token = getToken()
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })
+
+  if (res.status === 401 && !skipRetry && !_isRefreshing) {
+    _isRefreshing = true
+    try {
+      const data = await request<{ token: string }>(
+        'POST',
+        '/api/auth/refresh',
+        undefined,
+        true
+      )
+      setToken(data.token)
+      _isRefreshing = false
+      return request<T>(method, path, body, true)
+    } catch {
+      _isRefreshing = false
+      clearToken()
+      window.dispatchEvent(new Event('auth:signout'))
+      throw new Error('Session abgelaufen. Bitte erneut anmelden.')
+    }
+  }
+
   if (!res.ok) {
     const text = await res.text()
     let message = text?.trim() || `Request failed: ${res.status}`
@@ -35,6 +65,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     }
     throw new Error(message)
   }
+
   if (res.status === 204) return undefined as T
   return res.json()
 }
@@ -42,10 +73,17 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 export const apiClient = {
   auth: {
     register: (email: string, password: string) =>
-      request<{ user: any; token: string }>('POST', '/api/auth/register', { email, password }),
+      request<{ user: any; token: string }>('POST', '/api/auth/register', { email, password }, true),
     login: (email: string, password: string) =>
-      request<{ user: any; token: string }>('POST', '/api/auth/login', { email, password }),
+      request<{ user: any; token: string }>('POST', '/api/auth/login', { email, password }, true),
     me: () => request<any>('GET', '/api/auth/me'),
+    refresh: () =>
+      request<{ token: string; user: any }>('POST', '/api/auth/refresh', undefined, true),
+    logout: () => request<void>('POST', '/api/auth/logout', undefined, true),
+    forgotPassword: (email: string) =>
+      request<{ message: string }>('POST', '/api/auth/forgot-password', { email }, true),
+    resetPassword: (token: string, password: string) =>
+      request<{ message: string }>('POST', '/api/auth/reset-password', { token, password }, true),
   },
 
   projects: {

@@ -24,20 +24,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Beim App-Start: Session via Refresh-Token-Cookie wiederherstellen
   useEffect(() => {
-    const token = localStorage.getItem('auth_token')
-    if (!token) {
-      setLoading(false)
-      return
-    }
     apiClient.auth
-      .me()
-      .then((u) => setUser(normalizeUser(u)))
+      .refresh()
+      .then(({ token, user: u }) => {
+        setToken(token)
+        setUser(normalizeUser(u))
+      })
       .catch(() => {
         clearToken()
         setUser(null)
       })
       .finally(() => setLoading(false))
+  }, [])
+
+  // Beim apiClient-seitigen Signout-Event (z.B. Refresh fehlgeschlagen nach Retry)
+  useEffect(() => {
+    const handleSignout = () => setUser(null)
+    window.addEventListener('auth:signout', handleSignout)
+    return () => window.removeEventListener('auth:signout', handleSignout)
   }, [])
 
   const signIn = useCallback(async (email: string, password: string) => {
@@ -53,6 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signOut = useCallback(() => {
+    apiClient.auth.logout().catch(() => {}) // best effort
     clearToken()
     setUser(null)
   }, [])

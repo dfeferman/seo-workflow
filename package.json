@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:run:server": "vitest run server/tests/auth.test.ts",
+    "test:run:server": "vitest run --config vitest.server.config.ts",
     "prepare": "husky",
     "server:dev": "tsx watch server/index.ts",
     "server:build": "tsc --project server/tsconfig.json"
