@@ -2,6 +2,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import cors from 'cors'
 import express from 'express'
+import cookieParser from 'cookie-parser'
 import 'dotenv/config'
 import authRouter from './routes/auth.js'
 import projectsRouter from './routes/projects.js'
@@ -16,8 +17,10 @@ import categoryReferenceDocsRouter from './routes/categoryReferenceDocs.js'
 export const app = express()
 app.use(cors({
   origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+  credentials: true,
 }))
 app.use(express.json({ limit: '2mb' }))
+app.use(cookieParser())
 
 app.use('/api/auth', authRouter)
 app.use('/api/projects', projectsRouter)
@@ -37,7 +40,6 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
-// Global error handler
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Unhandled error:', err)
   res.status(500).json({ error: 'Internal server error' })
