@@ -2,12 +2,19 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import request from 'supertest'
 import { app } from '../index.js'
 import { pool } from '../db.js'
+import bcrypt from 'bcrypt'
+import { generateOpaqueToken, hashToken, resetTokenExpiry } from '../services/auth-tokens.js'
 
 const TEST_EMAIL = 'test-auth@example.com'
 const TEST_PW = 'password123'
 
 beforeAll(async () => {
   await pool.query(`DELETE FROM users WHERE email = $1`, [TEST_EMAIL])
+  const hash = await bcrypt.hash(TEST_PW, 10)
+  await pool.query(
+    `INSERT INTO users (email, password_hash) VALUES ($1, $2)`,
+    [TEST_EMAIL, hash]
+  )
 })
 
 afterAll(async () => {
@@ -16,20 +23,24 @@ afterAll(async () => {
 })
 
 describe('POST /api/auth/register', () => {
+  const REGISTER_EMAIL = `test-register-${Date.now()}@example.com`
+
   it('creates a user, returns access token and sets refresh cookie', async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ email: TEST_EMAIL, password: TEST_PW })
+      .send({ email: REGISTER_EMAIL, password: TEST_PW })
     expect(res.status).toBe(201)
     expect(res.body.token).toBeDefined()
-    expect(res.body.user.email).toBe(TEST_EMAIL)
+    expect(res.body.user.email).toBe(REGISTER_EMAIL)
     expect(res.headers['set-cookie']).toBeDefined()
     const cookie: string = res.headers['set-cookie'][0]
     expect(cookie).toContain('refresh_token=')
     expect(cookie).toContain('HttpOnly')
+    // cleanup
+    await pool.query(`DELETE FROM users WHERE email = $1`, [REGISTER_EMAIL])
   })
 
-  it('returns 409 for duplicate email', async () => {
+  it('returns 409 for duplicate email (existing user)', async () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({ email: TEST_EMAIL, password: TEST_PW })
@@ -155,7 +166,6 @@ describe('POST /api/auth/forgot-password', () => {
 
 describe('POST /api/auth/reset-password', () => {
   async function createResetToken(): Promise<string> {
-    const { generateOpaqueToken, hashToken, resetTokenExpiry } = await import('../services/auth-tokens.js')
     const userRes = await pool.query(`SELECT id FROM users WHERE email = $1`, [TEST_EMAIL])
     const userId = userRes.rows[0].id
     const rawToken = generateOpaqueToken()
@@ -169,37 +179,39 @@ describe('POST /api/auth/reset-password', () => {
   }
 
   async function restorePassword(): Promise<void> {
-    const bcrypt = await import('bcrypt')
     const hash = await bcrypt.hash(TEST_PW, 10)
     await pool.query(`UPDATE users SET password_hash = $1 WHERE email = $2`, [hash, TEST_EMAIL])
   }
 
   it('resets password with valid token', async () => {
     const token = await createResetToken()
-    const res = await request(app)
-      .post('/api/auth/reset-password')
-      .send({ token, password: 'newpassword99' })
-    expect(res.status).toBe(200)
-    expect(res.body.message).toBeDefined()
+    try {
+      const res = await request(app)
+        .post('/api/auth/reset-password')
+        .send({ token, password: 'newpassword99' })
+      expect(res.status).toBe(200)
+      expect(res.body.message).toBeDefined()
 
-    // Verify new password works
-    const loginRes = await request(app)
-      .post('/api/auth/login')
-      .send({ email: TEST_EMAIL, password: 'newpassword99' })
-    expect(loginRes.status).toBe(200)
-
-    await restorePassword()
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .send({ email: TEST_EMAIL, password: 'newpassword99' })
+      expect(loginRes.status).toBe(200)
+    } finally {
+      await restorePassword()
+    }
   })
 
   it('returns 400 for already-used token', async () => {
     const token = await createResetToken()
-    await request(app).post('/api/auth/reset-password').send({ token, password: 'somepassword1' })
-    const res = await request(app)
-      .post('/api/auth/reset-password')
-      .send({ token, password: 'anotherpass2' })
-    expect(res.status).toBe(400)
-
-    await restorePassword()
+    try {
+      await request(app).post('/api/auth/reset-password').send({ token, password: 'somepassword1' })
+      const res = await request(app)
+        .post('/api/auth/reset-password')
+        .send({ token, password: 'anotherpass2' })
+      expect(res.status).toBe(400)
+    } finally {
+      await restorePassword()
+    }
   })
 
   it('returns 400 for invalid token', async () => {
@@ -210,22 +222,20 @@ describe('POST /api/auth/reset-password', () => {
   })
 
   it('invalidates all existing sessions after password reset', async () => {
-    // Login to get a refresh token
     const loginRes = await request(app)
       .post('/api/auth/login')
       .send({ email: TEST_EMAIL, password: TEST_PW })
     const refreshCookie: string = loginRes.headers['set-cookie'][0].split(';')[0]
 
-    // Reset password
     const token = await createResetToken()
-    await request(app).post('/api/auth/reset-password').send({ token, password: 'newpassword99' })
-
-    // Old refresh token must now be invalid
-    const refreshRes = await request(app)
-      .post('/api/auth/refresh')
-      .set('Cookie', refreshCookie)
-    expect(refreshRes.status).toBe(401)
-
-    await restorePassword()
+    try {
+      await request(app).post('/api/auth/reset-password').send({ token, password: 'newpassword99' })
+      const refreshRes = await request(app)
+        .post('/api/auth/refresh')
+        .set('Cookie', refreshCookie)
+      expect(refreshRes.status).toBe(401)
+    } finally {
+      await restorePassword()
+    }
   })
 })
