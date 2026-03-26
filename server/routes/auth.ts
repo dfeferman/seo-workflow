@@ -21,6 +21,13 @@ const COOKIE_OPTIONS = {
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Tage in ms
 }
 
+const COOKIE_NAME = 'refresh_token'
+const CLEAR_COOKIE_OPTIONS = {
+  httpOnly: COOKIE_OPTIONS.httpOnly,
+  secure: COOKIE_OPTIONS.secure,
+  sameSite: COOKIE_OPTIONS.sameSite,
+}
+
 function isValidEmail(email: string): boolean {
   const idx = email.indexOf('@')
   return idx > 0 && email.slice(idx).includes('.')
@@ -31,12 +38,15 @@ async function issueTokens(userId: string, res: Response): Promise<string> {
   const tokenHash = hashToken(rawRefresh)
   const expiresAt = refreshTokenExpiry()
 
+  // Fix 6: cleanup expired tokens for this user before inserting new one
+  await pool.query(`DELETE FROM refresh_tokens WHERE user_id = $1 AND expires_at < NOW()`, [userId])
+
   await pool.query(
     `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)`,
     [userId, tokenHash, expiresAt]
   )
 
-  res.cookie('refresh_token', rawRefresh, COOKIE_OPTIONS)
+  res.cookie(COOKIE_NAME, rawRefresh, COOKIE_OPTIONS)
   return signAccessToken(userId)
 }
 
@@ -102,13 +112,13 @@ router.post('/login', async (req: Request, res: Response) => {
       [trimmedEmail]
     )
     const user = result.rows[0]
+    // Fix 3: always run bcrypt compare to prevent timing-based user enumeration
     let passwordOk = false
-    if (user?.password_hash) {
-      try {
-        passwordOk = await bcrypt.compare(String(password), user.password_hash)
-      } catch {
-        passwordOk = false
-      }
+    const hashToCompare = user?.password_hash ?? '$2b$10$invalidhashXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+    try {
+      passwordOk = await bcrypt.compare(String(password), hashToCompare)
+    } catch {
+      passwordOk = false
     }
     if (!user || !passwordOk) {
       res.status(401).json({ error: 'Invalid credentials' })
@@ -168,14 +178,33 @@ router.post('/refresh', async (req: Request, res: Response) => {
     )
     const row = result.rows[0]
     if (!row) {
-      res.clearCookie('refresh_token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' })
+      res.clearCookie(COOKIE_NAME, CLEAR_COOKIE_OPTIONS)
       res.status(401).json({ error: 'Invalid or expired refresh token' })
       return
     }
-    // Token rotation: delete old, issue new
-    await pool.query(`DELETE FROM refresh_tokens WHERE id = $1`, [row.id])
-    const newToken = await issueTokens(row.user_id, res)
-    res.json({ token: newToken, user: { id: row.user_id, email: row.email } })
+    // Fix 2: Token rotation in a DB transaction — delete old + insert new atomically
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN')
+      await client.query(`DELETE FROM refresh_tokens WHERE id = $1`, [row.id])
+      const rawRefresh = generateOpaqueToken()
+      const newHash = hashToken(rawRefresh)
+      const expiresAt = refreshTokenExpiry()
+      await client.query(
+        `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)`,
+        [row.user_id, newHash, expiresAt]
+      )
+      await client.query('COMMIT')
+      res.cookie(COOKIE_NAME, rawRefresh, COOKIE_OPTIONS)
+      const newToken = signAccessToken(row.user_id)
+      res.json({ token: newToken, user: { id: row.user_id, email: row.email } })
+    } catch (txErr) {
+      await client.query('ROLLBACK').catch(() => {})
+      console.error(txErr)
+      res.status(500).json({ error: 'Internal server error' })
+    } finally {
+      client.release()
+    }
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Internal server error' })
@@ -189,7 +218,7 @@ router.post('/logout', async (req: Request, res: Response) => {
     const tokenHash = hashToken(rawToken)
     await pool.query(`DELETE FROM refresh_tokens WHERE token_hash = $1`, [tokenHash]).catch(() => {})
   }
-  res.clearCookie('refresh_token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' })
+  res.clearCookie(COOKIE_NAME, CLEAR_COOKIE_OPTIONS)
   res.status(204).send()
 })
 
@@ -249,7 +278,13 @@ router.post('/reset-password', async (req: Request, res: Response) => {
     }
     const password_hash = await bcrypt.hash(String(password), 10)
     await pool.query(`UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2`, [password_hash, row.user_id])
-    await pool.query(`UPDATE password_reset_tokens SET used_at = NOW() WHERE id = $1`, [row.id])
+    // Fix 4: revoke ALL pending reset tokens for this user (not just the one used)
+    await pool.query(
+      `UPDATE password_reset_tokens SET used_at = NOW() WHERE user_id = $1 AND used_at IS NULL`,
+      [row.user_id]
+    )
+    // Fix 5: invalidate all existing refresh tokens after password reset
+    await pool.query(`DELETE FROM refresh_tokens WHERE user_id = $1`, [row.user_id])
     res.json({ message: 'Passwort erfolgreich geändert.' })
   } catch (err) {
     console.error(err)
