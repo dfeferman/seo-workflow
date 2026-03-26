@@ -20,6 +20,7 @@ app.use(cors({
   credentials: true,
 }))
 app.use(express.json({ limit: '2mb' }))
+// Unsigned cookies: refresh tokens are validated via SHA-256 hash lookup in DB, not cookie signing
 app.use(cookieParser())
 
 app.use('/api/auth', authRouter)
