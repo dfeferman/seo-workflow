@@ -45,5 +45,12 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 
 const PORT = process.env.PORT ?? 3001
 if (process.env.NODE_ENV !== 'test') {
+  if (!process.env.JWT_SECRET?.trim()) {
+    console.error(
+      'FATAL: JWT_SECRET fehlt oder ist leer. Ohne JWT_SECRET schlagen Login und Registrierung mit 500 fehl.\n' +
+        'Lege in .env JWT_SECRET an (siehe .env.example, mindestens eine sichere Zeichenkette).'
+    )
+    process.exit(1)
+  }
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
 }

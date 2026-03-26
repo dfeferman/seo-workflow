@@ -8,7 +8,10 @@ import { Response } from 'express'
 const router = Router()
 
 function signToken(userId: string): string {
-  const secret = process.env.JWT_SECRET!
+  const secret = process.env.JWT_SECRET?.trim()
+  if (!secret) {
+    throw new Error('JWT_SECRET is not configured')
+  }
   return jwt.sign({ userId }, secret, { expiresIn: '7d' })
 }
 
@@ -42,6 +45,18 @@ router.post('/register', async (req, res) => {
       res.status(409).json({ error: 'Email already registered' })
       return
     }
+    if (err.code === '42P01' || err.message?.includes('relation "users" does not exist')) {
+      console.error(err)
+      res.status(500).json({
+        error:
+          'Datenbank: Tabelle users fehlt. Wende server/db/schema.sql auf dieselbe Postgres-Instanz an wie DATABASE_URL.',
+      })
+      return
+    }
+    if (err.message === 'JWT_SECRET is not configured') {
+      res.status(503).json({ error: 'Server: JWT_SECRET ist nicht gesetzt.' })
+      return
+    }
     console.error(err)
     res.status(500).json({ error: 'Internal server error' })
   }
@@ -69,13 +84,33 @@ router.post('/login', async (req, res) => {
       [trimmedEmail]
     )
     const user = result.rows[0]
-    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+    let passwordOk = false
+    if (user?.password_hash) {
+      try {
+        passwordOk = await bcrypt.compare(password, user.password_hash)
+      } catch {
+        passwordOk = false
+      }
+    }
+    if (!user || !passwordOk) {
       res.status(401).json({ error: 'Invalid credentials' })
       return
     }
     const { password_hash: _, ...safeUser } = user
     res.json({ user: safeUser, token: signToken(user.id) })
-  } catch (err) {
+  } catch (err: any) {
+    if (err.code === '42P01' || err.message?.includes('relation "users" does not exist')) {
+      console.error(err)
+      res.status(500).json({
+        error:
+          'Datenbank: Tabelle users fehlt. Wende server/db/schema.sql auf dieselbe Postgres-Instanz an wie DATABASE_URL.',
+      })
+      return
+    }
+    if (err.message === 'JWT_SECRET is not configured') {
+      res.status(503).json({ error: 'Server: JWT_SECRET ist nicht gesetzt.' })
+      return
+    }
     console.error(err)
     res.status(500).json({ error: 'Internal server error' })
   }
