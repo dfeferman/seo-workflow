@@ -7,6 +7,10 @@ CREATE TABLE users (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email         VARCHAR(255) NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
+  is_superadmin BOOLEAN NOT NULL DEFAULT FALSE,
+  is_approved   BOOLEAN NOT NULL DEFAULT FALSE,
+  approved_at   TIMESTAMPTZ,
+  approved_by   UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at    TIMESTAMPTZ DEFAULT NOW(),
   updated_at    TIMESTAMPTZ DEFAULT NOW()
 );

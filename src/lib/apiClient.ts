@@ -1,6 +1,6 @@
-// Zentrales API-Abstraktionslayer. Alle Datenzugriffe laufen über dieses Modul.
+// Zentrales API-Abstraktionslayer. Alle Datenzugriffe laufen ueber dieses Modul.
 
-const BASE_URL = '' // Vite-Proxy leitet /api/* weiter; in Prod: gleicher Origin
+const BASE_URL = ''
 
 let _token: string | null = null
 let _isRefreshing = false
@@ -37,12 +37,7 @@ async function request<T>(
   if (res.status === 401 && !skipRetry && !_isRefreshing) {
     _isRefreshing = true
     try {
-      const data = await request<{ token: string }>(
-        'POST',
-        '/api/auth/refresh',
-        undefined,
-        true
-      )
+      const data = await request<{ token: string }>('POST', '/api/auth/refresh', undefined, true)
       setToken(data.token)
       _isRefreshing = false
       return request<T>(method, path, body, true)
@@ -73,7 +68,7 @@ async function request<T>(
 export const apiClient = {
   auth: {
     register: (email: string, password: string) =>
-      request<{ user: any; token: string }>('POST', '/api/auth/register', { email, password }, true),
+      request<{ message: string }>('POST', '/api/auth/register', { email, password }, true),
     login: (email: string, password: string) =>
       request<{ user: any; token: string }>('POST', '/api/auth/login', { email, password }, true),
     me: () => request<any>('GET', '/api/auth/me'),
@@ -84,6 +79,15 @@ export const apiClient = {
       request<{ message: string }>('POST', '/api/auth/forgot-password', { email }, true),
     resetPassword: (token: string, password: string) =>
       request<{ message: string }>('POST', '/api/auth/reset-password', { token, password }, true),
+  },
+
+  admin: {
+    getUsers: () => request<any[]>('GET', '/api/admin/users'),
+    approveUser: (id: string) => request<any>('POST', `/api/admin/users/${id}/approve`),
+    revokeUser: (id: string) => request<any>('POST', `/api/admin/users/${id}/revoke`),
+    setUserPassword: (id: string, password: string) =>
+      request<any>('POST', `/api/admin/users/${id}/set-password`, { password }),
+    deleteUser: (id: string) => request<void>('DELETE', `/api/admin/users/${id}`),
   },
 
   projects: {

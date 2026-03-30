@@ -12,7 +12,11 @@ export const Route = createRootRoute({
 function RootComponent() {
   const { pathname } = useLocation()
   const { user, loading } = useAuth()
-  const isPublicPage = pathname === '/login' || pathname === '/signup'
+  const isPublicPage =
+    pathname === '/login' ||
+    pathname === '/signup' ||
+    pathname === '/forgot-password' ||
+    pathname === '/reset-password'
 
   if (loading) {
     return (

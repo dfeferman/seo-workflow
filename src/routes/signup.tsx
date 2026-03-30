@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useAuth } from '@/hooks/useAuth'
 
 export const Route = createFileRoute('/signup')({
@@ -7,30 +7,21 @@ export const Route = createFileRoute('/signup')({
 })
 
 function SignupPage() {
-  const navigate = useNavigate()
-  const { user, register } = useAuth()
+  const { register } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const registeredOk = useRef(false)
-
-  useEffect(() => {
-    if (registeredOk.current && user) {
-      registeredOk.current = false
-      navigate({ to: '/' })
-    }
-  }, [user, navigate])
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setSuccessMessage(null)
     setLoading(true)
     try {
-      await register(email, password)
-      setSuccess(true)
-      registeredOk.current = true
+      const message = await register(email, password)
+      setSuccessMessage(message)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Registrierung fehlgeschlagen')
     } finally {
@@ -38,15 +29,18 @@ function SignupPage() {
     }
   }
 
-  if (success) {
+  if (successMessage) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
         <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8 shadow-lg text-center">
-          <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-700 text-2xl mx-auto mb-4">
-            ✓
+          <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-700 text-sm font-bold mx-auto mb-4">
+            OK
           </div>
           <h2 className="text-lg font-semibold text-slate-900 mb-2">Konto erstellt</h2>
-          <p className="text-sm text-slate-500">Du wirst gleich weitergeleitet.</p>
+          <p className="text-sm text-slate-500">{successMessage}</p>
+          <Link to="/login" className="mt-5 inline-flex text-sm text-blue-600 font-medium hover:underline">
+            Zur Anmeldung
+          </Link>
         </div>
       </div>
     )
@@ -91,12 +85,12 @@ function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
               autoComplete="new-password"
               className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-800 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400"
-              placeholder="••••••••"
+              placeholder="********"
             />
-            <p className="text-xs text-slate-500 mt-1">Mindestens 6 Zeichen</p>
+            <p className="text-xs text-slate-500 mt-1">Mindestens 8 Zeichen</p>
           </div>
           {error && (
             <p className="text-sm text-red-600" role="alert">
@@ -108,7 +102,7 @@ function SignupPage() {
             disabled={loading}
             className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
           >
-            {loading ? 'Wird erstellt…' : 'Konto anlegen'}
+            {loading ? 'Wird erstellt...' : 'Konto anlegen'}
           </button>
         </form>
 

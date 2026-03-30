@@ -10,8 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as ProjectsProjectIdCategoriesCategoryIdIndexRouteImport } from './routes/projects/$projectId/categories/$categoryId/index'
 import { Route as ProjectsProjectIdCategoriesCategoryIdSettingsRouteImport } from './routes/projects/$projectId/categories/$categoryId/settings'
 import { Route as ProjectsProjectIdCategoriesCategoryIdOverviewRouteImport } from './routes/projects/$projectId/categories/$categoryId/overview'
@@ -21,14 +24,29 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectsProjectIdCategoriesCategoryIdIndexRoute =
@@ -52,16 +70,22 @@ const ProjectsProjectIdCategoriesCategoryIdOverviewRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/admin/users': typeof AdminUsersRoute
   '/projects/$projectId/categories/$categoryId/overview': typeof ProjectsProjectIdCategoriesCategoryIdOverviewRoute
   '/projects/$projectId/categories/$categoryId/settings': typeof ProjectsProjectIdCategoriesCategoryIdSettingsRoute
   '/projects/$projectId/categories/$categoryId/': typeof ProjectsProjectIdCategoriesCategoryIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/admin/users': typeof AdminUsersRoute
   '/projects/$projectId/categories/$categoryId/overview': typeof ProjectsProjectIdCategoriesCategoryIdOverviewRoute
   '/projects/$projectId/categories/$categoryId/settings': typeof ProjectsProjectIdCategoriesCategoryIdSettingsRoute
   '/projects/$projectId/categories/$categoryId': typeof ProjectsProjectIdCategoriesCategoryIdIndexRoute
@@ -69,8 +93,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/admin/users': typeof AdminUsersRoute
   '/projects/$projectId/categories/$categoryId/overview': typeof ProjectsProjectIdCategoriesCategoryIdOverviewRoute
   '/projects/$projectId/categories/$categoryId/settings': typeof ProjectsProjectIdCategoriesCategoryIdSettingsRoute
   '/projects/$projectId/categories/$categoryId/': typeof ProjectsProjectIdCategoriesCategoryIdIndexRoute
@@ -79,24 +106,33 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/signup'
+    | '/admin/users'
     | '/projects/$projectId/categories/$categoryId/overview'
     | '/projects/$projectId/categories/$categoryId/settings'
     | '/projects/$projectId/categories/$categoryId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/signup'
+    | '/admin/users'
     | '/projects/$projectId/categories/$categoryId/overview'
     | '/projects/$projectId/categories/$categoryId/settings'
     | '/projects/$projectId/categories/$categoryId'
   id:
     | '__root__'
     | '/'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/signup'
+    | '/admin/users'
     | '/projects/$projectId/categories/$categoryId/overview'
     | '/projects/$projectId/categories/$categoryId/settings'
     | '/projects/$projectId/categories/$categoryId/'
@@ -104,8 +140,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   ProjectsProjectIdCategoriesCategoryIdOverviewRoute: typeof ProjectsProjectIdCategoriesCategoryIdOverviewRoute
   ProjectsProjectIdCategoriesCategoryIdSettingsRoute: typeof ProjectsProjectIdCategoriesCategoryIdSettingsRoute
   ProjectsProjectIdCategoriesCategoryIdIndexRoute: typeof ProjectsProjectIdCategoriesCategoryIdIndexRoute
@@ -120,6 +159,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -127,11 +173,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/projects/$projectId/categories/$categoryId/': {
@@ -160,8 +220,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  AdminUsersRoute: AdminUsersRoute,
   ProjectsProjectIdCategoriesCategoryIdOverviewRoute:
     ProjectsProjectIdCategoriesCategoryIdOverviewRoute,
   ProjectsProjectIdCategoriesCategoryIdSettingsRoute:

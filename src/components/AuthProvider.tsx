@@ -1,30 +1,51 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { apiClient, setToken, clearToken } from '@/lib/apiClient'
 
-type AppUser = { id: string; email: string }
+export type AppUser = {
+  id: string
+  email: string
+  is_superadmin: boolean
+  is_approved: boolean
+}
 
 type AuthContextValue = {
   user: AppUser | null
   loading: boolean
   signOut: () => void
   signIn: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string) => Promise<void>
+  register: (email: string, password: string) => Promise<string>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 function normalizeUser(u: unknown): AppUser | null {
   if (!u || typeof u !== 'object') return null
-  const row = u as { id?: string; email?: string }
-  if (typeof row.id !== 'string' || typeof row.email !== 'string') return null
-  return { id: row.id, email: row.email }
+  const row = u as {
+    id?: string
+    email?: string
+    is_superadmin?: boolean
+    is_approved?: boolean
+  }
+  if (
+    typeof row.id !== 'string' ||
+    typeof row.email !== 'string' ||
+    typeof row.is_superadmin !== 'boolean' ||
+    typeof row.is_approved !== 'boolean'
+  ) {
+    return null
+  }
+  return {
+    id: row.id,
+    email: row.email,
+    is_superadmin: row.is_superadmin,
+    is_approved: row.is_approved,
+  }
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Beim App-Start: Session via Refresh-Token-Cookie wiederherstellen
   useEffect(() => {
     apiClient.auth
       .refresh()
@@ -39,7 +60,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setLoading(false))
   }, [])
 
-  // Beim apiClient-seitigen Signout-Event (z.B. Refresh fehlgeschlagen nach Retry)
   useEffect(() => {
     const handleSignout = () => setUser(null)
     window.addEventListener('auth:signout', handleSignout)
@@ -53,13 +73,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const register = useCallback(async (email: string, password: string) => {
-    const { user: u, token } = await apiClient.auth.register(email, password)
-    setToken(token)
-    setUser(normalizeUser(u))
+    const { message } = await apiClient.auth.register(email, password)
+    clearToken()
+    setUser(null)
+    return message
   }, [])
 
   const signOut = useCallback(() => {
-    apiClient.auth.logout().catch(() => {}) // best effort
+    apiClient.auth.logout().catch(() => {})
     clearToken()
     setUser(null)
   }, [])
