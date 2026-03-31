@@ -33,8 +33,9 @@ async function fetchPlaceholderData(
 
 /**
  * Baut die dynamische Platzhalter-Map für eine Kategorie:
- * - [INPUT A] … [INPUT G], [INPUT X]: alle Ergebnisse der Phase (display_order), mit \n\n verbunden
- * - [INPUT <artifact_code>]: Ergebnis des Artefakts mit diesem Code (z. B. [INPUT C1])
+ * - [INPUT <artifact_code>]: Ergebnis des Artefakts (z. B. [INPUT A1]) – bleibt nur in der Map,
+ *   wenn für die zugehörige Phase ein Eintrag in category_phase_outputs existiert (siehe applyPhaseOutputOverrides).
+ * - [INPUT A] … [INPUT X]: nur via applyPhaseOutputOverrides aus category_phase_outputs
  * - [BRIEFING]: Ergebnis von C1
  * - [TEXT]: Ergebnis von D1
  * - [LINKS]: Ergebnis von B2 (oder B2.1 als Fallback)
@@ -50,29 +51,10 @@ export function buildDependencyMap(
     if (text != null) codeToText.set(a.artifact_code, text)
   }
 
-  const phaseToArtifacts = new Map<string, ArtifactRow[]>()
-  for (const a of artifacts) {
-    const list = phaseToArtifacts.get(a.phase) ?? []
-    list.push(a)
-    phaseToArtifacts.set(a.phase, list)
-  }
-  for (const list of phaseToArtifacts.values()) {
-    list.sort((x, y) => x.display_order - y.display_order)
-  }
-
   const result: PlaceholderMap = {}
 
   for (const [code, text] of codeToText) {
     result[`[INPUT ${code}]`] = text
-  }
-
-  const phaseOrder = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'X'] as const
-  for (const phase of phaseOrder) {
-    const list = phaseToArtifacts.get(phase) ?? []
-    const parts = list
-      .map((a) => latestByArtifactId.get(a.id))
-      .filter((t): t is string => t != null && t.length > 0)
-    result[`[INPUT ${phase}]`] = parts.join('\n\n')
   }
 
   if (codeToText.has('C1')) result['[BRIEFING]'] = codeToText.get('C1')!
@@ -87,13 +69,17 @@ export function buildDependencyMap(
 export type PhaseOutputRow = { phase: string; output_text: string | null }
 
 /**
- * Überschreibt dependencyMap mit category_phase_outputs; setzt [INPUT X], [BRIEFING], [TEXT]
- * für Phasen ohne Eintrag auf ''. (Kein Geister-Wert nach Löschen des Phase-Outputs.)
+ * Setzt [INPUT A]–[INPUT X] aus category_phase_outputs (Phase · Output generieren);
+ * Phasen ohne Eintrag auf ''. Setzt [BRIEFING]/[TEXT] aus Phase C/D/E-Outputs wo zutreffend.
+ * Entfernt [INPUT <Artefaktcode>] für alle Artefakte der Phasen ohne Phase-Output (Vorschau/Prompt
+ * zeigen dann weder [INPUT A] noch [INPUT A1] o. ä. aus Einzelergebnissen, bis „Output generieren“).
+ * Ohne Phase-B-Output wird [LINKS] entfernt (stammt aus B2/B2.1).
  * Exportiert für Unit-Tests.
  */
 export function applyPhaseOutputOverrides(
   dependencyMap: PlaceholderMap,
-  phaseOutputRows: PhaseOutputRow[]
+  phaseOutputRows: PhaseOutputRow[],
+  artifacts: ArtifactRow[] = []
 ): void {
   const seenPhases = new Set<string>()
   for (const row of phaseOutputRows) {
@@ -114,6 +100,13 @@ export function applyPhaseOutputOverrides(
   }
   if (!seenPhases.has('C')) dependencyMap['[BRIEFING]'] = ''
   if (!seenPhases.has('D') && !seenPhases.has('E')) dependencyMap['[TEXT]'] = ''
+  if (!seenPhases.has('B')) delete dependencyMap['[LINKS]']
+
+  for (const a of artifacts) {
+    if (!seenPhases.has(a.phase)) {
+      delete dependencyMap[`[INPUT ${a.artifact_code}]`]
+    }
+  }
 }
 
 /**
@@ -153,7 +146,8 @@ export function usePlaceholderData(categoryId: string | undefined): {
       )
       applyPhaseOutputOverrides(
         dependencyMap,
-        phaseOutputRows.map((r) => ({ phase: String(r.phase), output_text: r.output_text ?? null }))
+        phaseOutputRows.map((r) => ({ phase: String(r.phase), output_text: r.output_text ?? null })),
+        artifacts
       )
 
       const placeholderMap: PlaceholderMap = { ...hubPlaceholders, ...categoryPlaceholders, ...dependencyMap }

@@ -5,6 +5,7 @@ import { usePlaceholderData } from '@/hooks/usePlaceholderData'
 import { useUpdateArtifact } from '@/hooks/useUpdateArtifact'
 import { PhaseInputReference } from '@/components/PhaseInputReference'
 import { ConfirmModal } from '@/components/ConfirmModal'
+import { PromptFullscreenModal } from '@/components/PromptFullscreenModal'
 import { useCategoryReferenceDocs } from '@/hooks/useCategoryReferenceDocs'
 import type { ArtifactRow } from '@/types/database.types'
 import type { CategoryRow } from '@/types/database.types'
@@ -53,6 +54,7 @@ export function ArtifactPanel({
   const [promptEditing, setPromptEditing] = useState(false)
   const [promptDraft, setPromptDraft] = useState('')
   const [resetPromptConfirmOpen, setResetPromptConfirmOpen] = useState(false)
+  const [promptPreviewOpen, setPromptPreviewOpen] = useState(false)
 
   const updateArtifact = useUpdateArtifact()
   const { data: referenceDocs = [] } = useCategoryReferenceDocs(artifact.category_id)
@@ -70,6 +72,8 @@ export function ArtifactPanel({
   const displayResultText = draftText !== '' ? draftText : (latestResult?.result_text ?? '')
   const hasUnsavedEdit = draftText !== '' && draftText !== (latestResult?.result_text ?? '')
   const hasPromptEdit = promptEditing && promptDraft !== artifact.prompt_template
+  const promptPreviewBody = promptEditing ? promptDraft : promptResolved
+  const hasPromptContent = promptPreviewBody.trim().length > 0
 
   const handleCopyPrompt = useCallback(() => {
     void navigator.clipboard.writeText(promptResolved)
@@ -210,6 +214,14 @@ export function ArtifactPanel({
               )}
             </div>
             <div className="flex gap-1.5 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setPromptPreviewOpen(true)}
+                disabled={!hasPromptContent}
+                className="py-1.5 px-3 rounded-lg text-xs font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Großansicht
+              </button>
               <button
                 type="button"
                 onClick={handleCopyPrompt}
@@ -418,6 +430,13 @@ export function ArtifactPanel({
         onConfirm={handleResetPrompt}
         onCancel={() => setResetPromptConfirmOpen(false)}
         isLoading={updateArtifact.isPending}
+      />
+
+      <PromptFullscreenModal
+        open={promptPreviewOpen}
+        onClose={() => setPromptPreviewOpen(false)}
+        title={`Prompt · ${artifact.artifact_code} · ${artifact.name}`}
+        body={promptPreviewBody}
       />
     </div>
   )

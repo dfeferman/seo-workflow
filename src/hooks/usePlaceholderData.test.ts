@@ -26,24 +26,16 @@ function makeArtifact(
 }
 
 describe('buildDependencyMap', () => {
-  it('baut [INPUT A] aus allen Phase-A-Artefakten', () => {
+  it('setzt kein [INPUT A] aus Phase-A-Artefakten (nur per-code)', () => {
     const artifacts = [
       makeArtifact('a1', 'A1', 'A', 0),
       makeArtifact('a2', 'A2', 'A', 1),
     ]
     const results = new Map([['a1', 'SERP-Analyse'], ['a2', 'Quellen']])
     const map = buildDependencyMap(artifacts, results)
-    expect(map['[INPUT A]']).toBe('SERP-Analyse\n\nQuellen')
-  })
-
-  it('sortiert Artefakte nach display_order', () => {
-    const artifacts = [
-      makeArtifact('a2', 'A2', 'A', 1),
-      makeArtifact('a1', 'A1', 'A', 0),
-    ]
-    const results = new Map([['a1', 'Erst'], ['a2', 'Dann']])
-    const map = buildDependencyMap(artifacts, results)
-    expect(map['[INPUT A]']).toBe('Erst\n\nDann')
+    expect(map['[INPUT A]']).toBeUndefined()
+    expect(map['[INPUT A1]']).toBe('SERP-Analyse')
+    expect(map['[INPUT A2]']).toBe('Quellen')
   })
 
   it('baut [INPUT <code>] für einzelne Artefakte', () => {
@@ -53,11 +45,12 @@ describe('buildDependencyMap', () => {
     expect(map['[INPUT A1]']).toBe('SERP-Text')
   })
 
-  it('liefert leeren String für [INPUT A] wenn keine Ergebnisse', () => {
+  it('setzt kein [INPUT A] wenn keine Ergebnisse (nur per-code leer)', () => {
     const artifacts = [makeArtifact('a1', 'A1', 'A', 0)]
     const results = new Map<string, string>()
     const map = buildDependencyMap(artifacts, results)
-    expect(map['[INPUT A]']).toBe('')
+    expect(map['[INPUT A]']).toBeUndefined()
+    expect(map['[INPUT A1]']).toBeUndefined()
   })
 
   it('mappt [BRIEFING] von C1', () => {
@@ -98,68 +91,85 @@ describe('buildDependencyMap', () => {
     expect(map['[LINKS]']).toBe('Plan')
   })
 
-  it('setzt [INPUT B] aus mehreren Phase-B-Artefakten', () => {
+  it('setzt kein [INPUT B] aus mehreren Phase-B-Artefakten (nur per-code)', () => {
     const artifacts = [
       makeArtifact('b1', 'B1', 'B', 0),
       makeArtifact('b2', 'B2', 'B', 1),
     ]
     const results = new Map([['b1', 'Mapping'], ['b2', 'Interlinking']])
     const map = buildDependencyMap(artifacts, results)
-    expect(map['[INPUT B]']).toBe('Mapping\n\nInterlinking')
+    expect(map['[INPUT B]']).toBeUndefined()
+    expect(map['[INPUT B1]']).toBe('Mapping')
+    expect(map['[INPUT B2]']).toBe('Interlinking')
   })
 
-  it('überspringt Artefakte ohne Ergebnis', () => {
+  it('überspringt Artefakte ohne Ergebnis; [INPUT A] fehlt', () => {
     const artifacts = [
       makeArtifact('a1', 'A1', 'A', 0),
       makeArtifact('a2', 'A2', 'A', 1),
     ]
     const results = new Map([['a1', 'Nur A1']])
     const map = buildDependencyMap(artifacts, results)
-    expect(map['[INPUT A]']).toBe('Nur A1')
+    expect(map['[INPUT A]']).toBeUndefined()
+    expect(map['[INPUT A1]']).toBe('Nur A1')
   })
 })
 
 describe('applyPhaseOutputOverrides', () => {
-  it('leert [INPUT A] wenn kein Phase-Output für A (kein Geister-Wert nach Delete)', () => {
-    const map = buildDependencyMap(
-      [makeArtifact('a1', 'A1', 'A', 0)],
-      new Map([['a1', 'SERP-Analyse']])
-    )
-    expect(map['[INPUT A]']).toBe('SERP-Analyse')
-    applyPhaseOutputOverrides(map, [])
+  it('leert [INPUT A] und entfernt [INPUT A1] wenn kein Phase-Output für A', () => {
+    const artifacts = [makeArtifact('a1', 'A1', 'A', 0)]
+    const map = buildDependencyMap(artifacts, new Map([['a1', 'SERP-Analyse']]))
+    expect(map['[INPUT A]']).toBeUndefined()
+    expect(map['[INPUT A1]']).toBe('SERP-Analyse')
+    applyPhaseOutputOverrides(map, [], artifacts)
     expect(map['[INPUT A]']).toBe('')
+    expect(map['[INPUT A1]']).toBeUndefined()
   })
 
-  it('leert [INPUT B] und [BRIEFING]/[TEXT] wenn keine Phase-Outputs', () => {
-    const map = buildDependencyMap(
-      [
-        makeArtifact('b1', 'B1', 'B', 0),
-        makeArtifact('c1', 'C1', 'C', 0),
-      ],
-      new Map([['b1', 'Mapping'], ['c1', 'Briefing']])
-    )
-    applyPhaseOutputOverrides(map, [])
+  it('leert [INPUT B], [INPUT B1] und [BRIEFING]/[TEXT] wenn keine Phase-Outputs', () => {
+    const artifacts = [
+      makeArtifact('b1', 'B1', 'B', 0),
+      makeArtifact('c1', 'C1', 'C', 0),
+    ]
+    const map = buildDependencyMap(artifacts, new Map([['b1', 'Mapping'], ['c1', 'Briefing']]))
+    applyPhaseOutputOverrides(map, [], artifacts)
     expect(map['[INPUT B]']).toBe('')
+    expect(map['[INPUT B1]']).toBeUndefined()
     expect(map['[BRIEFING]']).toBe('')
     expect(map['[TEXT]']).toBe('')
   })
 
-  it('überschreibt [INPUT A] mit category_phase_outputs wenn Eintrag existiert', () => {
-    const map = buildDependencyMap(
-      [makeArtifact('a1', 'A1', 'A', 0)],
-      new Map([['a1', 'Altes Ergebnis']])
+  it('setzt [INPUT A] nur aus category_phase_outputs (nicht aus Artefakt-Join)', () => {
+    const artifacts = [makeArtifact('a1', 'A1', 'A', 0)]
+    const map = buildDependencyMap(artifacts, new Map([['a1', 'Altes Ergebnis']]))
+    expect(map['[INPUT A]']).toBeUndefined()
+    expect(map['[INPUT A1]']).toBe('Altes Ergebnis')
+    applyPhaseOutputOverrides(
+      map,
+      [{ phase: 'A', output_text: 'Kompilierter Phase-A-Output' }],
+      artifacts
     )
-    applyPhaseOutputOverrides(map, [
-      { phase: 'A', output_text: 'Kompilierter Phase-A-Output' },
-    ])
     expect(map['[INPUT A]']).toBe('Kompilierter Phase-A-Output')
+    expect(map['[INPUT A1]']).toBe('Altes Ergebnis')
+  })
+
+  it('entfernt [LINKS] wenn kein Phase-Output für B', () => {
+    const artifacts = [makeArtifact('b2', 'B2', 'B', 0)]
+    const map = buildDependencyMap(artifacts, new Map([['b2', 'Plan']]))
+    expect(map['[LINKS]']).toBe('Plan')
+    applyPhaseOutputOverrides(map, [], artifacts)
+    expect(map['[LINKS]']).toBeUndefined()
   })
 
   it('setzt [BRIEFING] aus Phase C Output', () => {
     const map: Record<string, string> = {}
-    applyPhaseOutputOverrides(map, [
-      { phase: 'C', output_text: 'C-Output' },
-    ])
+    applyPhaseOutputOverrides(
+      map,
+      [
+        { phase: 'C', output_text: 'C-Output' },
+      ],
+      []
+    )
     expect(map['[INPUT C]']).toBe('C-Output')
     expect(map['[BRIEFING]']).toBe('C-Output')
   })
