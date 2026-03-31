@@ -58,7 +58,7 @@ Routes live under `src/routes/` using TanStack Router file-based conventions. Th
 - Postgres **ERROR** logs for `duplicate key` on `users_email_key` / `test-auth@example.com` are often from **`server/tests/auth.test.ts`** or repeated register; the API returns **409** for duplicate email (`23505`).
 
 ### Key business logic in `src/utils/`
-- `replacePlaceholders.ts` — substitutes `[KATEGORIE]`, `[ZIELGRUPPEN]`, `[INPUT A]`, etc. in prompt templates. **No `[LAND]` or `[SPRACHE]` placeholders** (intentionally removed).
+- `replacePlaceholders.ts` — substitutes `[KATEGORIE]`, `[ZIELGRUPPEN]`, `[INPUT A]`, etc. in prompt templates. **No `[LAND]` or `[SPRACHE]` placeholders** (intentionally removed). **`[INPUT A]`–`[INPUT X]`** and **`[INPUT A1]`**-style codes (pro Phase) erscheinen in der Map **erst**, wenn für diese Phase **„Phase · Output generieren“** gelaufen ist (`category_phase_outputs`); **`[LINKS]`** erst nach Phase-B-Output. Vorher bleiben die Tokens in der Vorschau sichtbar (`usePlaceholderData`: `buildDependencyMap` + `applyPhaseOutputOverrides`).
 - `createDefaultArtifacts.ts` — generates 18 default artifacts for a `category` type or 12 for a `blog` type when a new category is created.
 - `exportCategory.ts` — exports all artifacts + results as Markdown.
 
