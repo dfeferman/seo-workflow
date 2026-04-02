@@ -5,7 +5,7 @@ const BASE_URL = ''
 let _token: string | null = null
 let _isRefreshing = false
 
-function getToken(): string | null {
+export function getToken(): string | null {
   return _token
 }
 
@@ -37,8 +37,11 @@ async function request<T>(
   if (res.status === 401 && !skipRetry && !_isRefreshing) {
     _isRefreshing = true
     try {
-      const data = await request<{ token: string }>('POST', '/api/auth/refresh', undefined, true)
+      const data = await request<{ token: string; user?: unknown }>('POST', '/api/auth/refresh', undefined, true)
       setToken(data.token)
+      if (data.user != null && typeof data.user === 'object') {
+        window.dispatchEvent(new CustomEvent('auth:session-refreshed', { detail: { user: data.user } }))
+      }
       _isRefreshing = false
       return request<T>(method, path, body, true)
     } catch {
