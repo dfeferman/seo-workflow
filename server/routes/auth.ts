@@ -14,9 +14,17 @@ import { coercePgBool, effectiveIsSuperadmin } from '../auth-flags.js'
 
 const router = Router()
 
+/** Ohne TLS (z. B. Docker auf http://localhost) muss secure=false, sonst speichern Browser das Refresh-Cookie oft nicht. */
+function cookieSecureFlag(): boolean {
+  const v = process.env.COOKIE_SECURE?.trim().toLowerCase()
+  if (v === 'false' || v === '0') return false
+  if (v === 'true' || v === '1') return true
+  return process.env.NODE_ENV === 'production'
+}
+
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
+  secure: cookieSecureFlag(),
   sameSite: 'strict' as const,
   maxAge: 7 * 24 * 60 * 60 * 1000,
 }

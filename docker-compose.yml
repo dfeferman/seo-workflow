@@ -1,3 +1,6 @@
+# Hinweis: postgres_data wird nur beim ersten Start aus server/db/schema.sql initialisiert.
+# Nach Schema-Änderungen: `docker compose down -v` (löscht DB) oder Migrationen manuell in Postgres ausführen.
+
 services:
   db:
     image: postgres:16-alpine
@@ -25,6 +28,10 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       NODE_ENV: production
       PORT: ${PORT:-3003}
+      # http://localhost ohne TLS: Browser akzeptieren Secure-Cookies oft nicht → Session/Refresh bricht
+      COOKIE_SECURE: "false"
+      # Browser-Origin beim Zugriff auf http://localhost:3000 (CORS nur relevant bei getrenntem Frontend)
+      CORS_ORIGIN: http://localhost:3000
     depends_on:
       db:
         condition: service_healthy

@@ -4,6 +4,7 @@ import cors from 'cors'
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import 'dotenv/config'
+import { runMigrations } from './db/migrate.js'
 import authRouter from './routes/auth.js'
 import projectsRouter from './routes/projects.js'
 import categoriesRouter from './routes/categories.js'
@@ -58,5 +59,12 @@ if (process.env.NODE_ENV !== 'test') {
     )
     process.exit(1)
   }
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+  runMigrations()
+    .then(() => {
+      app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+    })
+    .catch((err) => {
+      console.error('FATAL: Migrations fehlgeschlagen — Server wird nicht gestartet.', err)
+      process.exit(1)
+    })
 }
