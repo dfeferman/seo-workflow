@@ -1,15 +1,23 @@
-FROM node:22-bookworm-slim AS builder
+FROM node:22-bookworm-slim AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
+FROM deps AS build
+WORKDIR /app
 COPY . .
-RUN npm run build
-
+RUN npx vite build
+RUN ./node_modules/.bin/tsc -p server/tsconfig.json
+RUN npm prune --omit=dev
 FROM node:22-bookworm-slim AS runtime
 WORKDIR /app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/server/db/migrations ./dist/server/db/migrations
-EXPOSE 3001
+ENV NODE_ENV=production
+ENV PORT=5173
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/server/db/migrations ./dist/server/db/migrations
+RUN mkdir -p /app/data
+EXPOSE 5173
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:' + process.env.PORT + '/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 CMD ["node", "dist/server/index.js"]
