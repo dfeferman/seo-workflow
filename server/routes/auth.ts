@@ -10,6 +10,7 @@ import {
   resetTokenExpiry,
 } from '../services/auth-tokens.js'
 import { emailService } from '../services/email.js'
+import { coercePgBool, effectiveIsSuperadmin } from '../auth-flags.js'
 
 const router = Router()
 
@@ -98,8 +99,8 @@ function toSafeUser(user: Pick<AuthUserRow, 'id' | 'email' | 'is_superadmin' | '
   return {
     id: user.id,
     email: user.email,
-    is_superadmin: user.is_superadmin,
-    is_approved: user.is_approved,
+    is_superadmin: effectiveIsSuperadmin(user.email, user.is_superadmin),
+    is_approved: coercePgBool(user.is_approved),
     ...(user.created_at ? { created_at: user.created_at } : {}),
   }
 }
@@ -211,18 +212,26 @@ router.post('/login', async (req: Request, res: Response) => {
       res.status(401).json({ error: 'Invalid credentials' })
       return
     }
-    const bootstrapUserId = await bootstrapSuperadminIfMissing(user.id)
-    if (bootstrapUserId === user.id) {
-      user.is_superadmin = true
-      user.is_approved = true
+    await bootstrapSuperadminIfMissing(user.id)
+
+    const freshResult = await pool.query<AuthUserRow>(
+      `SELECT id, email, password_hash, is_superadmin, is_approved, created_at
+       FROM users
+       WHERE id = $1`,
+      [user.id],
+    )
+    const freshUser = freshResult.rows[0]
+    if (!freshUser) {
+      res.status(500).json({ error: 'Internal server error' })
+      return
     }
-    if (!user.is_approved) {
+    if (!coercePgBool(freshUser.is_approved)) {
       res.status(403).json({ error: 'Konto wartet auf Freigabe durch den Superadmin.' })
       return
     }
 
-    const token = await issueTokens(user.id, res)
-    res.json({ user: toSafeUser(user), token })
+    const token = await issueTokens(freshUser.id, res)
+    res.json({ user: toSafeUser(freshUser), token })
   } catch (err: any) {
     if (err.code === '42P01' || err.message?.includes('relation "users" does not exist')) {
       console.error(err)
@@ -307,14 +316,19 @@ router.post('/refresh', async (req: Request, res: Response) => {
       await client.query('COMMIT')
       res.cookie(COOKIE_NAME, rawRefresh, COOKIE_OPTIONS)
       const newToken = signAccessToken(row.user_id)
+
+      const freshResult = await pool.query<Pick<AuthUserRow, 'id' | 'email' | 'is_superadmin' | 'is_approved' | 'created_at'>>(
+        `SELECT id, email, is_superadmin, is_approved, created_at FROM users WHERE id = $1`,
+        [row.user_id],
+      )
+      const fresh = freshResult.rows[0]
+      if (!fresh) {
+        res.status(500).json({ error: 'Internal server error' })
+        return
+      }
       res.json({
         token: newToken,
-        user: {
-          id: row.user_id,
-          email: row.email,
-          is_superadmin: row.is_superadmin,
-          is_approved: row.is_approved,
-        },
+        user: toSafeUser(fresh),
       })
     } catch (txErr) {
       await client.query('ROLLBACK').catch(() => {})

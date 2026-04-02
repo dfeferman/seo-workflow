@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { pool } from '../db.js'
+import { coercePgBool, effectiveIsSuperadmin } from '../auth-flags.js'
 
 export interface AuthRequest extends Request {
   userId?: string
@@ -37,19 +38,21 @@ export async function requireSuperadmin(
   requireAuth(req, res, async () => {
     try {
       const result = await pool.query(
-        `SELECT is_superadmin, is_approved FROM users WHERE id = $1`,
+        `SELECT email, is_superadmin, is_approved FROM users WHERE id = $1`,
         [req.userId]
       )
-      const user = result.rows[0] as { is_superadmin?: boolean; is_approved?: boolean } | undefined
-      if (!user) {
+      const user = result.rows[0] as
+        | { email?: string; is_superadmin?: boolean; is_approved?: boolean }
+        | undefined
+      if (!user || typeof user.email !== 'string') {
         res.status(401).json({ error: 'User not found' })
         return
       }
-      if (!user.is_approved) {
+      if (!coercePgBool(user.is_approved)) {
         res.status(403).json({ error: 'Account is not approved' })
         return
       }
-      if (!user.is_superadmin) {
+      if (!effectiveIsSuperadmin(user.email, user.is_superadmin)) {
         res.status(403).json({ error: 'Superadmin access required' })
         return
       }
