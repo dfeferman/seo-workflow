@@ -19,12 +19,12 @@ services:
   app:
     build: .
     ports:
-      - "3000:3001"
+      - "3000:3003"
     environment:
       DATABASE_URL: postgresql://seo_user:${DB_PASSWORD}@db:5432/seo_workflow
       JWT_SECRET: ${JWT_SECRET}
       NODE_ENV: production
-      PORT: ${PORT:-3001}
+      PORT: ${PORT:-3003}
     depends_on:
       db:
         condition: service_healthy

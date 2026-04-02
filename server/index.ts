@@ -48,7 +48,8 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   res.status(500).json({ error: 'Internal server error' })
 })
 
-const PORT = process.env.PORT ?? 3001
+/** Default 3003 — vermeidet Kollision mit Velacare/Next (`next dev -p 3001`). Überschreibbar via PORT in .env */
+const PORT = process.env.PORT ?? 3003
 if (process.env.NODE_ENV !== 'test') {
   if (!process.env.JWT_SECRET?.trim()) {
     console.error(

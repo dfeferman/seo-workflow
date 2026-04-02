@@ -5,8 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev              # Vite dev server (proxy /api → localhost:3001)
-npm run server:dev       # Express API (tsx watch server/index.ts), port 3001
+npm run dev              # Vite dev server (proxy /api → PORT aus .env, Standard localhost:3003)
+npm run server:dev       # Express API (tsx watch server/index.ts), Standard-Port 3003 (nicht 3001 — Velacare)
 npm run build            # Type-check (tsc -b) + Vite build + server:build
 npm run lint             # ESLint across the project
 npm run test             # Vitest watch (src/utils tests, vite.config)
@@ -36,7 +36,7 @@ Docker Compose: `DB_PASSWORD`, `JWT_SECRET` in `.env`; DB name defaults to `seo_
 
 ## Architecture
 
-**React 18 + TypeScript SPA** (Vite, TanStack Router). **Backend: Express 5** in `server/` with `pg` (`server/db.ts`); the SPA calls **`src/lib/apiClient.ts`** (`/api/*`). Vite proxies `/api` to `http://localhost:3001` (`vite.config.ts`).
+**React 18 + TypeScript SPA** (Vite, TanStack Router). **Backend: Express 5** in `server/` with `pg` (`server/db.ts`); the SPA calls **`src/lib/apiClient.ts`** (`/api/*`). Vite proxies `/api` to `http://localhost:${PORT}` (Default **3003**, siehe `vite.config.ts` + `server/index.ts`) — bewusst nicht 3001, damit **Velacare** (`next dev -p 3001`) parallel laufen kann. Wenn Login einen **Velacare-404-HTML** liefert, lief der Proxy fälschlich gegen Next statt Express → `PORT` prüfen und `npm run server:dev` starten.
 
 ### Routing structure
 Routes live under `src/routes/` using TanStack Router file-based conventions. The main nested route is:
