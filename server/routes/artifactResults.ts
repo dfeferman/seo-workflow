@@ -6,14 +6,10 @@ import { routeParamOne } from './routeParams.js'
 const router = Router()
 router.use(requireAuth)
 
-async function resultBelongsToUser(resultId: string, userId: string): Promise<boolean> {
+async function resultExists(resultId: string): Promise<boolean> {
   const r = await pool.query(
-    `SELECT 1 FROM artifact_results ar
-     JOIN artifacts a ON a.id = ar.artifact_id
-     JOIN categories c ON c.id = a.category_id
-     JOIN projects p ON p.id = c.project_id
-     WHERE ar.id = $1 AND p.user_id = $2`,
-    [resultId, userId]
+    `SELECT 1 FROM artifact_results WHERE id = $1`,
+    [resultId]
   )
   return (r.rowCount ?? 0) > 0
 }
@@ -21,13 +17,10 @@ async function resultBelongsToUser(resultId: string, userId: string): Promise<bo
 // GET /api/artifact-results/by-artifact/:artifactId — vor /:id
 router.get('/by-artifact/:artifactId', async (req: AuthRequest, res: Response) => {
   const result = await pool.query(
-    `SELECT ar.* FROM artifact_results ar
-     JOIN artifacts a ON a.id = ar.artifact_id
-     JOIN categories c ON c.id = a.category_id
-     JOIN projects p ON p.id = c.project_id
-     WHERE ar.artifact_id = $1 AND p.user_id = $2
-     ORDER BY ar.version DESC`,
-    [routeParamOne(req.params.artifactId), req.userId]
+    `SELECT * FROM artifact_results
+     WHERE artifact_id = $1
+     ORDER BY version DESC`,
+    [routeParamOne(req.params.artifactId)]
   )
   res.json(result.rows)
 })
@@ -42,11 +35,8 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   }
 
   const check = await pool.query(
-    `SELECT 1 FROM artifacts a
-     JOIN categories c ON c.id = a.category_id
-     JOIN projects p ON p.id = c.project_id
-     WHERE a.id = $1 AND p.user_id = $2`,
-    [artifact_id, req.userId]
+    `SELECT 1 FROM artifacts WHERE id = $1`,
+    [artifact_id]
   )
   if ((check.rowCount ?? 0) === 0) {
     res.status(403).json({ error: 'Forbidden' })
@@ -71,7 +61,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 // PUT /api/artifact-results/:id
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)
-  if (!(await resultBelongsToUser(id, req.userId!))) {
+  if (!(await resultExists(id))) {
     res.status(404).json({ error: 'Not found' })
     return
   }

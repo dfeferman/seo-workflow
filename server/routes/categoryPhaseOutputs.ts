@@ -6,18 +6,17 @@ import { routeParamOne } from './routeParams.js'
 const router = Router()
 router.use(requireAuth)
 
-async function categoryBelongsToUser(categoryId: string, userId: string): Promise<boolean> {
+async function categoryExists(categoryId: string): Promise<boolean> {
   const r = await pool.query(
-    `SELECT 1 FROM categories c JOIN projects p ON p.id = c.project_id
-     WHERE c.id = $1 AND p.user_id = $2`,
-    [categoryId, userId]
+    `SELECT 1 FROM categories WHERE id = $1`,
+    [categoryId]
   )
   return (r.rowCount ?? 0) > 0
 }
 
 router.get('/by-category/:categoryId', async (req: AuthRequest, res: Response) => {
   const categoryId = routeParamOne(req.params.categoryId)
-  if (!(await categoryBelongsToUser(categoryId, req.userId!))) {
+  if (!(await categoryExists(categoryId))) {
     res.status(404).json({ error: 'Not found' })
     return
   }
@@ -35,7 +34,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     res.status(400).json({ error: 'category_id and phase required' })
     return
   }
-  if (!(await categoryBelongsToUser(category_id, req.userId!))) {
+  if (!(await categoryExists(category_id))) {
     res.status(403).json({ error: 'Forbidden' })
     return
   }
@@ -57,14 +56,8 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 router.delete('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)
   const result = await pool.query(
-    `DELETE FROM category_phase_outputs cpo
-     USING categories c, projects p
-     WHERE cpo.id = $1
-       AND cpo.category_id = c.id
-       AND c.project_id = p.id
-       AND p.user_id = $2
-     RETURNING cpo.id`,
-    [id, req.userId]
+    `DELETE FROM category_phase_outputs WHERE id = $1 RETURNING id`,
+    [id]
   )
   if (!result.rows[0]) {
     res.status(404).json({ error: 'Not found' })

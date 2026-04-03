@@ -6,18 +6,17 @@ import { routeParamOne } from './routeParams.js'
 const router = Router()
 router.use(requireAuth)
 
-async function categoryBelongsToUser(categoryId: string, userId: string): Promise<boolean> {
+async function categoryExists(categoryId: string): Promise<boolean> {
   const r = await pool.query(
-    `SELECT 1 FROM categories c JOIN projects p ON p.id = c.project_id
-     WHERE c.id = $1 AND p.user_id = $2`,
-    [categoryId, userId]
+    `SELECT 1 FROM categories WHERE id = $1`,
+    [categoryId]
   )
   return (r.rowCount ?? 0) > 0
 }
 
 router.get('/by-category/:categoryId', async (req: AuthRequest, res: Response) => {
   const categoryId = routeParamOne(req.params.categoryId)
-  if (!(await categoryBelongsToUser(categoryId, req.userId!))) {
+  if (!(await categoryExists(categoryId))) {
     res.status(404).json({ error: 'Not found' })
     return
   }
@@ -34,7 +33,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     res.status(400).json({ error: 'category_id and title required' })
     return
   }
-  if (!(await categoryBelongsToUser(category_id, req.userId!))) {
+  if (!(await categoryExists(category_id))) {
     res.status(403).json({ error: 'Forbidden' })
     return
   }
@@ -56,12 +55,8 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
        display_order = COALESCE($3, display_order),
        updated_at = NOW()
      WHERE id = $4
-       AND category_id IN (
-         SELECT c.id FROM categories c JOIN projects p ON p.id = c.project_id
-         WHERE p.user_id = $5
-       )
      RETURNING *`,
-    [title ?? null, content ?? null, display_order ?? null, id, req.userId]
+    [title ?? null, content ?? null, display_order ?? null, id]
   )
   if (!result.rows[0]) {
     res.status(404).json({ error: 'Not found' })
@@ -73,13 +68,8 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 router.delete('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)
   const result = await pool.query(
-    `DELETE FROM category_reference_docs
-     WHERE id = $1
-       AND category_id IN (
-         SELECT c.id FROM categories c JOIN projects p ON p.id = c.project_id WHERE p.user_id = $2
-       )
-     RETURNING id`,
-    [id, req.userId]
+    `DELETE FROM category_reference_docs WHERE id = $1 RETURNING id`,
+    [id]
   )
   if (!result.rows[0]) {
     res.status(404).json({ error: 'Not found' })

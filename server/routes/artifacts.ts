@@ -6,13 +6,10 @@ import { routeParamOne } from './routeParams.js'
 const router = Router()
 router.use(requireAuth)
 
-async function artifactBelongsToUser(artifactId: string, userId: string): Promise<boolean> {
+async function artifactExists(artifactId: string): Promise<boolean> {
   const r = await pool.query(
-    `SELECT 1 FROM artifacts a
-     JOIN categories c ON c.id = a.category_id
-     JOIN projects p ON p.id = c.project_id
-     WHERE a.id = $1 AND p.user_id = $2`,
-    [artifactId, userId]
+    `SELECT 1 FROM artifacts WHERE id = $1`,
+    [artifactId]
   )
   return (r.rowCount ?? 0) > 0
 }
@@ -20,25 +17,21 @@ async function artifactBelongsToUser(artifactId: string, userId: string): Promis
 // GET /api/artifacts/by-category/:categoryId — vor /:id
 router.get('/by-category/:categoryId', async (req: AuthRequest, res: Response) => {
   const result = await pool.query(
-    `SELECT a.* FROM artifacts a
-     JOIN categories c ON c.id = a.category_id
-     JOIN projects p ON p.id = c.project_id
-     WHERE a.category_id = $1 AND p.user_id = $2
-     ORDER BY a.display_order ASC`,
-    [routeParamOne(req.params.categoryId), req.userId]
+    `SELECT * FROM artifacts
+     WHERE category_id = $1
+     ORDER BY display_order ASC`,
+    [routeParamOne(req.params.categoryId)]
   )
   res.json(result.rows)
 })
 
-// GET /api/artifacts/by-template/:templateId — für Template→Artefakt-Sync (nur eigene Projekte)
+// GET /api/artifacts/by-template/:templateId — für Template→Artefakt-Sync
 router.get('/by-template/:templateId', async (req: AuthRequest, res: Response) => {
   const templateId = routeParamOne(req.params.templateId)
   const result = await pool.query(
-    `SELECT a.id, a.template_id, a.artifact_code, a.phase FROM artifacts a
-     JOIN categories c ON c.id = a.category_id
-     JOIN projects p ON p.id = c.project_id
-     WHERE a.template_id = $1 AND p.user_id = $2`,
-    [templateId, req.userId]
+    `SELECT id, template_id, artifact_code, phase FROM artifacts
+     WHERE template_id = $1`,
+    [templateId]
   )
   res.json(result.rows)
 })
@@ -53,11 +46,9 @@ router.get('/by-phase-code', async (req: AuthRequest, res: Response) => {
   }
   const phaseNorm = phase.toUpperCase().trim().slice(0, 1)
   const result = await pool.query(
-    `SELECT a.id, a.template_id, a.artifact_code, a.phase FROM artifacts a
-     JOIN categories c ON c.id = a.category_id
-     JOIN projects p ON p.id = c.project_id
-     WHERE a.phase = $1 AND a.artifact_code = $2 AND p.user_id = $3`,
-    [phaseNorm, code.trim(), req.userId]
+    `SELECT id, template_id, artifact_code, phase FROM artifacts
+     WHERE phase = $1 AND artifact_code = $2`,
+    [phaseNorm, code.trim()]
   )
   res.json(result.rows)
 })
@@ -65,7 +56,7 @@ router.get('/by-phase-code', async (req: AuthRequest, res: Response) => {
 // GET /api/artifacts/:id
 router.get('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)
-  if (!(await artifactBelongsToUser(id, req.userId!))) {
+  if (!(await artifactExists(id))) {
     res.status(404).json({ error: 'Not found' })
     return
   }
@@ -96,9 +87,8 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   }
 
   const check = await pool.query(
-    `SELECT 1 FROM categories c JOIN projects p ON p.id = c.project_id
-     WHERE c.id = $1 AND p.user_id = $2`,
-    [category_id, req.userId]
+    `SELECT 1 FROM categories WHERE id = $1`,
+    [category_id]
   )
   if ((check.rowCount ?? 0) === 0) {
     res.status(403).json({ error: 'Forbidden' })
@@ -129,7 +119,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 // PUT /api/artifacts/:id
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)
-  if (!(await artifactBelongsToUser(id, req.userId!))) {
+  if (!(await artifactExists(id))) {
     res.status(404).json({ error: 'Not found' })
     return
   }
@@ -165,7 +155,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 // DELETE /api/artifacts/:id
 router.delete('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)
-  if (!(await artifactBelongsToUser(id, req.userId!))) {
+  if (!(await artifactExists(id))) {
     res.status(404).json({ error: 'Not found' })
     return
   }
