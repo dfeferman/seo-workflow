@@ -13,6 +13,8 @@ import templatesRouter from './routes/templates.js'
 import phaseOutputTemplatesRouter from './routes/phaseOutputTemplates.js'
 import categoryPhaseOutputsRouter from './routes/categoryPhaseOutputs.js'
 import categoryReferenceDocsRouter from './routes/categoryReferenceDocs.js'
+import pagesRouter from './routes/pages.js'
+import pageLinksRouter from './routes/pageLinks.js'
 
 export const app = express()
 app.use(cors({
@@ -32,6 +34,8 @@ app.use('/api/templates', templatesRouter)
 app.use('/api/phase-output-templates', phaseOutputTemplatesRouter)
 app.use('/api/category-phase-outputs', categoryPhaseOutputsRouter)
 app.use('/api/category-reference-docs', categoryReferenceDocsRouter)
+app.use('/api/pages', pagesRouter)
+app.use('/api/page-links', pageLinksRouter)
 
 if (process.env.NODE_ENV === 'production') {
   const __dirname = path.dirname(fileURLToPath(import.meta.url))

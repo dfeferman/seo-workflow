@@ -158,4 +158,15 @@ export const apiClient = {
       request<any>('PUT', `/api/category-reference-docs/${id}`, data),
     delete: (id: string) => request<void>('DELETE', `/api/category-reference-docs/${id}`),
   },
+
+  pages: {
+    getByProject: (projectId: string) =>
+      request<any[]>('GET', `/api/pages/by-project/${projectId}`),
+    getById: (id: string) => request<any>('GET', `/api/pages/${id}`),
+  },
+
+  pageLinks: {
+    getByProject: (projectId: string) =>
+      request<any[]>('GET', `/api/page-links/by-project/${projectId}`),
+  },
 }

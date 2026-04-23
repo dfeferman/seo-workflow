@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectsProjectIdLinkGraphRouteImport } from './routes/projects/$projectId/link-graph'
 import { Route as ProjectsProjectIdCategoriesCategoryIdIndexRouteImport } from './routes/projects/$projectId/categories/$categoryId/index'
 import { Route as ProjectsProjectIdCategoriesCategoryIdSettingsRouteImport } from './routes/projects/$projectId/categories/$categoryId/settings'
 import { Route as ProjectsProjectIdCategoriesCategoryIdOverviewRouteImport } from './routes/projects/$projectId/categories/$categoryId/overview'
@@ -31,6 +32,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsProjectIdLinkGraphRoute =
+  ProjectsProjectIdLinkGraphRouteImport.update({
+    id: '/projects/$projectId/link-graph',
+    path: '/projects/$projectId/link-graph',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ProjectsProjectIdCategoriesCategoryIdIndexRoute =
   ProjectsProjectIdCategoriesCategoryIdIndexRouteImport.update({
     id: '/projects/$projectId/categories/$categoryId/',
@@ -54,6 +61,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/projects/$projectId/link-graph': typeof ProjectsProjectIdLinkGraphRoute
   '/projects/$projectId/categories/$categoryId/overview': typeof ProjectsProjectIdCategoriesCategoryIdOverviewRoute
   '/projects/$projectId/categories/$categoryId/settings': typeof ProjectsProjectIdCategoriesCategoryIdSettingsRoute
   '/projects/$projectId/categories/$categoryId/': typeof ProjectsProjectIdCategoriesCategoryIdIndexRoute
@@ -62,6 +70,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/projects/$projectId/link-graph': typeof ProjectsProjectIdLinkGraphRoute
   '/projects/$projectId/categories/$categoryId/overview': typeof ProjectsProjectIdCategoriesCategoryIdOverviewRoute
   '/projects/$projectId/categories/$categoryId/settings': typeof ProjectsProjectIdCategoriesCategoryIdSettingsRoute
   '/projects/$projectId/categories/$categoryId': typeof ProjectsProjectIdCategoriesCategoryIdIndexRoute
@@ -71,6 +80,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/projects/$projectId/link-graph': typeof ProjectsProjectIdLinkGraphRoute
   '/projects/$projectId/categories/$categoryId/overview': typeof ProjectsProjectIdCategoriesCategoryIdOverviewRoute
   '/projects/$projectId/categories/$categoryId/settings': typeof ProjectsProjectIdCategoriesCategoryIdSettingsRoute
   '/projects/$projectId/categories/$categoryId/': typeof ProjectsProjectIdCategoriesCategoryIdIndexRoute
@@ -81,6 +91,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/signup'
+    | '/projects/$projectId/link-graph'
     | '/projects/$projectId/categories/$categoryId/overview'
     | '/projects/$projectId/categories/$categoryId/settings'
     | '/projects/$projectId/categories/$categoryId/'
@@ -89,6 +100,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/signup'
+    | '/projects/$projectId/link-graph'
     | '/projects/$projectId/categories/$categoryId/overview'
     | '/projects/$projectId/categories/$categoryId/settings'
     | '/projects/$projectId/categories/$categoryId'
@@ -97,6 +109,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/signup'
+    | '/projects/$projectId/link-graph'
     | '/projects/$projectId/categories/$categoryId/overview'
     | '/projects/$projectId/categories/$categoryId/settings'
     | '/projects/$projectId/categories/$categoryId/'
@@ -106,6 +119,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  ProjectsProjectIdLinkGraphRoute: typeof ProjectsProjectIdLinkGraphRoute
   ProjectsProjectIdCategoriesCategoryIdOverviewRoute: typeof ProjectsProjectIdCategoriesCategoryIdOverviewRoute
   ProjectsProjectIdCategoriesCategoryIdSettingsRoute: typeof ProjectsProjectIdCategoriesCategoryIdSettingsRoute
   ProjectsProjectIdCategoriesCategoryIdIndexRoute: typeof ProjectsProjectIdCategoriesCategoryIdIndexRoute
@@ -132,6 +146,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects/$projectId/link-graph': {
+      id: '/projects/$projectId/link-graph'
+      path: '/projects/$projectId/link-graph'
+      fullPath: '/projects/$projectId/link-graph'
+      preLoaderRoute: typeof ProjectsProjectIdLinkGraphRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/projects/$projectId/categories/$categoryId/': {
@@ -162,6 +183,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  ProjectsProjectIdLinkGraphRoute: ProjectsProjectIdLinkGraphRoute,
   ProjectsProjectIdCategoriesCategoryIdOverviewRoute:
     ProjectsProjectIdCategoriesCategoryIdOverviewRoute,
   ProjectsProjectIdCategoriesCategoryIdSettingsRoute:

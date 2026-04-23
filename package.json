@@ -16,6 +16,7 @@
     "server:build": "tsc --project server/tsconfig.json"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^3.0.0",
     "@headlessui/react": "^2.2.0",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
@@ -23,6 +24,7 @@
     "@tanstack/react-router": "^1.78.0",
     "@tanstack/router-devtools": "^1.78.0",
     "@tanstack/router-vite-plugin": "^1.78.0",
+    "@xyflow/react": "^12.10.2",
     "bcrypt": "^6.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

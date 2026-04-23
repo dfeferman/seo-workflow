@@ -36,7 +36,7 @@
 ## SP17 - Leere Graph-View (Empty State)
 
 **Geschaetzte Dauer:** ~2h  
-**Status:** [ ] Todo  
+**Status:** [x] Abgeschlossen  
 **Abhaengig von:** SP16
 
 **Deliverables:**
@@ -49,6 +49,9 @@
 - Express-Routen fuer `/api/pages/*` und `/api/page-links/*` angelegt
 
 **Log:**
+- 2026-04-23 — gestartet
+- 2026-04-23 — GET-Routen pages + pageLinks, apiClient-Stubs, FilterSidebar, LinkGraphView, Route erstellt
+- 2026-04-23 — abgeschlossen
 
 ---
 
@@ -192,7 +195,7 @@
 | SP | Name | Dauer | Status |
 |----|------|-------|--------|
 | SP16 | Datenmodell | ~1h | [x] |
-| SP17 | Leere Graph-View | ~2h | [ ] |
+| SP17 | Leere Graph-View | ~2h | [x] |
 | SP18 | Nodes & Edges rendern | ~4h | [ ] |
 | SP19 | Node-Details-Panel | ~3h | [ ] |
 | SP20 | Edge-Details-Popup | ~2h | [ ] |
