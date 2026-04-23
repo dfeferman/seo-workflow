@@ -10,5 +10,5 @@ function LinkGraphPage() {
   const { projectId } = Route.useParams()
   const { data: project } = useProject(projectId)
 
-  return <LinkGraphView projectName={project?.name ?? '...'} />
+  return <LinkGraphView projectId={projectId} projectName={project?.name ?? '...'} />
 }

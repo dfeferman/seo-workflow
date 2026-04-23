@@ -58,17 +58,20 @@
 ## SP18 - Nodes & Edges rendern
 
 **Geschaetzte Dauer:** ~4h  
-**Status:** [ ] Todo  
+**Status:** [x] Abgeschlossen  
 **Abhaengig von:** SP17
 
 **Deliverables:**
 - `src/hooks/usePages.ts`
 - `src/hooks/usePageLinks.ts`
 - Custom Node-Komponenten: `HubNode.tsx`, `SpokeNode.tsx`, `BlogNode.tsx`
-- Dagre-Auto-Layout
+- `src/components/link-graph/graphLayout.ts` — Dagre Auto-Layout
 - Edges mit Staerke aus aggregierten Link-Instanzen
 
 **Log:**
+- 2026-04-23 — gestartet
+- 2026-04-23 — Hooks, Node-Komponenten, Layout, Rendering abgeschlossen
+- 2026-04-23 — abgeschlossen
 
 ---
 
@@ -196,7 +199,7 @@
 |----|------|-------|--------|
 | SP16 | Datenmodell | ~1h | [x] |
 | SP17 | Leere Graph-View | ~2h | [x] |
-| SP18 | Nodes & Edges rendern | ~4h | [ ] |
+| SP18 | Nodes & Edges rendern | ~4h | [x] |
 | SP19 | Node-Details-Panel | ~3h | [ ] |
 | SP20 | Edge-Details-Popup | ~2h | [ ] |
 | SP21 | Filter & Suche | ~3h | [ ] |
