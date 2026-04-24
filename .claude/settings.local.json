@@ -22,7 +22,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(npm run:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npx vite *)",
+      "Bash(pkill -f \"vite --mode\")"
     ]
   }
 }

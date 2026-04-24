@@ -1,0 +1,20 @@
+content/
+└── medizinprodukte-shop/          # Projekt
+    ├── _meta.json                 # Projekt-Metadaten
+    ├── Kategorien/                      # Hauptkategorien
+    │   └── desinfektionsmittel/   # Hub
+    │       ├── desinfektionsmittel-hub.md             # Hub-Seite
+    │       ├── _meta.json         # Hub-Metadaten
+    │       ├── UK/            # Unterkategorien
+    │          ├── haendedesinfektion-uk.md
+    │          ├── flaechendesinfektion-uk.md
+    │          └── ...
+    └── blog/                        # Alle Artikel hier
+        ├── anleitungen/         # How-To, Guides            
+        │   ├── 2025-01-vah-vs-rki.md
+        │   └── 2025-02-krinko-anleitung.md
+        ├── hygiene/                 # News/Themen
+        └── produktwissen/           # Produkt-bezogen
+        └── best-practices/      # Tipps & Tricks
+    ├── drafts/                    # Work in Progress
+    └── archive/                   # Alte Versionen
