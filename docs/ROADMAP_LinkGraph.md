@@ -10,8 +10,15 @@
 **Stand (letzte Pflege: 2026-04-28):** SP16–SP22 **abgeschlossen**. Naechster Meilenstein: **SP23** (Seite & Link manuell anlegen).  
 Route: `/projects/$projectId/link-graph`.
 
-**Umgesetzte Frontend-Bausteine (Auszug):**  
-`LinkGraphView.tsx`, `FilterSidebar.tsx`, `linkGraphFilter.ts`, `LinkGraphFitView.tsx`, `NodeDetailsPanel.tsx`, `EdgeDetailsPopup.tsx`, `LinkEditModal.tsx`, `HubNode.tsx` / `SpokeNode.tsx` / `BlogNode.tsx`, `graphLayout.ts`; Hooks `usePages`, `usePageLinks`, `useProjectCategoryPhases`.
+**Runtime:** Datenbank PostgreSQL (lokal/NAS): **Express-API**, kein Supabase-Client fuer den Link Graph.
+
+**Umgesetzt (Auszug):**
+
+| Bereich | Dateien / Endpunkte |
+|---------|---------------------|
+| **Frontend** | `LinkGraphView.tsx` (u. a. DnD-Upload SP22), `FilterSidebar.tsx`, `linkGraphFilter.ts`, `LinkGraphFitView.tsx`, `NodeDetailsPanel.tsx`, `EdgeDetailsPopup.tsx`, `LinkEditModal.tsx`, `HubNode` / `SpokeNode` / `BlogNode`, `graphLayout.ts` |
+| **Hooks** | `usePages`, `usePageLinks`, `useProjectCategoryPhases` |
+| **Backend SP22** | `POST /api/pages/import-markdown/:projectId`, `server/services/markdownProjectImport.ts`, `server/lib/` (sanitize, normalize, extract, dedupe); Konfiguration `UPLOAD_ROOT` |
 
 ---
 
@@ -39,7 +46,7 @@ Route: `/projects/$projectId/link-graph`.
 **Log:**
 - 2026-04-23 — gestartet
 - 2026-04-23 — Migration 006_link_graph.sql erstellt, TypeScript-Typen ergaenzt, Build gruen
-- 2026-04-23 — abgeschlossen (Migration noch manuell in Supabase auszufuehren)
+- 2026-04-23 — abgeschlossen (Migration in der jeweiligen Postgres-Instanz ausführen; RLS bezieht sich auf JWT/Supabase-typische Policies — bei barem Postgres ggf. anpassen)
 
 ---
 
@@ -95,7 +102,7 @@ Route: `/projects/$projectId/link-graph`.
 - `src/components/link-graph/NodeDetailsPanel.tsx`
 - Klick auf Node -> Panel rechts oeffnet
 - Anzeige: Name, Typ, Status, Wortcount, Kategorie-/Phase-Kontext, Incoming/Outgoing Links (mit Anchor-Texten)
-- Aktionen: Im Editor oeffnen, Bearbeiten, Loeschen (alle disabled bis SP22/SP23)
+- Aktionen: „Im Editor oeffnen“ (mit `markdown_file_path` nach SP22-Upload vorbereitet; **lesende** interne Ansicht / Polish in SP25), Bearbeiten & Loeschen weiter **SP23**
 
 **Log:**
 - 2026-04-28 — umgesetzt (selectedPageId in LinkGraphView, onNodeClick / onPaneClick, useCategory fuer Kategorie/Phase)
@@ -111,7 +118,7 @@ Route: `/projects/$projectId/link-graph`.
 **Deliverables:**
 - Edge-onClick-Handler (`onEdgeClick`, `interactionWidth` fuer groessere Klickflaeche)
 - `EdgeDetailsPopup.tsx`: Von -> Nach, pro Instanz Anchor, Kontext, Platzierung, Zeilen
-- Button "Im Editor oeffnen" (disabled bis SP22)
+- Button **„Im Editor oeffnen“** wenn Quell-Seite `markdown_file_path` hat (Platzhalter-Tooltips bis **interne Vorschau** in SP25; Storage: `UPLOAD_ROOT`)
 - `LinkEditModal.tsx`: Bearbeiten-UI, Speichern disabled bis SP23/API
 
 **Log:**
@@ -152,7 +159,7 @@ Route: `/projects/$projectId/link-graph`.
 - Graph-Re-Render nach Upload (`invalidateQueries` pages / page-links)
 
 **Log:**
-- 2026-04-28 — umgesetzt (Backend `POST /api/pages/import-markdown/:projectId`, Service `markdownProjectImport`, Libs unter `server/lib/`)
+- 2026-04-28 — umgesetzt: `POST /api/pages/import-markdown/:projectId` (multipart), `markdownProjectImport`, `server/lib/*`, Drag&Drop + Query-Invalidate im `LinkGraphView`; Spec `docs/superpowers/specs/2026-04-28-sp22-markdown-upload-design.md`
 
 ---
 
@@ -165,7 +172,7 @@ Route: `/projects/$projectId/link-graph`.
 **Deliverables:**
 - `AddPageModal.tsx` (Name, Typ Hub/Spoke/Blog, URL-Slug, optionale Kategorie)
 - `AddLinkModal.tsx` (Von, Nach, Anchor-Text, Kontextsatz, Platzierung)
-- Supabase-/API-Insert bei Submit
+- **POST/PUT** auf Express-API (`/api/pages`, `/api/page-links` — Routen in SP23 ergänzen), Persistenz PostgreSQL
 - Graph-Re-Render (TanStack Query Invalidate)
 
 **Log:**
@@ -192,7 +199,7 @@ Route: `/projects/$projectId/link-graph`.
 
 **Geschaetzte Dauer:** ~2h  
 **Status:** [ ] Todo  
-**Abhaengig von:** SP19, SP20, SP21
+**Abhaengig von:** SP19, SP20, SP21 (optional inhaltlich **SP22** fuer Upload-Fehlermeldungen / Editor-Polish)
 
 **Deliverables:**
 - Zoom-Controls (+ / - Buttons)
@@ -221,6 +228,8 @@ Route: `/projects/$projectId/link-graph`.
 | SP24 | Export-Funktionen | ~2h | [ ] |
 | SP25 | Polish & UX | ~2h | [ ] |
 | **Gesamt** |  | **~27h** | **7/10 SP** |
+
+**Schaetzung offen:** SP23 + SP24 + SP25 ≈ **~7h** (Rest).
 
 ---
 
