@@ -4,18 +4,23 @@ import type { PageStatus } from '@/types/database.types'
 interface SpokeNodeData {
   label: string
   status: PageStatus
+  dimmed?: boolean
+  searchMatch?: boolean
 }
 
 export function SpokeNode({ data }: { data: SpokeNodeData }) {
   const isDashed = data.status === 'planned'
+  const dimmed = data.dimmed === true
+  const match = data.searchMatch === true
 
   return (
-    <div className="flex flex-col items-center">
+    <div className={`flex flex-col items-center transition-opacity ${dimmed ? 'opacity-35' : ''}`}>
       <Handle type="target" position={Position.Top} className="!bg-green-400" />
       <div
         className={[
           'rounded-full bg-green-100 border-2 border-green-500',
           isDashed ? 'border-dashed' : '',
+          match ? 'ring-4 ring-amber-400 ring-offset-2' : '',
         ].join(' ')}
         style={{ width: 50, height: 50 }}
       />

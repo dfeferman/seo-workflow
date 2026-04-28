@@ -6,6 +6,7 @@ interface NodeDetailsPanelProps {
   pages: PageRow[]
   pageLinks: PageLinkRow[]
   onClose: () => void
+  onEditPage?: () => void
 }
 
 const TYPE_BADGE: Record<string, string> = {
@@ -32,7 +33,7 @@ const STATUS_LABEL: Record<string, string> = {
   planned: 'Geplant',
 }
 
-export function NodeDetailsPanel({ page, pages, pageLinks, onClose }: NodeDetailsPanelProps) {
+export function NodeDetailsPanel({ page, pages, pageLinks, onClose, onEditPage }: NodeDetailsPanelProps) {
   const { data: category } = useCategory(page.category_id ?? undefined)
 
   const pageById = new Map(pages.map((p) => [p.id, p]))
@@ -151,23 +152,24 @@ export function NodeDetailsPanel({ page, pages, pageLinks, onClose }: NodeDetail
         <button
           type="button"
           disabled={!page.markdown_file_path}
-          title={page.markdown_file_path ? 'Editor-View kommt in SP22' : 'Kein Dokument verknüpft'}
+          title={page.markdown_file_path ? 'Datei liegt unter UPLOAD_ROOT' : 'Kein Dokument verknüpft'}
           className="w-full px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-400 cursor-not-allowed"
         >
           Im Editor öffnen
         </button>
         <button
           type="button"
-          disabled
-          title="Bearbeiten kommt in SP23"
-          className="w-full px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-400 cursor-not-allowed"
+          disabled={!onEditPage}
+          title={onEditPage ? 'Seite bearbeiten' : ''}
+          onClick={() => onEditPage?.()}
+          className="w-full px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:text-slate-400 disabled:hover:bg-white disabled:cursor-not-allowed"
         >
           Bearbeiten
         </button>
         <button
           type="button"
           disabled
-          title="Löschen kommt in SP23"
+          title="Löschen ist noch nicht umgesetzt"
           className="w-full px-3 py-2 text-xs font-medium rounded-lg border border-red-100 bg-white text-red-300 cursor-not-allowed"
         >
           Löschen

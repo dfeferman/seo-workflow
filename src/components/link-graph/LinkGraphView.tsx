@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Background, BackgroundVariant, ReactFlow, MarkerType } from '@xyflow/react'
 import type { Edge, Node, EdgeMouseHandler, NodeMouseHandler } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
@@ -14,8 +14,11 @@ import { useProjectCategoryPhases } from '@/hooks/useProjectCategoryPhases'
 import { NodeDetailsPanel } from './NodeDetailsPanel'
 import { EdgeDetailsPopup } from './EdgeDetailsPopup'
 import { LinkGraphFitView } from './LinkGraphFitView'
+import { PageFormModal } from './PageFormModal'
+import { AddLinkModal } from './AddLinkModal'
+import { LinkGraphExportMenu } from './LinkGraphExportMenu'
 import { apiClient } from '@/lib/apiClient'
-import type { PageLinkRow } from '@/types/database.types'
+import type { PageLinkRow, PageRow } from '@/types/database.types'
 import { defaultLinkGraphFilters, filterPagesForGraph } from './linkGraphFilter'
 import type { LinkGraphFilters } from './linkGraphFilter'
 
@@ -43,6 +46,14 @@ export function LinkGraphView({ projectId, projectName }: LinkGraphViewProps) {
   const [fitRequest, setFitRequest] = useState<{ nodeIds: string[]; nonce: number } | null>(null)
   const [dragDepth, setDragDepth] = useState(0)
   const [uploadError, setUploadError] = useState<string | null>(null)
+
+  const [pageModalOpen, setPageModalOpen] = useState(false)
+  const [pageModalMode, setPageModalMode] = useState<'create' | 'edit'>('create')
+  const [pageModalInitial, setPageModalInitial] = useState<PageRow | null>(null)
+  const [linkModalOpen, setLinkModalOpen] = useState(false)
+  const [exportBanner, setExportBanner] = useState<{ text: string; kind: 'ok' | 'err' } | null>(null)
+
+  const flowWrapRef = useRef<HTMLDivElement>(null)
 
   const importMutation = useMutation({
     mutationFn: (file: File) => apiClient.pages.importMarkdown(projectId, file),
@@ -198,6 +209,18 @@ export function LinkGraphView({ projectId, projectName }: LinkGraphViewProps) {
     e.dataTransfer.dropEffect = 'copy'
   }, [])
 
+  const graphEditActions = useMemo(
+    () => ({
+      onAddPage: () => {
+        setPageModalInitial(null)
+        setPageModalMode('create')
+        setPageModalOpen(true)
+      },
+      onAddLink: () => setLinkModalOpen(true),
+    }),
+    []
+  )
+
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
@@ -214,6 +237,12 @@ export function LinkGraphView({ projectId, projectName }: LinkGraphViewProps) {
     },
     [importMutation]
   )
+
+  useEffect(() => {
+    if (!exportBanner) return
+    const t = window.setTimeout(() => setExportBanner(null), 2800)
+    return () => window.clearTimeout(t)
+  }, [exportBanner])
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
@@ -242,17 +271,26 @@ export function LinkGraphView({ projectId, projectName }: LinkGraphViewProps) {
               Suchen
             </button>
           </div>
-          <button
-            disabled
-            className="px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-200 bg-white text-slate-400 cursor-not-allowed"
-          >
-            Export
-          </button>
+          <LinkGraphExportMenu
+            projectId={projectId}
+            projectName={projectName}
+            pages={pages}
+            pageLinks={pageLinks}
+            pngContainerRef={flowWrapRef}
+            disabled={isLoading || importMutation.isPending}
+            onFeedback={(message, variant) =>
+              setExportBanner({ text: message, kind: variant === 'success' ? 'ok' : 'err' })
+            }
+          />
         </div>
       </div>
 
       <div className="flex-1 flex min-h-0">
-        <FilterSidebar filters={filters} onChange={handleFilterChange} />
+        <FilterSidebar
+          filters={filters}
+          onChange={handleFilterChange}
+          graphEditActions={graphEditActions}
+        />
 
         <div
           className="flex-1 relative outline-none"
@@ -284,24 +322,44 @@ export function LinkGraphView({ projectId, projectName }: LinkGraphViewProps) {
               </button>
             </div>
           )}
+          {exportBanner && (
+            <div
+              className={`absolute ${uploadError ? 'top-16' : 'top-2'} left-2 right-2 z-30 rounded-lg border px-3 py-2 text-sm flex items-center justify-between gap-2 ${
+                exportBanner.kind === 'ok'
+                  ? 'bg-emerald-50 border-emerald-100 text-emerald-900'
+                  : 'bg-red-50 border-red-100 text-red-900'
+              }`}
+            >
+              <span>{exportBanner.text}</span>
+              <button
+                type="button"
+                className="underline flex-shrink-0"
+                onClick={() => setExportBanner(null)}
+              >
+                OK
+              </button>
+            </div>
+          )}
           {isLoading ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <p className="text-slate-400 text-sm">Lade Graph...</p>
             </div>
           ) : (
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              nodeTypes={nodeTypes}
-              onNodeClick={handleNodeClick}
-              onEdgeClick={handleEdgeClick}
-              onPaneClick={handlePaneClick}
-              fitView
-              proOptions={{ hideAttribution: true }}
-            >
-              <LinkGraphFitView request={fitRequest} />
-              <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#e2e8f0" />
-            </ReactFlow>
+            <div ref={flowWrapRef} className="absolute inset-0 w-full h-full min-h-[200px]">
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                nodeTypes={nodeTypes}
+                onNodeClick={handleNodeClick}
+                onEdgeClick={handleEdgeClick}
+                onPaneClick={handlePaneClick}
+                fitView
+                proOptions={{ hideAttribution: true }}
+              >
+                <LinkGraphFitView request={fitRequest} />
+                <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#e2e8f0" />
+              </ReactFlow>
+            </div>
           )}
 
           {!isLoading && pages.length === 0 && (
@@ -309,7 +367,7 @@ export function LinkGraphView({ projectId, projectName }: LinkGraphViewProps) {
               <div className="text-center">
                 <p className="text-slate-400 text-sm font-medium">Noch keine Seiten vorhanden</p>
                 <p className="text-slate-300 text-xs mt-1">
-                  Markdown hierher ziehen (.md) oder Seiten später über „Seite anlegen“ (SP23)
+                  Markdown hierher ziehen (.md) oder links in der Sidebar „Seite anlegen“ wählen.
                 </p>
               </div>
             </div>
@@ -332,6 +390,11 @@ export function LinkGraphView({ projectId, projectName }: LinkGraphViewProps) {
               pages={pages}
               pageLinks={pageLinks}
               onClose={() => setSelectedPageId(null)}
+              onEditPage={() => {
+                setPageModalInitial(selectedPage)
+                setPageModalMode('edit')
+                setPageModalOpen(true)
+              }}
             />
           )}
 
@@ -342,8 +405,23 @@ export function LinkGraphView({ projectId, projectName }: LinkGraphViewProps) {
               fromPage={selectedEdgeBundle.fromPage}
               toPage={selectedEdgeBundle.toPage}
               links={selectedEdgeBundle.links}
+              projectId={projectId}
             />
           )}
+
+          <PageFormModal
+            open={pageModalOpen}
+            mode={pageModalMode}
+            projectId={projectId}
+            initialPage={pageModalInitial}
+            onClose={() => setPageModalOpen(false)}
+          />
+          <AddLinkModal
+            open={linkModalOpen}
+            projectId={projectId}
+            pages={pages}
+            onClose={() => setLinkModalOpen(false)}
+          />
         </div>
       </div>
     </div>

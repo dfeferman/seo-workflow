@@ -1,6 +1,14 @@
 // Zentrales API-Abstraktionslayer. Alle Datenzugriffe laufen ueber dieses Modul.
 
 import type { MarkdownImportResponse } from '@/types/markdownImport.types'
+import type {
+  PageLinkInsert,
+  PageLinkRow,
+  PageLinkUpdate,
+  PageRow,
+  PageStatus,
+  PageType,
+} from '@/types/database.types'
 
 const BASE_URL = ''
 
@@ -207,8 +215,28 @@ export const apiClient = {
 
   pages: {
     getByProject: (projectId: string) =>
-      request<any[]>('GET', `/api/pages/by-project/${projectId}`),
-    getById: (id: string) => request<any>('GET', `/api/pages/${id}`),
+      request<PageRow[]>('GET', `/api/pages/by-project/${projectId}`),
+    getById: (id: string) => request<PageRow>('GET', `/api/pages/${id}`),
+    create: (data: {
+      project_id: string
+      name: string
+      type: PageType
+      url_slug: string
+      status: PageStatus
+      category_id?: string | null
+    }) => request<PageRow>('POST', '/api/pages', data),
+    update: (
+      id: string,
+      data: Partial<{
+        name: string
+        type: PageType
+        status: PageStatus
+        url_slug: string
+        category_id: string | null
+        markdown_file_path: string
+        word_count: number
+      }>
+    ) => request<PageRow>('PUT', `/api/pages/${id}`, data),
     importMarkdown: (projectId: string, file: File) => {
       const fd = new FormData()
       fd.append('file', file)
@@ -221,6 +249,10 @@ export const apiClient = {
 
   pageLinks: {
     getByProject: (projectId: string) =>
-      request<any[]>('GET', `/api/page-links/by-project/${projectId}`),
+      request<PageLinkRow[]>('GET', `/api/page-links/by-project/${projectId}`),
+    create: (data: PageLinkInsert) =>
+      request<PageLinkRow>('POST', '/api/page-links', data),
+    update: (id: string, data: PageLinkUpdate) =>
+      request<PageLinkRow>('PUT', `/api/page-links/${id}`, data),
   },
 }
