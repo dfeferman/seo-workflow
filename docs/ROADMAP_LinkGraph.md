@@ -2,7 +2,16 @@
 
 **Design Spec:** `docs/superpowers/specs/2026-04-23-link-graph-design.md`  
 **Konzept:** `docs/konzept/SEO-Verlinkung/KONZEPT_Verlinkungsarchitektur_Visualisierung.md`  
-**Stand:** 2026-04-28 — SP16–SP19 abgeschlossen; naechster Schritt SP20
+**Plan SP20:** `docs/superpowers/plans/2026-04-28-sp20-edge-details-popup.md`  
+**Plan SP21:** `docs/superpowers/plans/2026-04-28-sp21-filter-suche.md`  
+**Plan SP22:** `docs/superpowers/plans/2026-04-28-sp22-markdown-upload.md`  
+**Spec SP22:** `docs/superpowers/specs/2026-04-28-sp22-markdown-upload-design.md`  
+
+**Stand (letzte Pflege: 2026-04-28):** SP16–SP22 **abgeschlossen**. Naechster Meilenstein: **SP23** (Seite & Link manuell anlegen).  
+Route: `/projects/$projectId/link-graph`.
+
+**Umgesetzte Frontend-Bausteine (Auszug):**  
+`LinkGraphView.tsx`, `FilterSidebar.tsx`, `linkGraphFilter.ts`, `LinkGraphFitView.tsx`, `NodeDetailsPanel.tsx`, `EdgeDetailsPopup.tsx`, `LinkEditModal.tsx`, `HubNode.tsx` / `SpokeNode.tsx` / `BlogNode.tsx`, `graphLayout.ts`; Hooks `usePages`, `usePageLinks`, `useProjectCategoryPhases`.
 
 ---
 
@@ -96,52 +105,54 @@
 ## SP20 - Edge-Details-Popup
 
 **Geschaetzte Dauer:** ~2h  
-**Status:** [ ] Todo  
+**Status:** [x] Abgeschlossen  
 **Abhaengig von:** SP18
 
 **Deliverables:**
-- Edge-onClick-Handler
-- Popup/Tooltip: Von -> Nach, Anchor-Text, Kontextsatz, Platzierung, Zeile im File
-- Button "Im Editor oeffnen" fuer interne Content-Ansicht
-- Bearbeiten-Modal fuer Link-Details
+- Edge-onClick-Handler (`onEdgeClick`, `interactionWidth` fuer groessere Klickflaeche)
+- `EdgeDetailsPopup.tsx`: Von -> Nach, pro Instanz Anchor, Kontext, Platzierung, Zeilen
+- Button "Im Editor oeffnen" (disabled bis SP22)
+- `LinkEditModal.tsx`: Bearbeiten-UI, Speichern disabled bis SP23/API
 
 **Log:**
+- 2026-04-28 — umgesetzt (Modal via Portal, Kantenwahl schliesst Node-Panel und umgekehrt; siehe Plan `docs/superpowers/plans/2026-04-28-sp20-edge-details-popup.md`)
 
 ---
 
 ## SP21 - Filter & Suche
 
 **Geschaetzte Dauer:** ~3h  
-**Status:** [ ] Todo  
+**Status:** [x] Abgeschlossen  
 **Abhaengig von:** SP18
 
 **Deliverables:**
-- Filter-State (Zustand/Context)
-- Multi-Select: Typ (Hub / Spoke / Blog), Status (Published / Draft / Planned), Phase
-- Toggle: "Verwaiste Seiten" (keine Incoming Links)
-- Toggle: "Tote Enden" (keine Outgoing Links)
-- Suche in Topbar -> Node hervorheben + hinzoomen
-- Phase-Filter ueber `pages.category_id -> categories -> artifacts.phase`
+- Filter-State in `LinkGraphView` + `linkGraphFilter.ts` (reine Funktionen)
+- Multi-Select: Typ (Hub / Spoke / Blog), Status (Published / Draft / Planned), Phase (A–G, X)
+- Toggle: Verwaiste Seiten / Tote Enden (basierend auf allen `page_links` des Projekts)
+- Suche in Topbar: Treffer hervorheben (Ring), andere dimmen, `fitView` auf Treffer (`LinkGraphFitView`)
+- Phase: `useProjectCategoryPhases` laedt Artefakt-Phasen pro Kategorie; Filter wie Spec (ohne `category_id` keine Uebereinstimmung bei aktivem Phasenfilter)
 
 **Log:**
+- 2026-04-28 — umgesetzt (siehe Plan `docs/superpowers/plans/2026-04-28-sp21-filter-suche.md`)
 
 ---
 
 ## SP22 - Markdown-Upload & Parsing
 
 **Geschaetzte Dauer:** ~5h  
-**Status:** [ ] Todo  
+**Status:** [x] Abgeschlossen  
 **Abhaengig von:** SP18
 
 **Deliverables:**
 - Drag & Drop Zone ueber Graph-Canvas
-- Upload nach Supabase Storage
+- Upload per Express multipart nach `UPLOAD_ROOT` (siehe `.env` / RUNBOOK), kein Supabase Storage
 - `remark`-Parser: extrahiert Title (`# Heading`) + Links `[text](url)` + Zeilennummer
-- Auto-Matching: URL -> vorhandener Node
+- Auto-Matching: URL -> vorhandener Node (Slug)
 - Fallback: Geplant-Node erstellen wenn kein Match
-- Graph-Re-Render nach Upload
+- Graph-Re-Render nach Upload (`invalidateQueries` pages / page-links)
 
 **Log:**
+- 2026-04-28 — umgesetzt (Backend `POST /api/pages/import-markdown/:projectId`, Service `markdownProjectImport`, Libs unter `server/lib/`)
 
 ---
 
@@ -203,13 +214,13 @@
 | SP17 | Leere Graph-View | ~2h | [x] |
 | SP18 | Nodes & Edges rendern | ~4h | [x] |
 | SP19 | Node-Details-Panel | ~3h | [x] |
-| SP20 | Edge-Details-Popup | ~2h | [ ] |
-| SP21 | Filter & Suche | ~3h | [ ] |
-| SP22 | Markdown-Upload & Parsing | ~5h | [ ] |
+| SP20 | Edge-Details-Popup | ~2h | [x] |
+| SP21 | Filter & Suche | ~3h | [x] |
+| SP22 | Markdown-Upload & Parsing | ~5h | [x] |
 | SP23 | Manuell anlegen | ~3h | [ ] |
 | SP24 | Export-Funktionen | ~2h | [ ] |
 | SP25 | Polish & UX | ~2h | [ ] |
-| **Gesamt** |  | **~27h** | 4/10 |
+| **Gesamt** |  | **~27h** | **7/10 SP** |
 
 ---
 

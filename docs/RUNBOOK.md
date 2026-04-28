@@ -1,5 +1,11 @@
 # Runbook – SEO Workflow Platform
 
+## Link Graph: Markdown-Upload (SP22)
+
+- **`UPLOAD_ROOT`:** Pfad fuer hochgeladene `.md`-Dateien (Unterordner pro `project_id`). Unter **Development** etwa `./uploads` setzen und Ordner beschreibbar halten oder anlegen.
+- **Production:** `UPLOAD_ROOT` auf einen persistenten Pfad setzen (lokal auf dem API-Host oder eingebundenes NAS-Share mit gleicher Mount-Strategie wie bei der Datenbank-Backups-Politik).
+- Nach **fehlgeschlagener DB-Transaktion** kann unter seltenen Abstuerzen eine Datei ohne DB-Eintrag verbleiben — gelegentliches Bereinigen des Upload-Verzeichnisses oder Monitoring der Speicherplaetze erwägen.
+
 ## Deployment Procedures
 
 - **Build:** `npm run build` (erzeugt z. B. `dist/`).

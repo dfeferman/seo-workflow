@@ -1,5 +1,7 @@
 // Zentrales API-Abstraktionslayer. Alle Datenzugriffe laufen ueber dieses Modul.
 
+import type { MarkdownImportResponse } from '@/types/markdownImport.types'
+
 const BASE_URL = ''
 
 let _token: string | null = null
@@ -15,6 +17,18 @@ export function setToken(token: string): void {
 
 export function clearToken(): void {
   _token = null
+}
+
+async function parseFetchError(res: Response): Promise<never> {
+  const text = await res.text()
+  let message = text?.trim() || `Request failed: ${res.status}`
+  try {
+    const j = JSON.parse(text) as { error?: string }
+    if (typeof j?.error === 'string' && j.error) message = j.error
+  } catch {
+    /* Body ist kein JSON */
+  }
+  throw new Error(message)
 }
 
 async function request<T>(
@@ -53,19 +67,44 @@ async function request<T>(
   }
 
   if (!res.ok) {
-    const text = await res.text()
-    let message = text?.trim() || `Request failed: ${res.status}`
-    try {
-      const j = JSON.parse(text) as { error?: string }
-      if (typeof j?.error === 'string' && j.error) message = j.error
-    } catch {
-      /* Body ist kein JSON */
-    }
-    throw new Error(message)
+    return parseFetchError(res)
   }
 
   if (res.status === 204) return undefined as T
   return res.json()
+}
+
+async function requestFormData<T>(path: string, formData: FormData, skipRetry = false): Promise<T> {
+  const token = getToken()
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  })
+
+  if (res.status === 401 && !skipRetry && !_isRefreshing) {
+    _isRefreshing = true
+    try {
+      const data = await request<{ token: string; user?: unknown }>('POST', '/api/auth/refresh', undefined, true)
+      setToken(data.token)
+      if (data.user != null && typeof data.user === 'object') {
+        window.dispatchEvent(new CustomEvent('auth:session-refreshed', { detail: { user: data.user } }))
+      }
+      _isRefreshing = false
+      return requestFormData<T>(path, formData, true)
+    } catch {
+      _isRefreshing = false
+      clearToken()
+      window.dispatchEvent(new Event('auth:signout'))
+      throw new Error('Session abgelaufen. Bitte erneut anmelden.')
+    }
+  }
+
+  if (!res.ok) {
+    return parseFetchError(res)
+  }
+  return res.json() as Promise<T>
 }
 
 export const apiClient = {
@@ -170,6 +209,14 @@ export const apiClient = {
     getByProject: (projectId: string) =>
       request<any[]>('GET', `/api/pages/by-project/${projectId}`),
     getById: (id: string) => request<any>('GET', `/api/pages/${id}`),
+    importMarkdown: (projectId: string, file: File) => {
+      const fd = new FormData()
+      fd.append('file', file)
+      return requestFormData<MarkdownImportResponse>(
+        `/api/pages/import-markdown/${projectId}`,
+        fd
+      )
+    },
   },
 
   pageLinks: {

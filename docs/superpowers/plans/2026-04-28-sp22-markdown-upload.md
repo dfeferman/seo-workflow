@@ -434,7 +434,11 @@ Keine „TBD“-Schritte; offene Punkte bewusst **festgelegt** (memory-multer, D
 
 **Plan gespeichert unter:** `docs/superpowers/plans/2026-04-28-sp22-markdown-upload.md`
 
-**Ausführung wählen:**
+**Status:** Umgesetzt 2026-04-28 (subagent-gestützt / Hauptsession).
+
+---
+
+**Ausführung wählen (historisch):**
 
 1. **Subagent-Driven (empfohlen)** — ein Subagent pro Task, Review zwischen Tasks, schnelle Iteration (`superpowers:subagent-driven-development`).
 
