@@ -7,6 +7,10 @@ CREATE TABLE users (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email         VARCHAR(255) NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
+  is_superadmin BOOLEAN NOT NULL DEFAULT FALSE,
+  is_approved   BOOLEAN NOT NULL DEFAULT FALSE,
+  approved_at   TIMESTAMPTZ,
+  approved_by   UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at    TIMESTAMPTZ DEFAULT NOW(),
   updated_at    TIMESTAMPTZ DEFAULT NOW()
 );
@@ -146,3 +150,25 @@ CREATE TABLE category_reference_docs (
   updated_at    TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX idx_category_reference_docs_category_id ON category_reference_docs(category_id);
+
+-- 11. Auth-Session & Passwort-Reset (vgl. server/db/migrations/002_password_reset.sql — für Docker postgres Init)
+CREATE TABLE refresh_tokens (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL UNIQUE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX idx_rt_user_id ON refresh_tokens(user_id);
+CREATE INDEX idx_rt_active ON refresh_tokens(token_hash) WHERE expires_at > NOW();
+
+CREATE TABLE password_reset_tokens (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL UNIQUE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  used_at    TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX idx_prt_user_id ON password_reset_tokens(user_id);
+CREATE INDEX idx_prt_active ON password_reset_tokens(token_hash) WHERE used_at IS NULL AND expires_at > NOW();

@@ -17,6 +17,7 @@ export function UserMenu() {
   }, [])
 
   const email = user?.email ?? ''
+  const isSuperadmin = user?.is_superadmin ?? false
 
   return (
     <div className="relative" ref={menuRef}>
@@ -45,6 +46,9 @@ export function UserMenu() {
           <div className="px-3 py-2 border-b border-slate-100">
             <p className="text-2xs text-slate-500">Eingeloggt als</p>
             <p className="text-sm font-medium text-slate-900 truncate">{email}</p>
+            {isSuperadmin && (
+              <p className="text-2xs text-orange-600 mt-1">Superadmin</p>
+            )}
           </div>
           <button
             type="button"

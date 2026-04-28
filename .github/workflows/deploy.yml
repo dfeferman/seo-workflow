@@ -28,4 +28,5 @@ jobs:
           context: .
           file: ./docker/Dockerfile
           push: true
+          no-cache: true 
           tags: ghcr.io/dfeferman/seo-workflow:latest

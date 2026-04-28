@@ -7,10 +7,9 @@ const router = Router()
 router.use(requireAuth)
 
 // GET /api/projects
-router.get('/', async (req: AuthRequest, res: Response) => {
+router.get('/', async (_req: AuthRequest, res: Response) => {
   const result = await pool.query(
-    `SELECT * FROM projects WHERE user_id = $1 ORDER BY updated_at DESC`,
-    [req.userId]
+    `SELECT * FROM projects ORDER BY updated_at DESC`
   )
   res.json(result.rows)
 })
@@ -19,8 +18,8 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 router.get('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)
   const result = await pool.query(
-    `SELECT * FROM projects WHERE id = $1 AND user_id = $2`,
-    [id, req.userId]
+    `SELECT * FROM projects WHERE id = $1`,
+    [id]
   )
   if (!result.rows[0]) {
     res.status(404).json({ error: 'Not found' })
@@ -53,8 +52,8 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)
   const result = await pool.query(
     `UPDATE projects SET name = $1, updated_at = NOW()
-     WHERE id = $2 AND user_id = $3 RETURNING *`,
-    [name, id, req.userId]
+     WHERE id = $2 RETURNING *`,
+    [name, id]
   )
   if (!result.rows[0]) {
     res.status(404).json({ error: 'Not found' })
@@ -67,8 +66,8 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 router.delete('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)
   const result = await pool.query(
-    `DELETE FROM projects WHERE id = $1 AND user_id = $2 RETURNING id`,
-    [id, req.userId]
+    `DELETE FROM projects WHERE id = $1 RETURNING id`,
+    [id]
   )
   if (!result.rows[0]) {
     res.status(404).json({ error: 'Not found' })

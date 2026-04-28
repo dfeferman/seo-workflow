@@ -6,11 +6,10 @@ import { routeParamOne } from './routeParams.js'
 const router = Router()
 router.use(requireAuth)
 
-async function categoryBelongsToUser(categoryId: string, userId: string): Promise<boolean> {
+async function categoryExists(categoryId: string): Promise<boolean> {
   const r = await pool.query(
-    `SELECT 1 FROM categories c JOIN projects p ON p.id = c.project_id
-     WHERE c.id = $1 AND p.user_id = $2`,
-    [categoryId, userId]
+    `SELECT 1 FROM categories WHERE id = $1`,
+    [categoryId]
   )
   return (r.rowCount ?? 0) > 0
 }
@@ -18,11 +17,10 @@ async function categoryBelongsToUser(categoryId: string, userId: string): Promis
 // GET /api/categories/by-project/:projectId — vor /:id registrieren
 router.get('/by-project/:projectId', async (req: AuthRequest, res: Response) => {
   const result = await pool.query(
-    `SELECT c.* FROM categories c
-     JOIN projects p ON p.id = c.project_id
-     WHERE c.project_id = $1 AND p.user_id = $2
-     ORDER BY c.display_order ASC`,
-    [routeParamOne(req.params.projectId), req.userId]
+    `SELECT * FROM categories
+     WHERE project_id = $1
+     ORDER BY display_order ASC`,
+    [routeParamOne(req.params.projectId)]
   )
   res.json(result.rows)
 })
@@ -30,7 +28,7 @@ router.get('/by-project/:projectId', async (req: AuthRequest, res: Response) => 
 // GET /api/categories/:id
 router.get('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)
-  if (!(await categoryBelongsToUser(id, req.userId!))) {
+  if (!(await categoryExists(id))) {
     res.status(404).json({ error: 'Not found' })
     return
   }
@@ -61,8 +59,8 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   }
 
   const pCheck = await pool.query(
-    `SELECT 1 FROM projects WHERE id = $1 AND user_id = $2`,
-    [project_id, req.userId]
+    `SELECT 1 FROM projects WHERE id = $1`,
+    [project_id]
   )
   if ((pCheck.rowCount ?? 0) === 0) {
     res.status(403).json({ error: 'Forbidden' })
@@ -94,7 +92,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 // PUT /api/categories/:id
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)
-  if (!(await categoryBelongsToUser(id, req.userId!))) {
+  if (!(await categoryExists(id))) {
     res.status(404).json({ error: 'Not found' })
     return
   }
@@ -132,7 +130,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 // DELETE /api/categories/:id
 router.delete('/:id', async (req: AuthRequest, res: Response) => {
   const id = routeParamOne(req.params.id)
-  if (!(await categoryBelongsToUser(id, req.userId!))) {
+  if (!(await categoryExists(id))) {
     res.status(404).json({ error: 'Not found' })
     return
   }

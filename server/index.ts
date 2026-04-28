@@ -4,6 +4,7 @@ import cors from 'cors'
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import 'dotenv/config'
+import { runMigrations } from './db/migrate.js'
 import authRouter from './routes/auth.js'
 import projectsRouter from './routes/projects.js'
 import categoriesRouter from './routes/categories.js'
@@ -15,6 +16,7 @@ import categoryPhaseOutputsRouter from './routes/categoryPhaseOutputs.js'
 import categoryReferenceDocsRouter from './routes/categoryReferenceDocs.js'
 import pagesRouter from './routes/pages.js'
 import pageLinksRouter from './routes/pageLinks.js'
+import adminUsersRouter from './routes/adminUsers.js'
 
 export const app = express()
 app.use(cors({
@@ -36,6 +38,7 @@ app.use('/api/category-phase-outputs', categoryPhaseOutputsRouter)
 app.use('/api/category-reference-docs', categoryReferenceDocsRouter)
 app.use('/api/pages', pagesRouter)
 app.use('/api/page-links', pageLinksRouter)
+app.use('/api/admin', adminUsersRouter)
 
 if (process.env.NODE_ENV === 'production') {
   const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -50,7 +53,8 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   res.status(500).json({ error: 'Internal server error' })
 })
 
-const PORT = process.env.PORT ?? 3001
+/** Default 3003 — vermeidet Kollision mit Velacare/Next (`next dev -p 3001`). Überschreibbar via PORT in .env */
+const PORT = process.env.PORT ?? 3003
 if (process.env.NODE_ENV !== 'test') {
   if (!process.env.JWT_SECRET?.trim()) {
     console.error(
@@ -59,5 +63,12 @@ if (process.env.NODE_ENV !== 'test') {
     )
     process.exit(1)
   }
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+  runMigrations()
+    .then(() => {
+      app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+    })
+    .catch((err) => {
+      console.error('FATAL: Migrations fehlgeschlagen — Server wird nicht gestartet.', err)
+      process.exit(1)
+    })
 }

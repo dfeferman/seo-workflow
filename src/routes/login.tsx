@@ -77,7 +77,7 @@ function LoginPage() {
               required
               autoComplete="current-password"
               className="w-full px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-800 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400"
-              placeholder="••••••••"
+              placeholder="********"
             />
           </div>
           {error && (
@@ -90,11 +90,17 @@ function LoginPage() {
             disabled={loading}
             className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
           >
-            {loading ? 'Anmelden…' : 'Anmelden'}
+            {loading ? 'Anmelden...' : 'Anmelden'}
           </button>
         </form>
 
         <p className="mt-4 text-sm text-slate-500 text-center">
+          <Link to="/forgot-password" className="text-blue-600 font-medium hover:underline">
+            Passwort vergessen?
+          </Link>
+        </p>
+
+        <p className="mt-2 text-sm text-slate-500 text-center">
           Noch kein Konto?{' '}
           <Link to="/signup" className="text-blue-600 font-medium hover:underline">
             Konto anlegen

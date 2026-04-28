@@ -9,9 +9,11 @@ import { ConfirmModal } from '@/components/ConfirmModal'
 import { UserMenu } from '@/components/UserMenu'
 import { SidebarProjectsSkeleton, SidebarCategoriesSkeleton } from '@/components/LoadingSkeleton'
 import { EmptyState } from '@/components/EmptyState'
+import { useAuth } from '@/hooks/useAuth'
 import type { CategoryRow, ProjectRow } from '@/types/database.types'
 
 export function ProjectSidebar() {
+  const { user } = useAuth()
   const params = useParams({ strict: false }) as { projectId?: string; categoryId?: string }
   const projectId = params.projectId ?? null
   const categoryId = params.categoryId ?? null
@@ -66,6 +68,14 @@ export function ProjectSidebar() {
       </div>
 
       <div className="mt-auto pt-4 border-t border-slate-100 flex-shrink-0 px-4 pb-4 space-y-2">
+        {user?.is_superadmin && (
+          <Link
+            to="/admin/users"
+            className="w-full px-3 py-2 rounded-xl border border-orange-200 bg-orange-50 text-orange-700 text-sm font-semibold flex items-center justify-center hover:bg-orange-100 transition-colors"
+          >
+            Nutzer verwalten
+          </Link>
+        )}
         <button
           type="button"
           className="w-full px-3 py-2 rounded-xl bg-gray-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors"

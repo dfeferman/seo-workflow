@@ -10,6 +10,9 @@ import { TanStackRouterVite } from '@tanstack/router-vite-plugin'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+/** Muss mit Express `server/index.ts` übereinstimmen (gleiches PORT in .env oder beide Default 3003). */
+const apiPort = process.env.PORT?.trim() || '3003'
+
 export default defineConfig({
   test: {
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
@@ -44,7 +47,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: `http://localhost:${apiPort}`,
         changeOrigin: true,
       },
     },

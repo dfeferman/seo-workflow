@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Background, BackgroundVariant, ReactFlow, MarkerType } from '@xyflow/react'
-import type { Edge, Node } from '@xyflow/react'
+import type { Edge, Node, NodeMouseHandler } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { FilterSidebar } from './FilterSidebar'
 import { HubNode } from './HubNode'
@@ -9,6 +9,7 @@ import { BlogNode } from './BlogNode'
 import { applyDagreLayout } from './graphLayout'
 import { usePages } from '@/hooks/usePages'
 import { usePageLinks } from '@/hooks/usePageLinks'
+import { NodeDetailsPanel } from './NodeDetailsPanel'
 
 const nodeTypes = {
   hub: HubNode,
@@ -25,6 +26,17 @@ export function LinkGraphView({ projectId, projectName }: LinkGraphViewProps) {
   const { data: pages = [], isLoading: pagesLoading } = usePages(projectId)
   const { data: pageLinks = [], isLoading: linksLoading } = usePageLinks(projectId)
   const isLoading = pagesLoading || linksLoading
+
+  const [selectedPageId, setSelectedPageId] = useState<string | null>(null)
+  const selectedPage = pages.find((p) => p.id === selectedPageId) ?? null
+
+  const handleNodeClick: NodeMouseHandler = (_event, node) => {
+    setSelectedPageId(node.id)
+  }
+
+  const handlePaneClick = () => {
+    setSelectedPageId(null)
+  }
 
   const { nodes, edges } = useMemo(() => {
     const rawNodes: Node[] = pages.map((page) => ({
@@ -86,6 +98,8 @@ export function LinkGraphView({ projectId, projectName }: LinkGraphViewProps) {
               nodes={nodes}
               edges={edges}
               nodeTypes={nodeTypes}
+              onNodeClick={handleNodeClick}
+              onPaneClick={handlePaneClick}
               fitView
               proOptions={{ hideAttribution: true }}
             >
@@ -102,6 +116,15 @@ export function LinkGraphView({ projectId, projectName }: LinkGraphViewProps) {
                 </p>
               </div>
             </div>
+          )}
+
+          {selectedPage && (
+            <NodeDetailsPanel
+              page={selectedPage}
+              pages={pages}
+              pageLinks={pageLinks}
+              onClose={() => setSelectedPageId(null)}
+            />
           )}
         </div>
       </div>

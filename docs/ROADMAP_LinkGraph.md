@@ -1,7 +1,8 @@
 # Roadmap: Link Graph Feature (SP16-SP25)
 
 **Design Spec:** `docs/superpowers/specs/2026-04-23-link-graph-design.md`  
-**Konzept:** `docs/konzept/KONZEPT_Verlinkungsarchitektur_Visualisierung.md`
+**Konzept:** `docs/konzept/SEO-Verlinkung/KONZEPT_Verlinkungsarchitektur_Visualisierung.md`  
+**Stand:** 2026-04-28 — SP16–SP19 abgeschlossen; naechster Schritt SP20
 
 ---
 
@@ -78,16 +79,17 @@
 ## SP19 - Node-Details-Panel
 
 **Geschaetzte Dauer:** ~3h  
-**Status:** [ ] Todo  
+**Status:** [x] Abgeschlossen  
 **Abhaengig von:** SP18
 
 **Deliverables:**
 - `src/components/link-graph/NodeDetailsPanel.tsx`
 - Klick auf Node -> Panel rechts oeffnet
 - Anzeige: Name, Typ, Status, Wortcount, Kategorie-/Phase-Kontext, Incoming/Outgoing Links (mit Anchor-Texten)
-- Aktionen: Markdown in App oeffnen, Seite bearbeiten, Seite loeschen
+- Aktionen: Im Editor oeffnen, Bearbeiten, Loeschen (alle disabled bis SP22/SP23)
 
 **Log:**
+- 2026-04-28 — umgesetzt (selectedPageId in LinkGraphView, onNodeClick / onPaneClick, useCategory fuer Kategorie/Phase)
 
 ---
 
@@ -200,14 +202,14 @@
 | SP16 | Datenmodell | ~1h | [x] |
 | SP17 | Leere Graph-View | ~2h | [x] |
 | SP18 | Nodes & Edges rendern | ~4h | [x] |
-| SP19 | Node-Details-Panel | ~3h | [ ] |
+| SP19 | Node-Details-Panel | ~3h | [x] |
 | SP20 | Edge-Details-Popup | ~2h | [ ] |
 | SP21 | Filter & Suche | ~3h | [ ] |
 | SP22 | Markdown-Upload & Parsing | ~5h | [ ] |
 | SP23 | Manuell anlegen | ~3h | [ ] |
 | SP24 | Export-Funktionen | ~2h | [ ] |
 | SP25 | Polish & UX | ~2h | [ ] |
-| **Gesamt** |  | **~27h** | 0/10 |
+| **Gesamt** |  | **~27h** | 4/10 |
 
 ---
 
